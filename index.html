@@ -2312,6 +2312,30 @@ addEventListener("resize", resize); resize();
 const cam = {x:P.x - 240, y:P.y - 135};
 const motes = Array.from({length:40}, () => ({x:Math.random()*WW, y:Math.random()*WH, z:Math.random(), s:0.2+Math.random()*0.5}));
 
+// someone going through a door in a wall seen face-on. Coming from the front (below the wall), they vanish behind
+// the wall the moment they pass the threshold and stay hidden, apart from what shows in the door opening, until
+// they're out the other side. Coming from behind, they stay visible above the wall as they step into the doorway,
+// and the wall covers them from the feet up until they step out in front.
+function throughDoor(who, x, y, cx, cy, draw){
+  for (const d of doors){
+    if (d.v || d.kind === "exit" || !d.tiles || !doorOpen(d)) continue;
+    const [i0, j0] = d.tiles[0]; if (!(hasFace(i0, j0) && hasFace(i0+1, j0))) continue;
+    const dc = (i0+1)*T + (d.off || 0), top = j0*T, sill = j0*T + 30, A = 12;
+    if (Math.abs(x - dc) > 18 || y < top - A || y > sill + A) continue;
+    const X = Math.round((x - cx)*HR);
+    const side = who._doorSide || (who._doorSide = {});
+    if (y >= sill - 1 || y < top){ side[d.n] = y >= sill - 1 ? "front" : "back"; draw(X); return; }
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.beginPath();
+    // coming from the front, the lintel and the wall hide them until they're past the middle of the wall;
+    // from then on (and always when coming from behind) the top of the wall never hides them, only the wall beside the door
+    const open = side[d.n] === "back" || y < top + 16, oy = open ? top : top + 9;
+    if (open) ctx.rect(0, 0, cv.width, Math.round((top - cy)*HR));
+    const hw = open ? 16 : 9;     // once they show, only the wall well beside the door can cover them
+    ctx.rect(Math.round((dc - hw - cx)*HR), Math.round((oy - cy)*HR), hw*2*HR, Math.round((sill - oy)*HR));
+    ctx.clip(); draw(X); ctx.restore(); return;
+  }
+  draw(Math.round((x - cx)*HR));
+}
 function render(){
   let cx, cy;
   if (ed.on){ cx = Math.round(ed.cam.x); cy = Math.round(ed.cam.y); }
@@ -2339,7 +2363,7 @@ function render(){
       if (!roomOpen(propRoom(p))){ ctx.fillStyle="rgba(8,11,16,.5)"; ctx.fillRect(b.x-cx, b.y-cy, b.w, b.h); }
     }});
   }
-  list.push({y: P.sit ? (P.sit.rot===2 ? P.sit.y - 0.5 : P.sit.y + 0.5) : P.y, draw:() => { ctx.setTransform(1,0,0,1,0,0); drawKarim(ctx, Math.round((P.x - cx)*HR), Math.round((P.y - cy)*HR)); }});
+  list.push({y: P.sit ? (P.sit.rot===2 ? P.sit.y - 0.5 : P.sit.y + 0.5) : P.y, draw:() => { ctx.setTransform(1,0,0,1,0,0); throughDoor(P, P.x, P.y, cx, cy, X => drawKarim(ctx, X, Math.round((P.y - cy)*HR))); }});
   if (!ed.on) for (const n of npcs){
     if (!visible(n)) continue;
     if (n.x < cx-30 || n.x > cx+VW+30 || n.y < cy-10 || n.y > cy+VH+50) continue;
@@ -2347,7 +2371,7 @@ function render(){
     list.push({y:key, draw:() => { ctx.setTransform(1,0,0,1,0,0);
       const X = Math.round((n.x - cx)*HR), Y = Math.round((n.y - cy)*HR);
       if (n.blur) drawBlurred(ctx, X, Y, n.L, Object.assign(npcAnim(n), n.onToilet ? {sit:true, dir:"down", pose:"sit", moving:false} : {}));
-      else drawPerson(ctx, X, Y, n.L, npcAnim(n)); }});
+      else throughDoor(n, n.x, n.y, cx, cy, X2 => drawPerson(ctx, X2, Y, n.L, npcAnim(n))); }});
   }
   list.sort((a,b) => a.y - b.y).forEach(o => o.draw());
   ctx.setTransform(HR,0,0,HR,0,0);
