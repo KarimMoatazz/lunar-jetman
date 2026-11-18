@@ -1,5 +1,5 @@
 // Lunar Jetman: keeps the game playable offline and quick to open from the home screen
-const CACHE = "lj-v1";
+const CACHE = "lj-v2";
 const CORE = ["./", "index.html", "manifest.webmanifest", "music.mp3", "cover.png",
   "icon-192.png", "icon-512.png", "apple-touch-icon.png", "favicon-32.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
