@@ -543,7 +543,7 @@ html.lj-gate .title,html.lj-gate .rotate,html.lj-gate .inst{display:none!importa
   <div class="mscr" id="mainScr">
     <h2>HOW DO YOU WANT TO PLAY?</h2>
     <div class="modes" id="modes">
-      <button class="mode on" data-m="day"><b>Workday</b><span>Pick a character and get through their day: tasks you play as minigames, a meter, abilities and a clock.</span></button>
+      <button class="mode on" data-m="day"><b>Workday</b><span>Clock in as Karim, Zeina, Nour or Yassin. Every day brings a new mix of client tasks to play as minigames, surprises to handle and a meter to keep in check before home time.</span></button>
       <button class="mode" data-m="roam"><b>Free roam</b><span>Walk around the office as anyone. No tasks, no timer, no locked rooms. Just the team going about their day.</span></button>
     </div>
     <p class="sub" id="modeKeys">Choose one to continue</p>
@@ -1925,7 +1925,7 @@ function callMeeting(lead){
   const lines = [[lead, pick(["Okay, let's start.","Right, let's begin. Quick updates, please."])]];
   who.forEach(m => {
     const pair = pick(MEET_PAIRS[m.id] || [["All good on my side.","Good."]]);
-    lines.push([lead, pick([`${first(m)}, how are things on your side?`, `${first(m)}, any updates?`, `${first(m)}, go ahead.`])], [m, pair[0]], [lead, pair[1]]);
+    lines.push([lead, pick([`${first(m)}, how are things on your side?`, `${first(m)}, any updates?`, `${first(m)}, go ahead.`]), m], [m, pair[0], m], [lead, pair[1], m]);
   });
   lines.push([lead, pick(["Good meeting. Back to work, everyone.","Thanks, everyone. Let's wrap up."])]);
   const t0 = state.t + 16; meeting = {lines, t0, said: 0};
@@ -1949,7 +1949,7 @@ function converse(a, b, lines){
 }
 function updateConvos(){
   for (let k = convos.length-1; k >= 0; k--){
-    const c = convos[k], gone = !visible(c.a) || !visible(c.b) || Math.hypot(c.a.x-c.b.x, c.a.y-c.b.y) > 70;
+    const c = convos[k], gone = !visible(c.a) || !visible(c.b) || c.a.blur || c.b.blur || Math.hypot(c.a.x-c.b.x, c.a.y-c.b.y) > 48 || roomOfXY(c.a.x, c.a.y) !== roomOfXY(c.b.x, c.b.y);
     if (gone || c.i >= c.lines.length){ if (state.t - c.t0 > c.i*2.7 + 0.5 || gone){ c.a.convo = c.b.convo = null; convos.splice(k, 1); } continue; }
     if (state.t >= c.t0 + c.i*2.7){ say(c.i % 2 === 0 ? c.a : c.b, c.lines[c.i], 2.6); c.i++; }
   }
@@ -1958,9 +1958,21 @@ function updateConvos(){
 let meeting = null;
 function updateMeeting(){
   if (!meeting) return;
+  const inRoom = m => visible(m) && !m.blur && roomOfXY(m.x, m.y) === 7 && !!m.sit;
+  if (!meeting.started && state.t >= meeting.t0){
+    const people = [...new Set(meeting.lines.map(l => l[0]))];
+    // wait (up to 40 s) for everyone to sit down, then drop the parts of anyone who never came
+    if (!people.every(inRoom) && state.t - meeting.t0 < 40) return;
+    meeting.started = true; meeting.t0 = state.t; meeting.said = 0;
+    meeting.lines = meeting.lines.filter(l => inRoom(l[0]) && (!l[2] || inRoom(l[2])));
+    if (meeting.lines.length < 3){ meeting = null; return; }
+    const until = state.t + meeting.lines.length*3.1 + 3;
+    npcs.forEach(m => { [m.cur, ...(m.q || []), ...(m.pending || [])].forEach(w => { if (w && w.meeting) w.until = until; }); });
+  }
+  if (!meeting.started) return;
   const idx = Math.floor((state.t - meeting.t0) / 3.1);
   if (idx >= 0 && idx < meeting.lines.length && idx >= meeting.said){
-    const [who, text] = meeting.lines[idx]; if (visible(who)) say(who, text, 2.9); meeting.said = idx + 1;
+    const [who, text] = meeting.lines[idx]; if (inRoom(who)) say(who, text, 2.9); meeting.said = idx + 1;
   }
   if (idx > meeting.lines.length + 2) meeting = null;
 }
@@ -1995,7 +2007,7 @@ function standUp(n){
 function updateNpc(n, dt){
   n.blinkT -= dt; if (n.blinkT <= 0){ n.blink = 0.12; n.blinkT = rnd(2.5, 5.5); } if (n.blink > 0) n.blink -= dt;
   if (n.sayT > 0) n.sayT -= dt;
-  if (n.replyAt && state.t >= n.replyAt){ if (visible(n)) say(n, n.replyText, 2.6); n.replyAt = 0; }
+  if (n.replyAt && state.t >= n.replyAt){ if (visible(n) && !n.blur && Math.hypot(n.x - P.x, n.y - P.y) < 60) say(n, n.replyText, 2.6); else if (P.follow && P.follow.n === n) P.follow = null; n.replyAt = 0; }
   if (n.gone){
     if (clock.min >= n.arriveAt && clock.min < n.leaveAt){ n.gone = false; n.hidden = false; [n.x, n.y] = POI.door; n.dir = "up"; n.q = n.visitor ? visitorPlan(n) : homeWork(n); n.cur = null;
       if (n.visitor) say(n, "Sabah el kheir! Just visiting today.", 3);
@@ -2077,6 +2089,7 @@ function updateNpc(n, dt){
       if (!t || !visible(t)){ n.cur = null; n.carry = null; break; }
       if (!c.stage){
         if (n.sit){ standUp(n); break; }
+        if (t.blur){ n.cur = null; n.carry = null; break; }
         const sides = [[16,4],[-16,4],[0,16],[0,-16]].map(([dx,dy]) => [t.x+dx, t.y+dy]);
         let spot = null; for (const s of sides){ const k = nearestCell(s[0], s[1]); if (k>=0){ const pt = cellPt(k); if (Math.hypot(pt[0]-t.x, pt[1]-t.y) < 26){ spot = pt; break; } } }
         if (!spot){ n.cur = null; n.carry = null; break; }
@@ -2084,11 +2097,18 @@ function updateNpc(n, dt){
         c.stage = 1; n.q.unshift(c); n.cur = go(spot[0], spot[1], {pose:c.carry}); break;
       }
       if (c.stage === 1){
+        // they moved while we walked over: follow them a couple of times, then give up
+        if (Math.hypot(t.x - n.x, t.y - n.y) > 30 || t.blur){
+          c.tries = (c.tries || 0) + 1;
+          if (c.tries > 2 || t.blur){ n.cur = null; n.carry = null; n.item = null; break; }
+          c.stage = 0; n.q.unshift(c); n.cur = null; break;
+        }
         c.stage = 2; c.t0 = state.t; c.next = 0;
         const dx = t.x - n.x, dy = t.y - n.y; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx<0?"left":"right") : (dy<0?"up":"down");
         if (!t.sit && !t.moving){ t.dir = Math.abs(dx) > Math.abs(dy) ? (dx<0?"right":"left") : (dy<0?"down":"up"); }
       }
       n.pose = c.pose || "talk";
+      if (Math.hypot(t.x - n.x, t.y - n.y) > 40 || t.blur){ if (c.carry){ n.carry = null; n.item = null; } n.cur = null; n.pose = "stand"; break; }   // they walked off
       const el = state.t - c.t0;
       if (c.script){
         c.t = Math.max(c.t, c.script.length*2.7 + 0.6);
@@ -2145,14 +2165,22 @@ function soloLine(n){ const all = (n.lines || []).filter(l => !TEAM_NAMES.test(l
 function lineFor(n, toKarim){
   const me = new RegExp("\\b" + PLAYER.name + "\\b(?! Hasabo)");
   const all = n.lines || [], forK = all.filter(l => me.test(l)), rest = all.filter(l => !TEAM_NAMES.test(l));
-  if (toKarim && forK.length && Math.random() < 0.45) return pick(forK);
-  return pick(rest.length ? rest : all);
+  const recent = n.recent || (n.recent = []);
+  const fresh = a => { const f = a.filter(l => !recent.includes(l)); return f.length ? f : a; };
+  const out = (toKarim && forK.length && Math.random() < 0.45) ? pick(fresh(forK)) : pick(fresh(rest.length ? rest : all));
+  recent.push(out); if (recent.length > 6) recent.shift();
+  return out;
 }
 function talkTo(n){
   if (n.blur){ say(n, "Occupied!", 2); return; }
   if (!n.sit && !n.moving){ const dx = P.x - n.x, dy = P.y - n.y; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx<0?"left":"right") : (dy<0?"up":"down"); }
   const busy = n.cur && n.cur.meeting ? "Not now, we're in a meeting." : null;
-  say(n, busy || lineFor(n, true), 3.4);
+  const ex = !busy && G.exchange ? G.exchange(n) : null;
+  if (ex){
+    meSay(ex.l[0], 2.6); n.replyAt = state.t + 1.5; n.replyText = ex.l[1];
+    P.follow = ex.l[2] ? {at: state.t + 3.7, text: ex.l[2], n} : null;
+    if (ex.fx && G.exFx) G.exFx(ex.fx, n);
+  } else say(n, busy || lineFor(n, true), 3.4);
   G.onTalk(n);
 }
 let karimTag = null;
@@ -2164,7 +2192,7 @@ function placeBubbles(cx, cy){
     el.style.transform = `translate(${Math.round((x - cx) * kx)}px, ${Math.round((y - cy) * ky)}px) translate(-50%, -100%)`;
     if (!el.classList.contains("show")) el.classList.add("show");
   };
-  place(karimTag, P.x, P.y - 27, show);
+  place(karimTag, P.x + ((ed.on || camFX === null) ? 0 : cx - camFX), P.y - 27, show);
   for (const n of npcs){
     const vis = show && visible(n) && n.x > cx-20 && n.x < cx+VW+20 && n.y > cy && n.y < cy+VH+40;
     const talking = vis && n.sayT > 0;
@@ -2177,7 +2205,8 @@ function placeBubbles(cx, cy){
     place(n.el, n.x, n.y - lift, vis);
   }
   G.syncMeTag(karimTag);
-  place(karimTag, P.x, P.y - (P.sit ? (P.sit.rot===2 ? 37 : 25) : 27), show);
+  const tgx = (ed.on || camFX === null) ? 0 : cx - camFX, tgy = (ed.on || camFY === null) ? 0 : cy - camFY;
+  place(karimTag, P.x + tgx, P.y + tgy - (P.sit ? (P.sit.rot===2 ? 37 : 25) : 27), show);
   placeHint(cx, cy);
   G.placeTaskHint(cx, cy);
 }
@@ -2431,6 +2460,42 @@ const MEET_PAIRS = {
   osama:[["Two clients are late on payments.","Call them this week. Politely."],["Expenses are up this month.","Let's review them together on Sunday."],["The budget is tight, but we're fine.","Good. No surprises, please."]],
   mohamed:[["The servers are stable.","Good to hear."],["The meeting room needs new cables.","Order them, send the invoice to Osama."],["Backups run every night now.","Excellent work."]]
 };
+
+// ---------- more lines (Nov 2026) ----------
+const MORE_LINES = {
+  zeina:["Why is everyone so quiet? Is something wrong?","I have four tabs of feedback open. Four.","Can someone please answer that phone?","The client wants a quick call. It's never quick.","Deadlines are not suggestions.","Who took my good pen?","I'm not panicking. I'm planning loudly.","Let's circle back after lunch.","If it's not in writing, it didn't happen.","Where is the courier? He said ten minutes.","OK. OK. OK. Breathe.","Karim, smile. The client is happy today.","Nour, the poster is perfect. Don't touch it.","Yassin, stop scrolling and start sending."],
+  yassin:["Is it lunch yet?","Lowkey, this deadline is wild.","I made a playlist for the client call.","Ten more minutes and I'll start. Promise.","The lounge couch is calling me.","Who wants to order koshary?","I'm on top of it. Mostly.","The Wi-Fi is so slow today.","I answered that email in my head.","Weekend energy and it's only Sunday.","No cap, this campaign is going to slap.","Karim, the client said the logo is 'mid'.","Nour, rate my outfit.","Zeina, I'm on it. Literally right now."],
+  nour:["Don't talk to me, I'm in the zone.","Who keeps stretching the logo?","This font has no soul.","I sketched this on a napkin at lunch.","Pixel-perfect or nothing.","Where's my stylus? Who took it?","The brief changed again. Of course it did.","White space is not empty space.","My eyes hurt from this neon green.","I need a bigger monitor. Or two.","Karim, steal this idea, it's yours.","Zeina, two more minutes. Honestly.","Yassin, stop saying 'make it pop'."],
+  amr:["The other branch has better coffee. Don't tell anyone.","Is the AC always this cold?","Twenty years in this business, still learning.","Keep the lab door shut, please.","Good energy in here today.","I'll be back next week. Maybe.","Zeina, how are the clients?","Nour, nice work on the poster.","Yassin, are you working or watching videos?","Karim, the music's a bit loud, no?"],
+  mohamed:["The server room is off limits. Yes, you.","Ninety-nine problems and all of them are printers.","Your password can't be 123456.","The router needs a rest. So do I.","I'm updating everything tonight. Save your work.","Don't drink coffee near the keyboard.","Zeina, your phone isn't syncing again.","Nour, please stop installing fonts.","Yassin, close some tabs.","Karim, your speaker is on the guest Wi-Fi."],
+  osama:["A receipt is a receipt. Not a photo of a receipt.","The client paid! Write the date down.","No lunch on the company card.","Profit is a habit.","Who ordered six teas on the company account?","Keep it tidy, keep it simple.","Zeina, the invoice for the new client?","Yassin, your expense report, please.","Nour, did you buy another drawing tablet?"],
+  hany:["My eyes see numbers when I sleep.","Tea, then the bank.","Which column is this?","The printer is mine for ten minutes.","Almost Thursday, inshallah."],
+  sherif:["Another invoice, another stamp.","My calculator needs new batteries.","I love a balanced sheet.","Don't touch my desk. It's organised chaos."],
+  magdy:["Young people type too fast.","Back in my day, a fax was exciting.","Let me find my glasses first.","Slowly, slowly, the numbers come."],
+  tarek:["The supplier wants their money. Again.","I printed it twice to be safe.","Who finished the biscuits?","Two more transfers and I'm free."],
+  wael:["The VAT never sleeps.","Found another missing receipt.","The bank queue was an hour today.","Numbers before tea, tea before numbers."],
+  yassin3am:["Tea with milk? Never heard of it.","The kettle never rests.","Water, tea, coffee, I bring everything.","Mind the step, ya basha.","The finance office drinks the most tea.","Sugar's finished. I'll get more."],
+  ahmed:["The hallway shines now.","Five more bins and I'm done.","Watch out, wet floor!","Who spilled coffee in the meeting room?","The lounge is clean. Keep it that way.","I swept the studio twice today."],
+  nescafe:["Nescafe is not a drink, it's a lifestyle.","Two scoops, one sugar, a bit of milk.","The kettle is my best friend.","I can make it with my eyes closed.","Anyone for a second round?","Nescafe makes everything better."]
+};
+Object.entries(MORE_LINES).forEach(([k, v]) => { if (!LINES[k]) LINES[k] = []; LINES[k].push(...v); });
+const MORE_SCRIPTS = {
+  "zeina>yassin":[["Yassin, did you call the client back?","Calling now.","You said 'now' an hour ago."],["Are you wearing slippers to the office?","They're designer slippers.","Yassin."]],
+  "yassin>zeina":[["Zeina, the client loved the deck!","Of course they did. Who checked it?","...You did."]],
+  "nour>yassin":[["Yassin, what's the deadline?","Yesterday.","Very funny.","I'm serious."]],
+  "design>design":[["Which shade, this or this?","They're the same.","They're clearly not.","Fine, the left one."],["Any music requests?","Anything but that song again.","Too late, it's on."],["Did the client reply?","With a voice note. Eight minutes long.","I'm not listening to that."]],
+  "it>*":[["Who's been streaming videos? The network is crying.","Not me.","The logs say otherwise."]],
+  "*>it":[["The mouse is dead.","Batteries.","Oh."]],
+  "boys>boys":[["Who's on lunch duty today?","You.","Me again?"]],
+  "finance>finance":[["Did Ostaz Osama see the report?","He's reading it twice.","Then we wait."]],
+  "*>*":[["Lunch plans?","Koshary. You?","Same. Let's go at two."],["Is it hot in here or is it me?","It's the AC again.","Call IT."],["Long day?","The longest.","It's only noon."]]
+};
+Object.entries(MORE_SCRIPTS).forEach(([k, v]) => { if (!SCRIPTS[k]) SCRIPTS[k] = []; SCRIPTS[k].push(...v); });
+MEET_PAIRS.zeina.push(["The new client wants a full rebrand.","Big job. Make sure we price it right."]);
+MEET_PAIRS.yassin.push(["The posts are scheduled until the end of the month.","Good. Check the comments every day."]);
+MEET_PAIRS.nour.push(["We're testing three logo directions.","Show me the strongest one next time."]);
+MEET_PAIRS.osama.push(["All invoices went out this week.","Excellent. That's what I like to hear."]);
+MEET_PAIRS.mohamed.push(["I changed the Wi-Fi password.","Tell everyone, and write it down somewhere safe."]);
 function scriptFor(a, b){
   const ga = GROUP[a.id] || "*", gb = GROUP[b.id] || "*";
   const keys = [`${a.id}>${b.id}`, `${a.id}>${gb}`, `${ga}>${b.id}`, `${ga}>${gb}`, `${ga}>*`, `*>${gb}`, "*>*"];
@@ -2446,13 +2511,22 @@ let VW = 480, VH = 270; const HR = 2;    // canvas runs at 2x the world pixels s
 let lastCX = 0, lastCY = 0;
 const ed = { on:false, sel:null, drag:null, cam:{x:0,y:0}, zoom:1, undo:[], mode:"select", canEdit:false, ghost:null };
 function resize(){
-  let s = innerHeight / 250; if (s >= 2) s = Math.round(s); s = Math.max(1, s);
-  if (ed.on) s = s * ed.zoom;
+  let s;
+  if (ed.on){
+    s = innerHeight / 250; if (s >= 2) s = Math.round(s); s = Math.max(1, s) * ed.zoom;
+    cv.style.width = ""; cv.style.height = "";
+  } else {
+    // whole screen pixels per game pixel, so pixels never change size as the office scrolls
+    const dpr = window.devicePixelRatio || 1, m = Math.max(1, Math.round(innerHeight / 250 * dpr / HR));
+    s = m * HR / dpr;
+  }
   VW = Math.ceil(innerWidth / s); VH = Math.ceil(innerHeight / s);
   cv.width = VW*HR; cv.height = VH*HR; ctx.imageSmoothingEnabled = false;
+  if (!ed.on){ cv.style.width = (VW*s) + "px"; cv.style.height = (VH*s) + "px"; }
 }
 addEventListener("resize", resize); resize();
 const cam = {x:P.x - 240, y:P.y - 135};
+let camT = 0, camFX = null, camFY = null;
 const motes = Array.from({length:40}, () => ({x:Math.random()*WW, y:Math.random()*WH, z:Math.random(), s:0.2+Math.random()*0.5}));
 
 function render(){
@@ -2461,9 +2535,14 @@ function render(){
   else {
     const fc = window.__frameAt;     // optional fixed framing (used for screenshots)
     const tx = (fc ? fc[0] : P.x) - VW/2, ty = (fc ? fc[1] : P.y - 12) - VH/2;
-    cam.x += (tx - cam.x) * 0.12; cam.y += (ty - cam.y) * 0.12;
-    cx = Math.round(Math.max(-40, Math.min(WW - VW + 40, cam.x)));
-    cy = Math.round(Math.max(-40, Math.min(WH - VH + 40, cam.y)));
+    // follow at the same pace whatever the frame rate, and settle exactly
+    const now = performance.now(), cdt = Math.min(0.05, Math.max(0, (now - (camT || now)) / 1000)); camT = now;
+    const k = 1 - Math.pow(0.88, cdt * 60);
+    cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
+    if (Math.abs(tx - cam.x) < 0.02) cam.x = tx; if (Math.abs(ty - cam.y) < 0.02) cam.y = ty;
+    camFX = Math.max(-40, Math.min(WW - VW + 40, cam.x)); camFY = Math.max(-40, Math.min(WH - VH + 40, cam.y));
+    // the office moves in whole canvas pixels; the player is drawn against the exact camera, so he never jitters
+    cx = Math.round(camFX * HR) / HR; cy = Math.round(camFY * HR) / HR;
   }
   lastCX = cx; lastCY = cy;
   ctx.setTransform(HR,0,0,HR,0,0); ctx.imageSmoothingEnabled = false;
@@ -2482,7 +2561,7 @@ function render(){
       if (!roomOpen(propRoom(p))){ ctx.fillStyle="rgba(8,11,16,.5)"; ctx.fillRect(b.x-cx, b.y-cy, b.w, b.h); }
     }});
   }
-  list.push({y: P.sit ? (P.sit.rot===2 ? P.sit.y - 0.5 : P.sit.y + 0.5) : P.y, draw:() => { ctx.setTransform(1,0,0,1,0,0); drawKarim(ctx, Math.round((P.x - cx)*HR), Math.round((P.y - cy)*HR)); }});
+  list.push({y: P.sit ? (P.sit.rot===2 ? P.sit.y - 0.5 : P.sit.y + 0.5) : P.y, draw:() => { ctx.setTransform(1,0,0,1,0,0); const pcx = (ed.on || camFX === null) ? cx : camFX, pcy = (ed.on || camFY === null) ? cy : camFY; drawKarim(ctx, Math.round((P.x - pcx)*HR), Math.round((P.y - pcy)*HR)); }});
   if (!ed.on) for (const n of npcs){
     if (!visible(n)) continue;
     if (n.x < cx-30 || n.x > cx+VW+30 || n.y < cy-10 || n.y > cy+VH+50) continue;
@@ -3325,6 +3404,7 @@ const KARIM_NPC = { id:"karim", bath:2, name:"Karim", role:"Graphic designer", r
 LINES.karim = ["Music on, world off.","Nour, come look at this.","Quick vape and I'm back.","Who touched my speaker?","Coffee first. Then pixels.",
   "One more export and I'm done.","Zeina, it's almost ready. Almost.","Yassin, send me the brief again?","The client wants it bigger? Of course."];
 GROUP.karim = "design";
+LINES.karim.push("This kerning is personal.","Headphones on means do not disturb.","Bass boosted, productivity boosted.","The client wants it bigger. Bigger it is.","Who unplugged my speaker? Again?","Lunch at three is still lunch.","Nour, your colours are fire today.","Zeina, I'm on it. Two minutes. Maybe ten.","Yassin, what does 'make it pop' mean?");
 PLANS.vape = n => { const w = POI.win[5]; return [go(w[0], w[1]), wait(rnd(6,10), "drink", w[2], {say: pick(["Quick vape break.","Mango ice. The best flavour.","Two minutes, then back to it."])}), ...homeWork(n)]; };
 
 // ---------- the four playable characters ----------
@@ -3337,8 +3417,8 @@ const CHARS = {
     tasks:[
       {id:"y1", title:"Make the morning coffee", where:"kitchen", game:"coffee", due:600},
       {id:"y2", title:"Sort the morning inbox", where:"desk", game:"inbox"},
-      {id:"y3", title:"Brief Nour on the Keep post", where:"npc:nour", talk:["Nour! Keep wants a post for Friday. The brief's in your inbox.","Got it. Give me till lunch."], after:["y2"]},
-      {id:"y4", title:"Client call: Keep's feedback", where:"desk", game:"call", after:["y2"]},
+      {id:"y3", title:"Brief Nour on the client's post", where:"npc:nour", talk:["Nour! The client wants a post for Friday. The brief's in your inbox.","Got it. Give me till lunch."], after:["y2"]},
+      {id:"y4", title:"Client call: the client's feedback", where:"desk", game:"call", after:["y2"]},
       {id:"y5", title:"Print the deck for Zeina", where:"printer", game:"print", after:["y4"]},
       {id:"y6", title:"Hand the deck to Zeina", where:"npc:zeina", talk:["Deck's printed and ready, Zeina.","Finally! Good job, Yassin."], after:["y5"]},
       {id:"y7", title:"Afternoon coffee run", where:"kitchen", game:"coffee", from:840},
@@ -3351,8 +3431,8 @@ const CHARS = {
     abilities:[{id:"keycard", name:"Master keycard", desc:"The only one who can open Robert's office."},{id:"print", name:"Print room access", desc:"More time in printing tasks."}],
     tasks:[
       {id:"z1", title:"Check the client inbox", where:"desk", game:"inbox"},
-      {id:"z2", title:"Answer the Keep call", where:"anywhere", game:"call", after:["z1"], note:"Walk and talk: answer anywhere"},
-      {id:"z3", title:"Get the old Keep files", where:"robert", game:"print", after:["z2"], note:"Use your keycard on Robert's office door"},
+      {id:"z2", title:"Answer the client call", where:"anywhere", game:"call", after:["z1"], note:"Walk and talk: answer anywhere"},
+      {id:"z3", title:"Get the old client files", where:"robert", game:"print", after:["z2"], note:"Use your keycard on Robert's office door"},
       {id:"z4", title:"Chase Karim for the logo", where:"npc:karim", talk:["Karim. The logo. Today.","Already on it, give me an hour."], from:735},
       {id:"z5", title:"Approve the logo proof", where:"npc:karim", game:"proof", after:["z4"], from:800},
       {id:"z6", title:"Run errands: bank and courier", where:"door", game:"errand", from:840},
@@ -3365,8 +3445,8 @@ const CHARS = {
       tip:"Nour runs hot and cold. Interruptions knock his focus down, a coffee from the kitchen and good work bring it back. Low focus means less time in tasks." },
     abilities:[{id:"burst", name:"Creative burst", active:true, desc:"With focus above 60: +50% time and a bonus star in the next design task."},{id:"gossip", name:"Gossip network", desc:"Always knows where everyone is."}],
     tasks:[
-      {id:"n1", title:"Catch up with Yassin", where:"npc:yassin", talk:["Morning, Yassin. What did I miss?","Keep wants a post. And Zeina's already on her third call."]},
-      {id:"n2", title:"Sketch the Keep mascot", where:"desk", game:"pixel"},
+      {id:"n1", title:"Catch up with Yassin", where:"npc:yassin", talk:["Morning, Yassin. What did I miss?","The client wants a post. And Zeina's already on her third call."]},
+      {id:"n2", title:"Sketch the client's mascot", where:"desk", game:"pixel"},
       {id:"n3", title:"Build the brand palette", where:"desk", game:"color", after:["n2"]},
       {id:"n4", title:"Lay out the campaign poster", where:"desk", game:"align", after:["n3"]},
       {id:"n5", title:"Check the print proof", where:"printer", game:"proof", after:["n4"]},
@@ -3381,11 +3461,11 @@ const CHARS = {
     tasks:[
       {id:"k1", title:"Coffee for the studio", where:"kitchen", game:"coffee"},
       {id:"k2", title:"Put the music on", where:"desk", game:"music"},
-      {id:"k3", title:"Get the Keep brief from Yassin", where:"npc:yassin", talk:["Yassin, what's the Keep brief?","Logo bigger, colours greener, deadline yesterday."]},
-      {id:"k4", title:"Design the Keep logo", where:"desk", game:"pixel", after:["k3"]},
+      {id:"k3", title:"Get the client's brief from Yassin", where:"npc:yassin", talk:["Yassin, what's the client's brief?","Logo bigger, colours greener, deadline yesterday."]},
+      {id:"k4", title:"Design the client's logo", where:"desk", game:"pixel", after:["k3"]},
       {id:"k5", title:"Pick brand colours with Nour", where:"npc:nour", game:"color", after:["k4"]},
       {id:"k6", title:"Fix the jammed printer", where:"printer", game:"wires", from:870},
-      {id:"k7", title:"Lay out the Keep post", where:"desk", game:"align", after:["k5"]},
+      {id:"k7", title:"Lay out the client's post", where:"desk", game:"align", after:["k5"]},
       {id:"k8", title:"Send the logo to Zeina", where:"npc:zeina", talk:["Zeina, the logo's in your inbox.","Perfect. The client will love it."], after:["k4"]}
     ] }
 };
@@ -3504,7 +3584,7 @@ function renderPanel(force){
     if (t.opt) cls.push("opt");
     if (G.collapsed && t !== G.track) return "";
     if (lock && !t.done) return `<button class="${cls.join(" ")}" data-t="${t.id}"><i class="bx"></i><span class="tt">${esc(t.title)}</span><span class="ts">${lock.startsWith("From") ? lock : "Later"}</span></button>`;
-    let sub = t.done ? (t.game && t.game !== "errand" && t.game !== "music" && !t.talk ? `<span class="st">${starsHtml(t.stars)}</span>` : "Done")
+    let sub = t.done ? (t.game && t.game !== "errand" && t.game !== "music" && !t.talk && !t.quick ? `<span class="st">${starsHtml(t.stars)}</span>` : "Done")
       : lock ? lock : whereText(t);
     if (!t.done && !lock && t.note) sub = t.where === "anywhere" ? t.note : t.note + " · " + sub;
     const late = !t.done && t.due && clock.min > t.due;
@@ -3553,7 +3633,7 @@ function renderMeter(){
   if (btn.dataset.h !== inner){ btn.innerHTML = inner; btn.dataset.h = inner; btn.title = ab.desc; }
   btn.classList.toggle("off", off);
 }
-function DESIGN_OR_STARRED(t){ return !t.talk && t.game !== "errand" && t.game !== "music"; }
+function DESIGN_OR_STARRED(t){ return !t.talk && !t.quick && t.game !== "errand" && t.game !== "music"; }
 function bumpMeter(d){ G.meter = Math.max(0, Math.min(100, G.meter + d)); }
 // how well the character is doing changes the time in minigames
 function timeFactor(kind){
@@ -3562,6 +3642,8 @@ function timeFactor(kind){
   if (G.cid === "karim" && kind === "wires") f *= 1.5;
   if (G.cid === "yassin" && kind === "coffee") f *= 1.5;
   if (G.burst && DESIGN_GAMES.has(kind)) f *= 1.5;
+  if (G.fx && G.fx.slowUntil > clock.min) f *= 0.85;
+  if (G.itBoost) f *= 1.15;
   return f;
 }
 function useAbility(){
@@ -3572,8 +3654,8 @@ function useAbility(){
     const t = G.tasks.find(t => isAvail(t) && t.talk && target(t) && !target(t).away);
     if (!t){ toast("No one to message right now."); return; }
     G.smoothUses--; const n = target(t).npc;
-    say(n, t.talk[1], 3); completeTask(t, 0);
-    toast(`You message ${n.name}: "${esc(t.talk[0])}" Done.`);
+    completeTask(t, 0);
+    toast(`You message ${esc(n.name)}: "${esc(t.talk[0])}" ${esc(n.name.split(" ")[0])} replies: "${esc(t.talk[1])}"`);
   }
   if (ab.id === "burst"){
     if (G.burst){ toast("Creative burst is ready for your next design task."); return; }
@@ -3605,6 +3687,7 @@ function startTask(t){
     if (!n.sit && !n.moving){ const dx = P.x - n.x, dy = P.y - n.y; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx<0?"left":"right") : (dy<0?"up":"down"); }
     completeTask(t, 0); return;
   }
+  if (t.quick){ P.act = {pose: t.quick.pose || "drink", until: state.t + 2.5}; goodMeter(t.quick.meter || 0); if (t.quick.clock) clock.min += t.quick.clock; toast(t.quick.text); completeTask(t, 0); return; }
   if (t.game === "music"){ P.act = {pose:"type", until: state.t + 2}; bumpMeter(18); completeTask(t, 0); toast("Speakers on. The studio fills with music. Vibe up."); return; }
   if (t.game === "errand"){ runErrand(t); return; }
   openGame(t);
@@ -3613,6 +3696,7 @@ function completeTask(t, stars){
   t.done = true; t.stars = stars; t.doneAt = clock.min;
   if (t.due && clock.min > t.due && stars > 1){ t.stars = stars - 1; toast(`Done, but late. <span class="k">-1 star</span>`); }
   G.stars += t.stars;
+  if (t.onDone) t.onDone(t);
   if (G.tut) tutEvent("task", t);
   if (G.track === t) G.track = null;
   pickTrack(); renderPanel(true); renderMeter();
@@ -3651,7 +3735,8 @@ function beginDay(cid, withTut){
   cam.x = P.x - VW/2; cam.y = P.y - 12 - VH/2;
   SPEED = cid === "yassin" ? 84 : 62;
   setLocks(true);
-  G.tasks = G.char.tasks.map(t => Object.assign({}, t, {done:false, stars:0, expired:false}));
+  G.tasks = buildDayTasks(cid).map(t => Object.assign({}, t, {done:false, stars:0, expired:false}));
+  G.fx = {}; G.evUsed = {}; G.nextGen = clock.min + rnd(35, 60); G.greeted = {}; G.exUsed = {}; G.exCool = {}; G.itBoost = false;
   G.track = null; G.stars = 0; G.meter = G.char.meter.start; G.lastPanel = ""; G.allDoneShown = false;
   G.smoothUses = (G.char.abilities.find(a => a.uses) || {}).uses || 0; G.burst = false; G.cool = {}; G.talkCool = {};
   G.nextEvent = clock.min + rnd(50, 80); G.callN = 0;
@@ -3724,8 +3809,11 @@ function updateDay(dt){
     if (G.cid === "nour" && P.sit && P.room === 18) bumpMeter(0.6 * dt);
   }
   // expiring calls
-  G.tasks.forEach(t => { if (t.expires && !t.done && !t.expired && clock.min > t.expires){ t.expired = true; bumpMeter(G.cid==="zeina" ? 15 : -10); toast("You missed the call. <span class=\"k\">Panic up.</span>"); renderPanel(true); } });
-  if (rate > 0) dayEvents();
+  G.tasks.forEach(t => { if (t.expires && !t.done && !t.expired && clock.min > t.expires){ t.expired = true;
+    if (t.game === "call" && !t.ev){ bumpMeter(G.cid==="zeina" ? 15 : -10); toast(G.cid === "zeina" ? "You missed the call. <span class=\"k\">Panic up.</span>" : "You missed the call."); }
+    else { goodMeter(-(t.missMeter || 5)); toast(t.miss || `Missed: ${esc(t.title)}`); }
+    renderPanel(true); } });
+  if (rate > 0){ dayEvents(); generalEvents(); }
   if (clock.min >= G.char.end){ toast(`${hhmm(G.char.end)}. Time to go home.`); endDay(false, true); return; }
   if (G.char.end - clock.min < 30 && !G.warned){ G.warned = true; toast(`Thirty minutes left in ${G.char.name}'s day.`); }
   meterT -= dt; if (meterT <= 0){ meterT = 0.25; renderMeter(); }
@@ -3863,6 +3951,7 @@ function beginRoam(cid){
   cam.x = P.x - VW/2; cam.y = P.y - 12 - VH/2;
   SPEED = cid === "yassin" ? 84 : 62;
   setLocks(false);
+  G.fx = {}; G.greeted = {}; G.exUsed = {}; G.exCool = {}; G.nextRoam = clock.min + rnd(40, 70);
   G.mode = "roam"; G.paused = false;
   $("menu").hidden = true; $("sum").hidden = true; $("ghud").hidden = true; $("gAbil").hidden = true; $("tcard").hidden = true;
   syncMenuBtn(); showRoom(1);
@@ -3924,11 +4013,12 @@ let MGS = null;      // current game session
 function openGame(t){
   const def = MG[t.game]; if (!def) return;
   G.paused = true; keys.clear(); P.vx = P.vy = 0;
-  const factor = timeFactor(t.game), total = Math.round(def.time * factor);
+  const factor = timeFactor(t.game), total = Math.round(def.time * factor); const itB = G.itBoost; G.itBoost = false;
   MGS = { t, def, total, left: total, phase:"intro", inst:null, last: performance.now() };
   const boosts = [];
   if (factor > 1.01) boosts.push(`<b>+${Math.round((factor-1)*100)}% time</b>${G.burst && DESIGN_GAMES.has(t.game) ? " from your creative burst" : " from your ability"}`);
-  if (factor < 0.99) boosts.push(`<b>${Math.round((1-factor)*100)}% less time</b>: your ${G.char.meter.name.toLowerCase()} is ${G.char.meter.good==="high" ? "low" : "high"}`);
+  if (factor < 0.99) boosts.push(`<b>${Math.round((1-factor)*100)}% less time</b>: ${G.fx && G.fx.slowUntil > clock.min && !meterBad() ? "the Wi-Fi is acting up" : `your ${G.char.meter.name.toLowerCase()} is ${G.char.meter.good==="high" ? "low" : "high"}`}`);
+  if (itB) boosts.push(`<b>Laptop sped up</b> by Mohamed Ali`);
   $("mgp").innerHTML = `<div class="mgh"><div class="mgt"><div class="mgk">${esc(def.name)}</div><h3>${esc(t.title)}</h3></div>
     <div class="mgtime"><span id="mgT">${total}s</span><div class="gbar"><i id="mgBar" style="width:100%"></i></div></div></div>
     <div class="mgb" id="mgB"><div class="mgi"><p>${def.how}</p>${boosts.length ? `<p class="tip">${boosts.join(" · ")}</p>` : ""}
@@ -3939,6 +4029,7 @@ function openGame(t){
 }
 function playGame(){
   if (!MGS || MGS.phase !== "intro") return;
+  if (!MGS.t.client || !CLIENTS.includes(MGS.t.client)) MGS.t.client = pick(CLIENTS);
   MGS.phase = "play"; MGS.last = performance.now();
   const box = $("mgB"); box.innerHTML = `<div class="flash" id="mgF"></div>`;
   const api = {
@@ -4013,17 +4104,19 @@ const MG = {};
 MG.proof = { name:"Spot the mistakes", time:32,
   how:"The proof on the right should match the approved design on the left. <b>Tap the 3 mistakes on the proof.</b> Wrong taps cost 2 seconds.",
   build(box, api){
+    const CL = clientOf(api), BR0 = BRAND(CL), HD = HANDLE(CL);
+    const swap = w => { const a = w.split(""), i = 1 + Math.floor(Math.random() * Math.max(1, a.length - 2)); if (a[i] === a[i+1]) return w + w[w.length-1]; [a[i], a[i+1]] = [a[i+1], a[i]]; return a.join(""); };
     const BASE = {
-      logo:{x:8,y:6,w:15,h:11.25, c:"#3f8f5a", html:c => `<span class="pf-logo" style="background:${c.c}">K</span>`},
-      brand:{x:27,y:7.5,w:44,h:8, t:"KEEP", html:c => `<span style="font-size:2.2em;font-weight:600;letter-spacing:.08em">${c.t}</span>`},
+      logo:{x:8,y:6,w:15,h:11.25, c:"#3f8f5a", html:c => `<span class="pf-logo" style="background:${c.c}">${esc(BR0[0])}</span>`},
+      brand:{x:27,y:7.5,w:44,h:8, t:BR0, html:c => `<span style="font-size:2.2em;font-weight:600;letter-spacing:.08em">${c.t}</span>`},
       photo:{x:8,y:22,w:84,h:36, html:() => `<span class="pf-photo"></span>`},
       head:{x:8,y:61,w:84,h:8, t:"Fresh every day", html:c => `<span style="font-size:1.35em;font-weight:600">${c.t}</span>`},
       price:{x:8,y:72,w:32,h:7, t:"EGP 120", html:c => `<span style="font-size:1.05em">${c.t}</span>`},
       date:{x:56,y:72,w:36,h:7, t:"SUN 24 NOV", html:c => `<span style="font-size:1em;margin-left:auto">${c.t}</span>`},
       cta:{x:8,y:84,w:42,h:9, c:"#3f8f5a", t:"Order now", html:c => `<span class="pf-cta" style="background:${c.c}">${c.t}</span>`},
-      tag:{x:56,y:85.5,w:36,h:6, t:"@keepcafe", html:c => `<span style="font-size:.9em;margin-left:auto;color:#5b6a5f">${c.t}</span>`}
+      tag:{x:56,y:85.5,w:36,h:6, t:HD, html:c => `<span style="font-size:.9em;margin-left:auto;color:#5b6a5f">${c.t}</span>`}
     };
-    const MUT = { logo:{c:"#8f3f6a"}, brand:{t:"KEPE"}, photo:{x:14}, head:{t:"Fresh evrey day"}, price:{t:"EGP 210"}, date:{t:"SUN 42 NOV"}, cta:{c:"#c9783a"}, tag:{t:"@keepcaffe"} };
+    const MUT = { logo:{c:"#8f3f6a"}, brand:{t:swap(BR0)}, photo:{x:14}, head:{t:"Fresh evrey day"}, price:{t:"EGP 210"}, date:{t:"SUN 42 NOV"}, cta:{c:"#c9783a"}, tag:{t:HD.slice(0, -1) + HD.slice(-2)} };
     const wrong = shuffle(Object.keys(BASE)).slice(0, 3), found = new Set();
     const make = (live, h) => {
       const p = el("div", "poster" + (live ? " live" : "")); p.style.height = h; p.style.fontSize = `calc(${h} / 26)`;
@@ -4113,7 +4206,8 @@ MG.align = { name:"Lay out the design", time:34,
 MG.color = { name:"Match the colours", time:26,
   how:"The client's brand colour is on the left. <b>Tap the exact same colour</b> from the six swatches. Four rounds, and they get harder.",
   build(box, api){
-    const BR = [{n:"Keep green", h:145, s:38, l:40},{n:"Keep cream", h:40, s:48, l:86},{n:"Keep coffee", h:25, s:40, l:30},{n:"Keep orange", h:24, s:72, l:55},{n:"Keep sky", h:200, s:45, l:62}];
+    const CN = clientOf(api).split(" ")[0];
+    const BR = [{n:CN+" green", h:145, s:38, l:40},{n:CN+" cream", h:40, s:48, l:86},{n:CN+" brown", h:25, s:40, l:30},{n:CN+" orange", h:24, s:72, l:55},{n:CN+" sky", h:200, s:45, l:62}];
     const rounds = shuffle(BR).slice(0, 4), D = [16, 11, 8, 5];
     let r = 0, good = 0;
     const wrap = el("div", "cm"); box.appendChild(wrap);
@@ -4173,26 +4267,26 @@ const CALLS = [
   {q:"We need it for tomorrow morning. Is that okay?", a:[["Tight, but yes. You'll get it by 10am.",1],["We'll try.",0.4],["Impossible.",0.1]]}
 ];
 MG.call = { name:"Client call", time:30,
-  how:"Hesham from Keep is on the line. <b>Pick the best reply</b> each time: calm, clear, and helpful. Three questions.",
+  how:"The client is on the line. <b>Pick the best reply</b> each time: calm, clear, and helpful. Three questions.",
   build(box, api){
-    const qs = shuffle(CALLS).slice(0, 3); let i = 0, sum = 0;
+    const qs = shuffle(CALLS).slice(0, 3); let i = 0, sum = 0; const CL = clientOf(api), WHO = CONTACT[CL] || "The client";
     const w = el("div", "call"); box.appendChild(w);
     function show(){
       const q = qs[i], ops = shuffle(q.a);
-      w.innerHTML = `<div class="cl"><span class="av">H</span><div class="bb"><small>Hesham · Keep</small>${esc(q.q)}</div></div><div class="ops"></div><div class="rd">Question ${i+1} of 3</div>`;
+      w.innerHTML = `<div class="cl"><span class="av">${esc(WHO[0])}</span><div class="bb"><small>${esc(WHO)} · ${esc(CL)}</small>${esc(q.q)}</div></div><div class="ops"></div><div class="rd">Question ${i+1} of 3</div>`;
       const o = w.querySelector(".ops");
       ops.forEach((a, k) => { const b = el("button", "", `<kbd>${k+1}</kbd>${esc(a[0])}`); b.onclick = () => pickA(a); o.appendChild(b); });
       w._ops = ops;
     }
     function pickA(a){ sum += a[1]; flash(a[1] >= 1 ? "Great answer" : a[1] > 0.2 ? "Okay…" : "Ouch", a[1] >= 1); i++;
-      if (i >= qs.length) api.finish(sum/qs.length, sum/qs.length > 0.9 ? "Hesham sounds happy." : "Hesham hangs up."); else show(); }
+      if (i >= qs.length) api.finish(sum/qs.length, sum/qs.length > 0.9 ? `${WHO} sounds happy.` : `${WHO} hangs up.`); else show(); }
     show();
     return { partial: () => sum/qs.length*0.8, key: k => { const n = +k; if (n >= 1 && n <= 3 && w._ops) pickA(w._ops[n-1]); } };
   } };
 
 const MAILS = [
   ["Hesham · Keep","Logo feedback (urgent!!)","Can we see it bigger and greener?","client"],["Keep · Accounts","Invoice question","Which address should the invoice go to?","client"],
-  ["Mona · Keep","Photoshoot on Thursday?","We can host the shoot at the café.","client"],["Hesham · Keep","Re: Re: Re: post schedule","Friday at 8pm works for us.","client"],
+  ["Mona · Keep","Photoshoot on Thursday?","We can host the shoot at our place.","client"],["Hesham · Keep","Re: Re: Re: post schedule","Friday at 8pm works for us.","client"],
   ["Nour","Poster v2 for review","Exported it, have a look.","team"],["Karim","Logo files","All formats in the shared folder.","team"],["Osama Metwally","Receipts, please","I need last month's taxi receipts.","team"],
   ["Mohamed Ali","Password reset","Your password expires tomorrow.","team"],["Amr Fawzy","Branch meeting","Next Sunday at 11.","team"],
   ["Prince Abdul","You won 1,000,000 USD","Send your bank details to claim.","spam"],["Mega Deals","90% off sunglasses!!!","Today only, click now.","spam"],["Crypto King","Double your money","Guaranteed returns, no risk.","spam"],
@@ -4201,7 +4295,9 @@ const MAILS = [
 MG.inbox = { name:"Sort the inbox", time:28,
   how:"Sort each email. <b>Client</b>: reply to it. <b>Team</b>: forward it. <b>Spam</b>: delete it. Eight emails. On a keyboard use 1, 2 and 3.",
   build(box, api){
-    const list = shuffle(MAILS).slice(0, 8); let i = 0, good = 0;
+    const CL = clientOf(api), others = CLIENTS.filter(c => c !== CL), WHO = CONTACT[CL] || "Client";
+    // client emails come from today's client (and one other), never from the player themself
+    const list = shuffle(MAILS.filter(m => m[0] !== PLAYER.name && !m[0].startsWith(PLAYER.name + " "))).slice(0, 8).map(m => m[3] !== "client" ? m : [m[0].replace("Hesham", WHO).replace("Mona", CONTACT[others[0]] || "Mona").replace("Keep", m[0].startsWith("Mona") ? others[0] : CL), m[1], m[2], m[3]]); let i = 0, good = 0;
     const w = el("div", "ib"); box.appendChild(w);
     function show(){
       const m = list[i];
@@ -4302,6 +4398,444 @@ MG.print = { name:"Collate the pages", time:24,
     return { partial: () => doneN/total*0.8 };
   } };
 
+// ======================================================================
+// WORKDAY CONTENT (Nov 2026): shuffled task pools, more minigames, events, conversations
+// ======================================================================
+function goodMeter(n){ if (!G.char) return; bumpMeter(G.char.meter.good === "high" ? n : -n); }
+const CLIENTS = ["Nile Bakery","Sahel Surf Co.","Orbit Gym","Mesk Perfumes","Lumen Clinic"];
+const CONTACT = {"Nile Bakery":"Hesham","Sahel Surf Co.":"Mona","Orbit Gym":"Tamer","Mesk Perfumes":"Laila","Lumen Clinic":"Rania"};
+const BRAND = c => c.split(" ")[0].toUpperCase();
+const HANDLE = c => "@" + c.toLowerCase().replace(/[^a-z]/g, "");
+// Each pool is a list of chains. A chain's tasks run in order; "p" is the chance a chain is always in the day,
+// every chain gets one client for the day; the minigames are drawn for that client.
+const POOLS = {
+  karim:[
+    {p:1, first:true, n:[{title:"Put the music on", where:"desk", game:"music"}]},
+    {p:0.7, first:true, n:[{title:"Coffee for the studio", where:"kitchen", game:"coffee"}]},
+    {keep:true, n:[{title:"Get the {c} brief from Yassin", where:"npc:yassin", talk:["Yassin, what's the {c} brief?","Logo bigger, colours greener, deadline yesterday."]},
+                   {title:"Design the {c} logo", where:"desk", game:"pixel"},
+                   {title:"Send the logo to Zeina", where:"npc:zeina", talk:["Zeina, the {c} logo's in your inbox.","Perfect. The client will love it."]}]},
+    {keep:true, n:[{title:"Pick brand colours with Nour", where:"npc:nour", game:"color"},{title:"Lay out the {c} post", where:"desk", game:"align"}]},
+    {n:[{title:"Fix the jammed printer", where:"printer", game:"wires"}]},
+    {n:[{title:"Proofread the {c} caption", where:"desk", game:"typos"}]},
+    {n:[{title:"Find the final {c} files", where:"desk", game:"findfile"}]},
+    {n:[{title:"Export the {c} social sizes", where:"desk", game:"sizes"}]},
+    {keep:true, n:[{title:"Check the {c} print proof", where:"printer", game:"proof"}]},
+    {n:[{title:"Sort the {c} asset folder", where:"desk", game:"memory"}]},
+    {n:[{title:"Hand Osama your taxi receipts", where:"npc:osama", game:"receipts"}]},
+    {n:[{title:"Ask Mohamed Ali for the new fonts", where:"npc:mohamed", talk:["Mohamed, can you install the {c} fonts?","Send me the files. Only those, please."]}]}
+  ],
+  zeina:[
+    {p:1, first:true, n:[{title:"Check the client inbox", where:"desk", game:"inbox"},{title:"Answer the {c} call", where:"anywhere", game:"call", note:"Walk and talk: answer anywhere"}]},
+    {p:0.8, n:[{title:"Get the old {c} files", where:"robert", game:"findfile", note:"Use your keycard on Robert's office door"}]},
+    {keep:true, n:[{title:"Chase Karim for the logo", where:"npc:karim", talk:["Karim. The logo. Today.","Already on it, give me an hour."], from:735},
+                   {title:"Approve the logo proof", where:"npc:karim", game:"proof", from:800},
+                   {title:"Print the final for the client", where:"printer", game:"print"}]},
+    {p:0.6, n:[{title:"Run errands: bank and courier", where:"door", game:"errand", from:840}]},
+    {n:[{title:"Book the meeting room for {c}", where:"desk", game:"meeting"}]},
+    {n:[{title:"Approve the {c} expenses with Osama", where:"npc:osama", game:"receipts"}]},
+    {n:[{title:"Brief Yassin on {c}", where:"npc:yassin", talk:["Yassin, {c} wants a proposal by Thursday.","On it. Well, after lunch."]}]},
+    {n:[{title:"Proofread the {c} proposal", where:"desk", game:"typos"}]},
+    {n:[{title:"Second client call", where:"anywhere", game:"call", from:960, note:"Walk and talk: answer anywhere"}]},
+    {n:[{title:"Chase the {c} payment with Osama", where:"npc:osama", talk:["Osama, did {c} pay yet?","Not yet. I'll call them today."]}]},
+    {n:[{title:"Print the {c} contract", where:"printer", game:"print"}]}
+  ],
+  nour:[
+    {p:0.8, first:true, n:[{title:"Catch up with Yassin", where:"npc:yassin", talk:["Morning, Yassin. What did I miss?","{c} wants a post. And Zeina's already on her third call."]}]},
+    {keep:true, n:[{title:"Sketch the {c} mascot", where:"desk", game:"pixel"},{title:"Build the {c} palette", where:"desk", game:"color"},{title:"Lay out the {c} poster", where:"desk", game:"align"}]},
+    {keep:true, n:[{title:"Check the print proof", where:"printer", game:"proof"},{title:"Show Zeina the poster", where:"npc:zeina", talk:["Zeina, the poster's ready. Take a look.","Love it. Don't touch it again."]}]},
+    {keep:true, n:[{title:"Pick logo colours with Karim", where:"npc:karim", game:"color", from:750}]},
+    {n:[{title:"Export the {c} social sizes", where:"desk", game:"sizes"}]},
+    {n:[{title:"Proofread the {c} flyer", where:"desk", game:"typos"}]},
+    {n:[{title:"Organise the {c} asset folder", where:"desk", game:"memory"}]},
+    {n:[{title:"Find the {c} logo file", where:"desk", game:"findfile"}]},
+    {n:[{title:"Fix the tablet cable with Mohamed Ali", where:"npc:mohamed", game:"wires"}]}
+  ],
+  yassin:[
+    {p:0.8, first:true, n:[{title:"Make the morning coffee", where:"kitchen", game:"coffee", due:600}]},
+    {p:0.8, first:true, n:[{title:"Sort the morning inbox", where:"desk", game:"inbox"}]},
+    {n:[{title:"Brief Nour on the {c} post", where:"npc:nour", talk:["Nour! {c} wants a post for Thursday. The brief's in your inbox.","Got it. Give me till lunch."]}]},
+    {n:[{title:"Client call: feedback from {c}", where:"desk", game:"call"},{title:"Print the deck for Zeina", where:"printer", game:"print"},
+        {title:"Hand the deck to Zeina", where:"npc:zeina", talk:["Deck's printed and ready, Zeina.","Finally! Good job, Yassin."]}]},
+    {n:[{title:"Afternoon coffee run", where:"kitchen", game:"coffee", from:840}]},
+    {p:0.7, n:[{title:"Send the end-of-day update", where:"desk", game:"inbox", from:930, due:1015}]},
+    {n:[{title:"Book the meeting room for {c}", where:"desk", game:"meeting"}]},
+    {n:[{title:"Find the {c} contract", where:"desk", game:"findfile"}]},
+    {n:[{title:"Submit your expenses to Osama", where:"npc:osama", game:"receipts"}]},
+    {n:[{title:"Proofread the {c} caption", where:"desk", game:"typos"}]},
+    {n:[{title:"Check the {c} post sizes", where:"desk", game:"sizes"}]},
+    {n:[{title:"Ask Karim for the {c} logo", where:"npc:karim", talk:["Karim, any news on the {c} logo?","Tonight. Maybe tomorrow morning."], from:735}]}
+  ]
+};
+function buildDayTasks(cid){
+  const pool = POOLS[cid] || [], want = cid === "zeina" || cid === "yassin" ? 8 : 7 + (Math.random() < 0.5 ? 1 : 0);
+  const sh = a => shuffle(a);
+  let chosen = pool.filter(c => c.p && Math.random() < c.p);
+  let count = chosen.reduce((a, c) => a + c.n.length, 0);
+  for (const c of sh(pool.filter(c => !chosen.includes(c)))){
+    if (count >= want) break;
+    if (count + c.n.length > want + 1) continue;
+    chosen.push(c); count += c.n.length;
+  }
+  // a chain you can start right away goes first, then the rest in random order
+  const firsts = sh(chosen.filter(c => c.first)), others = sh(chosen.filter(c => !c.first));
+  chosen = firsts.concat(others);
+  const clients = sh(CLIENTS); let ci = 0, k = 0;
+  const start = CHARS[cid].start, end = CHARS[cid].end, tasks = [];
+  G.dayN = (G.dayN || 0) + 1;
+  chosen.forEach((c, idx) => {
+    const cl = clients[ci++ % clients.length];
+    // later chains open up through the day
+    const open = idx >= 3 && !c.n[0].from ? start + rnd(60, Math.max(90, (end - start) * 0.55)) : 0;
+    let prev = null;
+    c.n.forEach((t, j) => {
+      const id = `${cid}${G.dayN}_${k++}`, fill = x => String(x).replace(/\{c\}/g, cl);
+      const o = Object.assign({}, t, {id, client:cl, title:fill(t.title)});
+      if (t.talk) o.talk = t.talk.map(fill);
+      if (prev) o.after = [prev];
+      if (j === 0 && open && !o.from) o.from = Math.round(open / 5) * 5;
+      prev = id; tasks.push(o);
+    });
+  });
+  return tasks;
+}
+
+// ---------- conversations the player starts ----------
+const DIALOG = {
+  "*>zeina":[{l:["Zeina, need anything from me?","Yes. Everything. By three.","...On it."]},{l:["How was the client call?","Long. They want a new direction.","Again?"]},{l:["You look stressed.","I'm not stressed. I'm efficient."]}],
+  "*>yassin":[{l:["Yassin, what are you watching?","Research. For the client.","Sure it is."]},{l:["Lunch later?","Always. Koshary?","Deal."]},{l:["Did the client reply?","They sent a thumbs up. That's a yes, right?"]}],
+  "*>nour":[{l:["Nour, what are you working on?","Something beautiful. Don't look yet."]},{l:["Coffee?","Only if it's strong.","Is there another kind?"]},{l:["Can I see the poster?","Two more minutes. Then you'll be amazed."]}],
+  "*>karim":[{l:["Karim, what's playing?","Something chill. Want me to turn it up?","Maybe a bit."]},{l:["How's the logo?","Almost there. The client will love it.","Or ask for it bigger."]},{l:["Vape break later?","Already had one. OK, maybe one more."]}],
+  "*>amr":[{l:["Welcome back, Amr!","Thank you, {me}. Everything good here?","All good."], fx:"amr"},{l:["How's the other branch?","Busy, but not as fun as here."], fx:"amr"}],
+  "*>mohamed":[{l:["Mohamed, my laptop is so slow.","Give it here. Your next task will run smoother.","You're a hero."], fx:"it"},{l:["Can you fix the Wi-Fi?","It's not broken. It's busy.","Busy with what?"]},{l:["Any chance of a second monitor?","Fill in the form. Then wait. Then wait more."]}],
+  "*>osama":[{l:["Osama, any news on the payment?","It came in this morning. Finally."]},{l:["Need any receipts from me?","All of them. Every single one.","I'll look."]},{l:["How are the numbers this month?","Good. Don't spend anything."]}],
+  "*>finance":[{l:["How's it going in finance?","Numbers, numbers, numbers.","Sounds fun.","It's not."]},{l:["Busy day?","Month end. Always busy."]},{l:["Need anything from us?","Just the receipts, please."]}],
+  "*>boys":[{l:["Can I get a tea, please?","Right away, {me}. Mint or no mint?","Mint, please."], fx:"tea"},{l:["Thanks for cleaning up earlier.","Anytime, ya basha."]},{l:["What's for lunch today?","Rice, chicken and molokhia.","Perfect."]},{l:["Could I get a Nescafe?","Three sugars, as usual?","You know me."], fx:"tea"}],
+  "karim>nour":[{l:["Nour, rate this colour.","It's... bold.","Bold good or bold bad?"]},{l:["Any music requests?","Anything but that same playlist."]}],
+  "karim>zeina":[{l:["Zeina, the client wants changes again.","What did they say?","Bigger."]}],
+  "karim>yassin":[{l:["Yassin, who approved this brief?","The client. At midnight.","That explains a lot."]}],
+  "nour>karim":[{l:["Karim, A or B?","B. Always B.","I knew it."]},{l:["Turn it up, I love this song.","Finally, someone with taste."]}],
+  "nour>zeina":[{l:["Zeina, can I get one more day?","For what?","Perfection."]}],
+  "nour>yassin":[{l:["Yassin, did you read the brief?","I skimmed it.","That's a no."]}],
+  "zeina>yassin":[{l:["Yassin. The deck.","Already in your inbox!","...Really?"]},{l:["Yassin, are you on TikTok?","Market research, Zeina."]}],
+  "zeina>karim":[{l:["Karim, the logo?","Thirty minutes. Promise.","I'm timing you."]}],
+  "zeina>nour":[{l:["Nour, I need the poster today.","You'll have it by four.","Three."]}],
+  "yassin>zeina":[{l:["Zeina, can I leave early today?","Finish the report first.","Worth a try."]},{l:["You OK, Zeina? You seem stressed.","I'm fine. Just three calls and a fire."]}],
+  "yassin>nour":[{l:["Nour, the client wants it to pop.","Say that again and I quit.","Kidding! Kidding."]}],
+  "yassin>karim":[{l:["Karim, send me that playlist.","Only if you stop skipping songs."]}]
+};
+const GREET = {
+  morning:[["Morning, {n}!","Morning! Coffee first."],["Sabah el kheir!","Sabah el noor."],["Morning! How are you?","Alive. Ask me after tea."]],
+  lunch:[["Had lunch yet?","Not yet. I'm starving."],["Lunch?","Already ate. Sorry!"]],
+  late:[["Long day, huh?","Almost done. Hang in there."],["Going home soon?","Not soon enough."]]
+};
+function exchange(n){
+  if (Math.random() < 0.38) return null;   // sometimes they just say something
+  const me = PLAYER.id, grp = GROUP[n.id] || "*", fill = l => l.replace(/\{me\}/g, PLAYER.name).replace(/\{n\}/g, n.name.split(" ")[0]);
+  G.greeted = G.greeted || {}; G.exUsed = G.exUsed || {};
+  if (!G.greeted[n.id]){
+    G.greeted[n.id] = true;
+    const m = clock.min, set = m < 690 ? GREET.morning : (m >= 780 && m < 900) ? GREET.lunch : m >= 1020 ? GREET.late : null;
+    if (set) return {l: pick(set).map(fill)};
+  }
+  const keys = [`${me}>${n.id}`, `*>${n.id}`, `${me}>${grp}`, `*>${grp}`];
+  let opts = [];
+  keys.forEach(k => (DIALOG[k] || []).forEach(e => opts.push(e)));
+  opts = opts.filter(e => !G.exUsed[e.l[0]]);
+  if (!opts.length) return null;
+  const e = pick(opts); G.exUsed[e.l[0]] = true;
+  return {l: e.l.map(fill), fx: e.fx};
+}
+function exFx(fx, n){
+  G.exCool = G.exCool || {};
+  if ((G.exCool[fx] || 0) > clock.min) return;
+  if (fx === "tea"){ G.exCool.tea = clock.min + 60;
+    const at = clock.min + Math.round(rnd(8, 15)), who = n.name;
+    G.pendingTea = {at, who}; }
+  if (fx === "it" && G.mode === "day"){ G.exCool.it = clock.min + 120; G.itBoost = true; setTimeout(() => toast(`${esc(n.name)} cleaned up your laptop. <span class="k">More time</span> in your next task.`), 2600); }
+  if (fx === "amr" && G.mode === "day"){ G.exCool.amr = clock.min + 600; goodMeter(8); }
+}
+function teaArrives(){
+  const t = G.pendingTea; if (!t || clock.min < t.at) return;
+  G.pendingTea = null; meSay("Shukran!", 2);
+  if (G.mode === "day"){ goodMeter(12); toast(`${esc(t.who)} brings your tea. <span class="k">${esc(G.char.meter.name)} ${G.char.meter.good === "high" ? "up" : "down"}</span>`); }
+  else toast(`${esc(t.who)} brings your tea.`);
+}
+
+// ---------- unplanned events ----------
+function evTask(o){
+  const t = Object.assign({id:"ev" + Math.floor(Math.random()*1e9), opt:true, ev:true, done:false, stars:0}, o);
+  if (t.expires) t.expires = Math.round(t.expires);
+  G.tasks.push(t); renderPanel(true); return t;
+}
+function fadeEvent(text, mins, after){
+  G.paused = true; const f = $("fade"); f.textContent = text; f.classList.add("show");
+  setTimeout(() => { clock.min += mins; f.classList.remove("show"); G.paused = false; if (after) after(); }, 1800);
+}
+const EVENTS = [
+  {id:"wifi", ok:() => { const m = myNpc("mohamed"); return m && visible(m); }, run(){
+    G.fx.slowUntil = clock.min + 45;
+    evTask({title:"Help Mohamed Ali reset the router", where:"npc:mohamed", game:"wires", expires: clock.min + 45, miss:"The Wi-Fi came back by itself. Eventually.",
+      onDone(){ G.fx.slowUntil = 0; toast("The Wi-Fi is back. Everyone cheers."); }});
+    toast(`<span class="k">Wi-Fi down.</span> Every task is slower until it's back. Mohamed Ali could use a hand.`); }},
+  {id:"urgent", run(){
+    const from = G.cid === "yassin" ? "Zeina" : G.cid === "zeina" ? "Yassin" : pick(["Zeina","Yassin"]), cl = pick(CLIENTS);
+    evTask({title:`Urgent: ${cl} needs new sizes`, where:"desk", game:"sizes", client:cl, expires: clock.min + 40, miss:`${cl} waited and waited. Not great.`});
+    toast(`${from}: "Urgent! ${esc(cl)} needs the post in new sizes. Forty minutes!"`); }},
+  {id:"typo", run(){
+    const cl = pick(CLIENTS);
+    evTask({title:`Fix the typo in the ${cl} post`, where:"desk", game:"typos", client:cl, expires: clock.min + 45, miss:"The typo stayed up all day. Someone screenshotted it."});
+    toast(`<span class="k">Oops.</span> The client spotted a typo in yesterday's ${esc(cl)} post.`); }},
+  {id:"cake", run(){
+    evTask({title:"Grab a slice of birthday cake", where:"kitchen", expires: clock.min + 50, quick:{meter:15, pose:"drink", text:"Chocolate cake. Totally worth it."}, miss:"The cake's gone. Of course it is.", missMeter:3});
+    toast("Someone brought <b>birthday cake</b>. It's in the kitchen, but not for long."); }},
+  {id:"delivery", run(){
+    evTask({title:"Sign for your delivery", where:"door", expires: clock.min + 25, quick:{meter:6, pose:"stand", text:"Signed. New samples for the studio."}, miss:"The courier left. You'll have to pick it up tomorrow."});
+    toast("A courier is at the <b>front door</b> with a parcel for you."); }},
+  {id:"jam", run(){
+    evTask({title:"Unjam the printer", where:"printer", game:"wires", expires: clock.min + 45, miss:"Someone else fixed the printer. Badly."});
+    toast("The printer jammed mid-print. Everyone's staring at it."); }},
+  {id:"drill", run(){ fadeEvent("Fire drill! Everyone out to the hallway…", 12, () => { goodMeter(-6); toast("Fire drill over. Twelve minutes gone."); }); }},
+  {id:"power", run(){ fadeEvent("Power cut. The office goes dark for a moment…", 8, () => { G.fx.slowUntil = clock.min + 20; toast("Power's back. The computers are still waking up."); }); }},
+  {id:"coffee", run(){ goodMeter(-8); toast("The coffee machine broke. Mohamed Nescafe says it's tea only today."); }},
+  {id:"deadline", ok:() => G.tasks.some(t => !t.done && !t.opt && !t.due && !t.talk && t.game && t.game !== "music" && t.game !== "errand" && isAvail(t)), run(){
+    const t = pick(G.tasks.filter(t => !t.done && !t.opt && !t.due && !t.talk && t.game && t.game !== "music" && t.game !== "errand" && isAvail(t)));
+    t.due = Math.round((clock.min + 60) / 5) * 5; renderPanel(true);
+    toast(`${esc(t.client || "The client")} moved the deadline up. "${esc(t.title)}" is now due at ${hhmm(t.due)}.`); }},
+  {id:"amrcall", run(){
+    evTask({title:"Call back Amr", where:"anywhere", game:"call", expires: clock.min + 25, note:"Walk and talk: answer anywhere", miss:"Amr left a voice note. A long one."});
+    toast(`<span class="k">Ring ring.</span> Amr is calling from the other branch.`); }},
+  {id:"praise", run(){ goodMeter(10); toast("The client loved yesterday's work. Everyone's in a good mood."); }},
+  {id:"battery", run(){
+    evTask({title:"Grab your charger", where:"desk", expires: clock.min + 30, quick:{meter:4, pose:"type", text:"Plugged in. Crisis avoided."}, miss:"Your laptop died. Ten minutes to get it back.", missMeter:6});
+    toast("Your laptop battery is at <b>5%</b>. The charger is at your desk."); }},
+  {id:"walkin", run(){
+    evTask({title:"Welcome the walk-in client", where:"door", expires: clock.min + 20, quick:{meter:6, pose:"stand", clock:5, text:"Five minutes of small talk. They leave happy."}, miss:"The client waited, then left. Awkward."});
+    toast("A client walked in without an appointment. Say hello at the <b>front door</b>."); }}
+];
+function generalEvents(){
+  teaArrives();
+  if (G.tut || G.paused || clock.min < G.nextGen) return;
+  G.nextGen = clock.min + rnd(45, 75);
+  if (clock.min > G.char.end - 45) return;
+  if (G.tasks.some(t => t.ev && !t.done && !t.expired)) return;    // one surprise at a time
+  const opts = EVENTS.filter(e => !G.evUsed[e.id] && (!e.ok || e.ok()));
+  if (!opts.length) return;
+  const e = pick(opts); G.evUsed[e.id] = true; e.run();
+}
+const ROAM_FLAVOUR = ["Someone brought cake to the kitchen.","The Wi-Fi blinks for a second. Nobody notices.","A courier waits at the front door.","The printer is jammed. Again.","Somebody's playing music in the lounge.","The coffee machine makes a worrying noise.","The AC switches itself off. Then on.","A client walks in, waves, and walks out."];
+function roamEvents(){
+  teaArrives();
+  if (!G.nextRoam || clock.min < G.nextRoam) return;
+  G.nextRoam = clock.min + rnd(60, 100); toast(pick(ROAM_FLAVOUR));
+}
+Object.assign(G, { exchange, exFx, EVENTS, generalEvents });
+
+// ---------- new minigames ----------
+(function addMgCss(){
+  const st = document.createElement("style");
+  st.textContent = `
+.g2{display:flex;flex-direction:column;gap:9px;align-items:center}
+.g2 .rd{font-size:12px;color:var(--dim);text-align:center}
+.g2 .q{font-size:14px;text-align:center;line-height:1.35}
+.g2 .q b{color:var(--amber);font-weight:600}
+.ty{background:#f3ecdf;color:#1e2a22;border-radius:4px;padding:12px 14px;max-width:560px;line-height:1.9;font-size:15px}
+.ty button{font:inherit;color:inherit;background:none;border:0;padding:1px 2px;margin:0 1px;border-radius:2px;cursor:pointer}
+.ty button:hover{background:rgba(30,42,34,.1)}
+.ty button.found{background:#c9e8cf;text-decoration:line-through;text-decoration-color:#3fae5a}
+.ty button.miss{animation:shk .3s}
+.mem{display:grid;grid-template-columns:repeat(6,clamp(44px,12vh,72px));gap:7px}
+.mem button{aspect-ratio:3/4;border-radius:5px;border:1px solid #2a2f37;background:#1b2129;color:transparent;font:inherit;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px}
+.mem button i{display:block;width:60%;aspect-ratio:1;border-radius:3px;opacity:0}
+.mem button.up,.mem button.got{background:#f3ecdf;color:#1e2a22}
+.mem button.up i,.mem button.got i{opacity:1}
+.mem button.got{opacity:.45;cursor:default}
+.cal{display:grid;grid-template-columns:auto repeat(8,clamp(30px,8vw,50px));gap:3px;align-items:center}
+.cal .nm{font-size:12px;color:var(--dim);padding-right:6px;text-align:right}
+.cal .hr{font-size:10.5px;color:var(--dim);text-align:center}
+.cal .c{height:clamp(18px,5vh,26px);border-radius:3px;background:#22303a}
+.cal .c.busy{background:#7a3b33}
+.cal .pick{height:clamp(26px,7vh,34px);border-radius:4px;border:1px solid #2a2f37;background:#141920;color:var(--ink);font:inherit;font-size:11px;cursor:pointer}
+.cal .pick:hover{border-color:var(--amber)}
+.rc{display:grid;grid-template-columns:repeat(3,clamp(84px,22vw,120px));gap:8px}
+.rc button{background:#f3ecdf;color:#1e2a22;border:2px solid transparent;border-radius:3px;font:inherit;padding:8px 6px;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.rc button small{font-size:10px;color:#5b6a5f}
+.rc button b{font-size:16px}
+.rc button.on{border-color:var(--amber);transform:translateY(-2px)}
+.sz{display:flex;gap:12px;align-items:flex-end;justify-content:center;height:clamp(110px,32vh,190px)}
+.sz button{background:#f3ecdf;border:2px solid transparent;border-radius:3px;cursor:pointer;padding:0}
+.sz button:hover{border-color:var(--amber)}
+.ff{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:min(620px,100%)}
+.ff button{font:inherit;font-size:12px;text-align:left;color:var(--ink);background:#141920;border:1px solid #2a2f37;border-radius:4px;padding:8px 9px;cursor:pointer;display:flex;gap:7px;align-items:center;overflow-wrap:anywhere;line-height:1.25}
+.ff button i{flex:none;width:16px;height:20px;border-radius:2px;background:#4a515c}
+.ff button:hover{border-color:#4a515c}
+.ff button.miss{animation:shk .3s;border-color:#e0705a}
+.g2 .sub2{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#141920;border:1px solid #2a2f37;border-radius:4px;padding:5px 9px;color:var(--amber)}
+.g2 .row2{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+`;
+  document.head.appendChild(st);
+})();
+const clientOf = api => { const t = api.task || {}; if (!t.client || !CLIENTS.includes(t.client)) t.client = pick(CLIENTS); return t.client; };
+
+// Proofread: tap the typos
+const COPY = [
+  "{c} opens its doors this weekend with special offers for everyone who visits before noon.",
+  "Fresh ideas, honest service and a team that listens. That is the promise behind every project.",
+  "Join us on Thursday evening for live music, good company and something sweet from the kitchen.",
+  "This season we are introducing three new flavours, inspired by summer evenings on the coast.",
+  "Book your appointment online and receive a personal consultation with one of our specialists.",
+  "Thank you to every customer who supported us this year. We could not have done it without you."
+];
+function typoOf(w){
+  const core = w.replace(/[^A-Za-z]/g, ""); if (core.length < 5) return null;
+  const st = w.indexOf(core[0]), i = 1 + Math.floor(Math.random() * (core.length - 3));
+  const a = core.split(""); if (a[i] === a[i+1]) return null; [a[i], a[i+1]] = [a[i+1], a[i]];
+  return w.slice(0, st) + a.join("") + w.slice(st + core.length);
+}
+MG.typos = { name:"Proofread the copy", time:30,
+  how:"The copy is going out in a minute. <b>Tap the 4 words with typos.</b> Wrong taps cost 2 seconds.",
+  build(box, api){
+    const text = pick(COPY).replace(/\{c\}/g, clientOf(api)), words = text.split(" ");
+    const cand = shuffle(words.map((w, i) => i).filter(i => typoOf(words[i]) && !/\{|\}/.test(words[i]) && !clientOf(api).includes(words[i].replace(/[^A-Za-z]/g, ""))));
+    const bad = new Set(), shown = words.slice();
+    for (const i of cand){ if (bad.size >= 4) break; const t = typoOf(words[i]); if (t){ shown[i] = t; bad.add(i); } }
+    const total = bad.size; let found = 0;
+    const w = el("div", "g2"); box.appendChild(w);
+    const p = el("div", "ty"); w.appendChild(p); const info = el("div", "rd", `Found 0 of ${total}`); w.appendChild(info);
+    shown.forEach((t, i) => { const b = el("button", "", esc(t)); p.appendChild(b); p.appendChild(document.createTextNode(" "));
+      b.onclick = () => { if (b.classList.contains("found")) return;
+        if (bad.has(i)){ b.classList.add("found"); b.textContent = words[i]; found++; info.textContent = `Found ${found} of ${total}`; flash("Fixed", true);
+          if (found === total) api.finish(0.65 + 0.35*ratio(), "Clean copy."); }
+        else { b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss"); api.penalty(2); } }; });
+    return { partial: () => found/total*0.8 };
+  } };
+
+// Memory: match the file pairs
+const FILES = [["LOGO","ai","#e08a3a"],["PHOTO","jpg","#4f86c6"],["FONT","otf","#8f6ac9"],["DECK","pdf","#d0504a"],["POST","png","#3fae5a"],["VIDEO","mp4","#c9a23a"],["BRIEF","docx","#2f6fb3"],["SHEET","xlsx","#2e8b57"]];
+MG.memory = { name:"Sort the asset folder", time:42,
+  how:"The asset folder is a mess. <b>Flip two cards at a time to find matching files.</b> Six pairs.",
+  build(box, api){
+    const set = shuffle(FILES).slice(0, 6), deck = shuffle(set.concat(set));
+    const w = el("div", "g2"); box.appendChild(w);
+    const g = el("div", "mem"); w.appendChild(g); const info = el("div", "rd", "Pairs: 0 of 6"); w.appendChild(info);
+    let open = [], pairs = 0, misses = 0, lock = false;
+    deck.forEach(f => { const b = el("button", "", `<i style="background:${f[2]}"></i>${f[0]}.${f[1]}`); b._f = f[0]; g.appendChild(b);
+      b.onclick = () => { if (lock || b.classList.contains("up") || b.classList.contains("got")) return;
+        b.classList.add("up"); open.push(b);
+        if (open.length === 2){ const [x, y] = open; open = [];
+          if (x._f === y._f){ x.classList.replace("up", "got"); y.classList.replace("up", "got"); pairs++; info.textContent = `Pairs: ${pairs} of 6`; flash("Match", true);
+            if (pairs === 6) api.finish(Math.max(0.3, 0.6 + 0.4*ratio() - misses*0.02), "Folder sorted."); }
+          else { misses++; lock = true; setTimeout(() => { x.classList.remove("up"); y.classList.remove("up"); lock = false; }, 650); } } }; });
+    return { partial: () => pairs/6*0.8 };
+  } };
+
+// Meeting: find the hour everyone is free
+MG.meeting = { name:"Book the meeting room", time:30,
+  how:"Find an hour when <b>everyone is free</b> (no red) and tap it. Three meetings to book. Wrong picks cost 2 seconds.",
+  build(box, api){
+    const PEOPLE = ["Zeina","Yassin","Nour","Karim","Osama","Mohamed Ali"].filter(n => n !== PLAYER.name);
+    const HOURS = [10,11,12,13,14,15,16,17]; let round = 0, good = 0;
+    const w = el("div", "g2"); box.appendChild(w);
+    function show(){
+      const who = shuffle(PEOPLE).slice(0, 3), free = Math.floor(Math.random()*8);
+      const busy = who.map(() => HOURS.map((h, i) => i !== free && Math.random() < 0.55));
+      // every other hour must be blocked by at least one person
+      HOURS.forEach((h, i) => { if (i !== free && !busy.some(r => r[i])) busy[Math.floor(Math.random()*3)][i] = true; });
+      w.innerHTML = `<div class="q">Meeting ${round+1} of 3 · <b>${who.join(", ")}</b> and you</div>`;
+      const cal = el("div", "cal"); w.appendChild(cal);
+      cal.appendChild(el("span", "nm", ""));
+      HOURS.forEach(h => cal.appendChild(el("span", "hr", h + ":00")));
+      who.forEach((n, r) => { cal.appendChild(el("span", "nm", esc(n))); HOURS.forEach((h, i) => cal.appendChild(el("span", "c" + (busy[r][i] ? " busy" : "")))); });
+      cal.appendChild(el("span", "nm", "Book"));
+      HOURS.forEach((h, i) => { const b = el("button", "pick", h + ":00"); cal.appendChild(b);
+        b.onclick = () => { if (i === free){ good++; round++; flash("Booked", true); if (round >= 3) api.finish(0.6 + 0.4*ratio(), "Three meetings booked."); else show(); }
+          else { api.penalty(2); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); } }; });
+    }
+    show();
+    return { partial: () => good/3*0.8 };
+  } };
+
+// Receipts: pick the receipts that add up to the total
+MG.receipts = { name:"Add up the receipts", time:40,
+  how:"Osama needs the expense report to match. <b>Tap the receipts that add up exactly to the total</b>, then Submit. Three reports.",
+  build(box, api){
+    const KINDS = ["Taxi","Lunch","Printing","Courier","Coffee","Parking","Supplies","Fonts","Snacks"];
+    let round = 0, good = 0;
+    const w = el("div", "g2"); box.appendChild(w);
+    function makeRound(){
+      for (let tries = 0; tries < 200; tries++){
+        const vals = shuffle([...Array(6)].map(() => 10 * (2 + Math.floor(Math.random()*24))));
+        const k = 2 + Math.floor(Math.random()*2), target = vals.slice(0, k).reduce((a, b) => a + b, 0);
+        // only one way to make the total
+        let ways = 0; for (let m = 1; m < 64; m++){ let s2 = 0; for (let i = 0; i < 6; i++) if (m & (1<<i)) s2 += vals[i]; if (s2 === target) ways++; }
+        if (ways === 1) return {vals: shuffle(vals.map((v, i) => ({v, k:KINDS[(i + round*2) % KINDS.length]}))), target};
+      }
+      return {vals:[{v:50,k:"Taxi"},{v:70,k:"Lunch"},{v:30,k:"Coffee"},{v:90,k:"Courier"},{v:110,k:"Printing"},{v:20,k:"Parking"}], target:120};
+    }
+    function show(){
+      const R = makeRound(), sel = new Set();
+      w.innerHTML = `<div class="q">Report ${round+1} of 3 · total <b>EGP ${R.target}</b></div>`;
+      const grid = el("div", "rc"); w.appendChild(grid);
+      const sum = el("div", "rd", "Selected: EGP 0"); const row = el("div", "row2"); const go = el("button", "gobtn", "Submit"); const clr = el("button", "ghost", "Clear");
+      row.append(clr, go); w.append(sum, row);
+      const upd = () => { sum.textContent = `Selected: EGP ${[...sel].reduce((a, i) => a + R.vals[i].v, 0)}`; };
+      R.vals.forEach((r, i) => { const b = el("button", "", `<small>${r.k}</small><b>${r.v}</b><small>EGP</small>`); grid.appendChild(b);
+        b.onclick = () => { if (sel.has(i)){ sel.delete(i); b.classList.remove("on"); } else { sel.add(i); b.classList.add("on"); } upd(); }; });
+      clr.onclick = () => { sel.clear(); grid.querySelectorAll("button").forEach(b => b.classList.remove("on")); upd(); };
+      go.onclick = () => { const s2 = [...sel].reduce((a, i) => a + R.vals[i].v, 0);
+        if (s2 === R.target){ good++; round++; flash("It adds up", true); if (round >= 3) api.finish(0.6 + 0.4*ratio(), "Osama is satisfied. For now."); else show(); }
+        else { api.penalty(3); flash(s2 > R.target ? "Too much" : "Not enough"); } };
+    }
+    show();
+    return { partial: () => good/3*0.8, key: k => { if (k === "enter"){ const g2 = w.querySelector(".gobtn"); if (g2) g2.click(); } } };
+  } };
+
+// Sizes: pick the frame with the right shape
+const SIZES = [["Instagram post", "4:5", 4/5],["Instagram story", "9:16", 9/16],["YouTube thumbnail", "16:9", 16/9],["Square post", "1:1", 1],["LinkedIn banner", "4:1", 4],["Facebook cover", "2.7:1", 2.7],["Pinterest pin", "2:3", 2/3]];
+MG.sizes = { name:"Export the sizes", time:24,
+  how:"Each platform needs its own shape. <b>Tap the frame with the right proportions.</b> Six exports. Wrong picks cost 2 seconds.",
+  build(box, api){
+    const list = shuffle(SIZES).slice(0, 6); let i = 0, good = 0;
+    const w = el("div", "g2"); box.appendChild(w);
+    function show(){
+      const s0 = list[i], others = shuffle(SIZES.filter(x => Math.abs(Math.log(x[2]/s0[2])) > 0.18)).slice(0, 3), opts = shuffle([s0, ...others]);
+      w.innerHTML = `<div class="q">Export ${i+1} of 6 · <b>${esc(clientOf(api))}</b> for <b>${s0[0]}</b> <span class="sub2">${s0[1]}</span></div>`;
+      const row = el("div", "sz"); w.appendChild(row);
+      const H = Math.min(innerHeight*0.3, 180), MAXW = 150;
+      opts.forEach(o => { let h = H, wd = H*o[2]; if (wd > MAXW){ wd = MAXW; h = MAXW/o[2]; }
+        const b = el("button", ""); b.style.width = wd+"px"; b.style.height = h+"px"; row.appendChild(b);
+        b.onclick = () => { if (o === s0){ good++; i++; flash("Exported", true); if (i >= list.length) api.finish(0.6 + 0.4*ratio(), "All sizes out."); else show(); }
+          else { api.penalty(2); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); } }; });
+    }
+    show();
+    return { partial: () => good/list.length*0.8 };
+  } };
+
+// Find file: tap the exact file name
+MG.findfile = { name:"Find the right file", time:28,
+  how:"Find the <b>exact</b> file in the folder. Watch out for copies, old versions and the wrong format. Four files. Wrong taps cost 2 seconds.",
+  build(box, api){
+    const slug = clientOf(api).replace(/[^A-Za-z]/g, "");
+    const KINDS = [["logo","ai"],["poster","psd"],["proposal","pdf"],["contract","pdf"],["deck","pptx"],["post","png"],["brief","docx"]];
+    let round = 0, good = 0;
+    const w = el("div", "g2"); box.appendChild(w);
+    function show(){
+      const [kd, ext] = pick(KINDS), v = 2 + Math.floor(Math.random()*4), base = `${slug}_${kd}`;
+      const target = `${base}_FINAL_v${v}.${ext}`;
+      const decoys = shuffle([`${base}_FINAL_v${v-1}.${ext}`, `${base}_FINAL_v${v+1}.${ext}`, `${base}_final_v${v}.${ext}`, `${base}_FINAL_v${v} copy.${ext}`,
+        `${base}_FINAL_v${v}.${ext === "pdf" ? "docx" : "pdf"}`, `${base}_FINALFINAL_v${v}.${ext}`, `${base}_FINAL_v${v}_old.${ext}`, `${base.toLowerCase()}_FINAL_v${v}.${ext}`, `${base}_FINAL-v${v}.${ext}`]).slice(0, 8);
+      const all = shuffle([target, ...decoys]);
+      w.innerHTML = `<div class="q">File ${round+1} of 4 · find</div><div class="sub2">${esc(target)}</div>`;
+      const g = el("div", "ff"); w.appendChild(g);
+      all.forEach(n => { const b = el("button", "", `<i></i><span>${esc(n).replace(/[_.-]/g, m => m + "\u200b")}</span>`); g.appendChild(b);
+        b.onclick = () => { if (n === target){ good++; round++; flash("Found it", true); if (round >= 4) api.finish(0.6 + 0.4*ratio(), "Every file found."); else show(); }
+          else { api.penalty(2); b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss"); } }; });
+    }
+    show();
+    return { partial: () => good/4*0.8 };
+  } };
+DESIGN_GAMES.add("sizes");
+
 // ---------- the tutorial ----------
 function tutSteps(){
   const c = G.char, touch = isTouch(), first = G.tasks[0];
@@ -4395,7 +4929,10 @@ function onKey(k, e){
   }
   return false;
 }
-function gmFrame(dt){ animMenu(dt); tickGame(dt); updateDay(dt); }
+function gmFrame(dt){ animMenu(dt); tickGame(dt); updateDay(dt);
+  if (P.follow && state.t >= P.follow.at){ const fn = P.follow.n; if (!fn || (visible(fn) && Math.hypot(fn.x - P.x, fn.y - P.y) < 60)) meSay(P.follow.text, 2.4); P.follow = null; }
+  if (G.mode === "roam" && !G.hold) roamEvents();
+}
 
 Object.assign(G, { openMenu, beginDay, onInteract, onTalk, placeTaskHint, drawWorld, syncMeTag, onKey, gmFrame, rate:clockRate, lockMsg, endDay, CHARS, MG, openGame, completeTask, taskById });
 
