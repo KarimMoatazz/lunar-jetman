@@ -138,7 +138,8 @@ canvas.logo{image-rendering:pixelated;image-rendering:crisp-edges}
 .pause{z-index:13}
 .pause .pbtns{display:grid;gap:10px;width:min(300px,100%)}
 .pause .pbtns .gobtn,.pause .pbtns .ghost{width:100%;font-size:15px;padding:11px 18px}
-.menu .resume{margin-top:2px}
+.menu .resume{margin-top:0}
+.menu .mfoot{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:2px}
 .menu[hidden],.pause[hidden],.ghud[hidden],.tcard[hidden],.mg[hidden],.sum[hidden],.abil[hidden]{display:none!important}
 .menu h2{margin:0;font-size:clamp(18px,3.4vh,26px);font-weight:600;letter-spacing:.14em;color:var(--amber);text-shadow:0 3px 0 #000}
 .menu .sub{margin:-4px 0 0;font-size:clamp(11px,1.9vh,14px);color:var(--dim);letter-spacing:.04em}
@@ -369,7 +370,7 @@ body.editing .ghud,body.editing .abil,body.editing .tcard,body.editing .menu{dis
   <div class="room" id="room"><b id="roomN">2</b><span id="roomName">Main hallway</span></div>
   <div class="btns">
     <button class="btn" id="bEdit" aria-pressed="false" title="Move furniture, adjust doors and add items" hidden>Edit</button>
-    <span class="clock" id="clock" aria-label="Office time"><i id="clockD">Sun</i><span id="clockT">10:00</span></span>
+    <span class="clock" id="clock" aria-label="Office time"><i id="clockD">Sun</i><span id="clockT">10:00 am</span></span>
     <button class="btn" id="bMenu" title="Pause (Esc or P)" hidden>Pause</button>
     <button class="btn" id="bMusic" title="Music" aria-pressed="true">Music</button>
     <button class="btn" id="bFull" title="Full screen">Full screen</button>
@@ -547,7 +548,7 @@ html.lj-gate .title,html.lj-gate .rotate,html.lj-gate .inst{display:none!importa
       <button class="mode" data-m="roam"><b>Free roam</b><span>Walk around the office as anyone. No tasks, no timer, no locked rooms. Just the team going about their day.</span></button>
     </div>
     <p class="sub" id="modeKeys">Choose one to continue</p>
-    <button class="ghost resume" id="mResume" hidden>Back to the game</button>
+    <div class="mfoot"><button class="ghost resume" id="mResume" hidden>Back to the game</button><button class="ghost" id="mTitle">Exit to title screen</button></div>
   </div>
   <div class="mscr" id="charScr" hidden>
     <h2>CHOOSE YOUR CHARACTER</h2>
@@ -1764,7 +1765,8 @@ const seatTaken = new Map();
 const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday"];
 const AMR_VISIT_CHANCE = 0.1;      // Amr works from another branch: about one day in ten
 const clock = { min: 600, day: 0, lastMeeting: 0 };
-const hhmm = m => { const h = Math.floor(m/60)%24, mm = Math.floor(m%60); return (h<10?"0":"")+h+":"+(mm<10?"0":"")+mm; };
+const hhmm = m => { const h = Math.floor(m/60)%24, mm = Math.floor(m%60), h12 = h % 12 || 12; return h12 + ":" + (mm<10?"0":"") + mm + " " + (h < 12 ? "am" : "pm"); };
+const hr12 = h => (h % 12 || 12) + " " + (h % 24 < 12 ? "am" : "pm");
 const rnd = (a,b) => a + Math.random()*(b-a);
 const pick = a => a[Math.floor(Math.random()*a.length)];
 
@@ -2015,6 +2017,15 @@ function updateNpc(n, dt){
     return;
   }
   if (n.slide){ const s = n.slide; s.t += dt/0.3; const k = Math.min(1, s.t); n.x = s.fx + (s.tx-s.fx)*k; n.y = s.fy + (s.ty-s.fy)*k; if (k >= 1) n.slide = null; return; }
+  // talking to the player: stand still and face them until the conversation is over
+  if (n.holdT > state.t){
+    if (Math.hypot(P.x - n.x, P.y - n.y) > 70){ n.holdT = 0; }
+    else {
+      n.moving = false;
+      if (!n.sit){ const dx = P.x - n.x, dy = P.y - n.y; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx<0?"left":"right") : (dy<0?"up":"down"); n.pose = n.carry || "stand"; }
+      return;
+    }
+  }
   if (!n.cur){
     if (!n.q.length){ n.carry = null; n.item = null; n.tool = "mop"; n.q = chooseNext(n); }
     n.cur = n.q.shift(); if (!n.cur) return;
@@ -2162,6 +2173,11 @@ function npcNear(){
 }
 const TEAM_NAMES = /\b(Karim|Zeina|Yassin|Nour|Osama|Hany|Sherif|Magdy|Tarek|Wael|Amr|Ahmed|Mohamed|Ostaz)\b/;
 function soloLine(n){ const all = (n.lines || []).filter(l => !TEAM_NAMES.test(l)); return pick(all.length ? all : (n.lines || ["..."])); }
+function holdForPlayer(n, secs){
+  n.holdT = Math.max(n.holdT || 0, state.t + secs);
+  if (n.convo){ n.convo.i = n.convo.lines.length; n.convo.t0 = -1e9; }   // break off any chat with someone else
+  if (n.cur && n.cur.do === "go"){ n.cur.path = null; n.q.unshift(n.cur); n.cur = null; }   // pick the walk up again afterwards
+}
 function lineFor(n, toKarim){
   const me = new RegExp("\\b" + PLAYER.name + "\\b(?! Hasabo)");
   const all = n.lines || [], forK = all.filter(l => me.test(l)), rest = all.filter(l => !TEAM_NAMES.test(l));
@@ -2176,6 +2192,7 @@ function talkTo(n){
   if (!n.sit && !n.moving){ const dx = P.x - n.x, dy = P.y - n.y; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx<0?"left":"right") : (dy<0?"up":"down"); }
   const busy = n.cur && n.cur.meeting ? "Not now, we're in a meeting." : null;
   const ex = !busy && G.exchange ? G.exchange(n) : null;
+  if (!busy) holdForPlayer(n, ex ? (ex.l[2] ? 6.4 : 4.6) : 3.6);
   if (ex){
     meSay(ex.l[0], 2.6); n.replyAt = state.t + 1.5; n.replyText = ex.l[1];
     P.follow = ex.l[2] ? {at: state.t + 3.7, text: ex.l[2], n} : null;
@@ -3409,7 +3426,7 @@ PLANS.vape = n => { const w = POI.win[5]; return [go(w[0], w[1]), wait(rnd(6,10)
 
 // ---------- the four playable characters ----------
 const CHARS = {
-  yassin:{ name:"Yassin", role:"Account manager", start:540, end:1020, room:4, hours:"First in, first out: 09:00 to 17:00",
+  yassin:{ name:"Yassin", role:"Account manager", start:540, end:1020, room:4, hours:"First in, first out: 9 am to 5 pm",
     blurb:"Easy going, a bit lazy, always up for fun.",
     meter:{ name:"Fun", good:"high", start:80, decay:0.2, low:35,
       tip:"Yassin gets bored fast. Fun drops all day. Sit in the lounge or chat with people to top it up. When it's low he walks slower and gets less time in tasks." },
@@ -3424,7 +3441,7 @@ const CHARS = {
       {id:"y7", title:"Afternoon coffee run", where:"kitchen", game:"coffee", from:840},
       {id:"y8", title:"Send the end-of-day update", where:"desk", game:"inbox", from:930, due:1015}
     ] },
-  zeina:{ name:"Zeina", role:"Accounts director", start:600, end:1080, room:4, hours:"10:00 to 18:00, with errands outside",
+  zeina:{ name:"Zeina", role:"Accounts director", start:600, end:1080, room:4, hours:"10 am to 6 pm, with errands outside",
     blurb:"Always on the phone, loud, a little bossy.",
     meter:{ name:"Panic", good:"low", start:25, decay:-0.13, low:70,
       tip:"Zeina panics. It creeps up all day and every client call adds more. Sit down anywhere to calm down. When it's high she gets less time in tasks." },
@@ -3439,7 +3456,7 @@ const CHARS = {
       {id:"z7", title:"Print the final for the client", where:"printer", game:"print", after:["z5"]},
       {id:"z8", title:"Second client call", where:"anywhere", game:"call", from:960, note:"Walk and talk: answer anywhere"}
     ] },
-  nour:{ name:"Nour", role:"Graphic designer", start:630, end:1110, room:5, hours:"10:30 to 18:30",
+  nour:{ name:"Nour", role:"Graphic designer", start:630, end:1110, room:5, hours:"10:30 am to 6:30 pm",
     blurb:"A great artist who talks a lot. Big energy, big swings.",
     meter:{ name:"Focus", good:"high", start:75, decay:0.1, low:35,
       tip:"Nour runs hot and cold. Interruptions knock his focus down, a coffee from the kitchen and good work bring it back. Low focus means less time in tasks." },
@@ -3453,7 +3470,7 @@ const CHARS = {
       {id:"n6", title:"Show Zeina the poster", where:"npc:zeina", talk:["Zeina, the poster's ready. Take a look.","Love it. Don't touch it again."], after:["n5"]},
       {id:"n7", title:"Pick logo colours with Karim", where:"npc:karim", game:"color", from:750}
     ] },
-  karim:{ name:"Karim", role:"Graphic designer", start:720, end:1140, room:5, hours:"12:00 to 19:00",
+  karim:{ name:"Karim", role:"Graphic designer", start:720, end:1140, room:5, hours:"12 pm to 7 pm",
     blurb:"Coffee as he settles in, music on the speakers.",
     meter:{ name:"Vibe", good:"high", start:80, decay:0.15, low:35,
       tip:"Karim works on vibes. They fade over the day. Walk around the office, put the music on, or take a vape break at the studio window. Low vibe means less time in tasks." },
@@ -3683,7 +3700,7 @@ function ringing(){ return G.tasks.find(t => isAvail(t) && t.where === "anywhere
 function startTask(t){
   if (t.talk){
     const n = target(t).npc;
-    meSay(t.talk[0]); n.replyAt = state.t + 1.7; n.replyText = t.talk[1];
+    meSay(t.talk[0]); n.replyAt = state.t + 1.7; n.replyText = t.talk[1]; holdForPlayer(n, 4.8);
     if (!n.sit && !n.moving){ const dx = P.x - n.x, dy = P.y - n.y; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx<0?"left":"right") : (dy<0?"up":"down"); }
     completeTask(t, 0); return;
   }
@@ -3992,6 +4009,14 @@ $("bMenu").addEventListener("click", e => { e.currentTarget.blur(); openPause();
 $("pBack").addEventListener("click", resumeGame);
 $("pMenu").addEventListener("click", pauseToMenu);
 $("mResume").addEventListener("click", resumeGame);
+function exitToTitle(){
+  if (G.resume && G.resume.mode === "day" && !window.confirm("Leave the paused workday and go back to the title screen?")) return;
+  G.hold = false; G.resume = null; G.paused = false; tutStop(); closeGame(true);
+  ["menu","pause","mResume","ghud","gAbil","tcard"].forEach(id => { const e = $(id); if (e) e.hidden = true; });
+  G.mode = "title"; P.vx = P.vy = 0; syncMenuBtn();
+  state.started = false; document.getElementById("title").classList.remove("gone");
+}
+$("mTitle").addEventListener("click", e => { e.currentTarget.blur(); exitToTitle(); });
 // leave the paused game for good when something new starts from the menu
 function dropPaused(){
   if (!G.resume) return true;
@@ -4744,10 +4769,10 @@ MG.meeting = { name:"Book the meeting room", time:30,
       w.innerHTML = `<div class="q">Meeting ${round+1} of 3 · <b>${who.join(", ")}</b> and you</div>`;
       const cal = el("div", "cal"); w.appendChild(cal);
       cal.appendChild(el("span", "nm", ""));
-      HOURS.forEach(h => cal.appendChild(el("span", "hr", h + ":00")));
+      HOURS.forEach(h => cal.appendChild(el("span", "hr", hr12(h))));
       who.forEach((n, r) => { cal.appendChild(el("span", "nm", esc(n))); HOURS.forEach((h, i) => cal.appendChild(el("span", "c" + (busy[r][i] ? " busy" : "")))); });
       cal.appendChild(el("span", "nm", "Book"));
-      HOURS.forEach((h, i) => { const b = el("button", "pick", h + ":00"); cal.appendChild(b);
+      HOURS.forEach((h, i) => { const b = el("button", "pick", hr12(h)); cal.appendChild(b);
         b.onclick = () => { if (i === free){ good++; round++; flash("Booked", true); if (round >= 3) api.finish(0.6 + 0.4*ratio(), "Three meetings booked."); else show(); }
           else { api.penalty(2); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); } }; });
     }
