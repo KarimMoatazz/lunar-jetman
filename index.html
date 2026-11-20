@@ -1305,6 +1305,7 @@ let SPEED = 62;
 const SKINS = {
   karim:  ["#c8996f","#a97d57","#dcb08a"],
   light:  ["#d6a882","#b88a63","#e5bd98"],
+  fair:   ["#e6c2a0","#cba27c","#f1d4b8"],
   medium: ["#c28c63","#a3724c","#d5a179"],
   warm:   ["#b47c52","#956541","#c8916a"],
   brown:  ["#93603c","#784c2e","#a9744d"]      // medium-dark
@@ -1378,6 +1379,7 @@ function drawPerson(g, X, Y, L, A){
       p(-3, ty, 6, 2, L.skinSh); if (L.print) { p(-4, ty+6, 8, 5, L.print); p(-3, ty+7, 6, 1, L.topC); }
     } else if (L.top==="blazer"){
       p(-4, ty+1, 8, 17, L.accent); p(-1, ty+1, 2, 1, L.skinSh);
+      if (L.tie){ p(-1, ty+2, 2, 2, L.tie); p(-1, ty+4, 3, 10, L.tie); p(0, ty+14, 1, 1, L.tie); }
       p(-5, ty+1, 2, 9, L.topSh); p(3, ty+1, 2, 9, L.topSh); p(-W+3, ty+15, 3, 1, L.topSh); p(W-6, ty+15, 3, 1, L.topSh);
       if (L.necklace) p(-2, ty+4, 4, 1, L.necklace);
     } else if (L.top==="sweater"){
@@ -1486,7 +1488,8 @@ function drawPerson(g, X, Y, L, A){
     p(bx, by, 7, 9, "#1e1f22"); p(bx+1, by+1, 2, 6, "#34363b"); p(bx+2, by-2, 3, 2, "#2c2d31");
   }
   // ---------- head ----------
-  const hy = (sit ? -47 : -49) + bob, HS = L.hairStyle, BS = L.beardStyle;
+  const HSX = L.hairStyle, HS = ({hollywood:"long", curlylong:"long", bangs:"long", bob:"slick", ponytail:"slick", bun:"slick", updo:"slick"})[HSX] || HSX;
+  const hy = (sit ? -47 : -49) + bob, BS = L.beardStyle;
   const look = pose==="text" ? 2 : (pose==="read" ? 1 : 0);
   const talking = A.talk && Math.floor(t*7)%2===0;
   if (dir==="up"){
@@ -1500,6 +1503,12 @@ function drawPerson(g, X, Y, L, A){
       if (HS==="fade"){ p(-8, hy+10, 16, 4, L.skinSh); p(-7, hy+9, 14, 1, L.hair); }
     }
     if (HS==="long"){ p(-9, hy+2, 18, 16, L.hair); p(-8, hy+18, 16, 8, L.hair); p(-6, hy+25, 12, 2, L.hair); p(-5, hy+4, 3, 12, L.hairHi); p(2, hy+8, 2, 10, L.hairHi); }
+    if (HSX==="hollywood"){ p(-9, hy, 18, 3, L.hair); p(-4, hy+1, 6, 1, L.hairHi); }
+    else if (HSX==="curlylong"){ p(-11, hy+3, 22, 18, L.hair); p(-9, hy+20, 18, 7, L.hair); for (let k=-9;k<10;k+=4) p(k, hy+5+((k+11)%5)*3, 2, 2, L.hairHi); }
+    else if (HSX==="bob"){ p(-9, hy+2, 18, 13, L.hair); p(-5, hy+4, 3, 8, L.hairHi); }
+    else if (HSX==="ponytail"){ p(-2, hy+3, 4, 2, L.hairHi); p(-2, hy+5, 4, 13, L.hair); p(-1, hy+7, 1, 9, L.hairHi); }
+    else if (HSX==="bun"){ p(-3, hy-1, 6, 5, L.hair); p(-2, hy, 2, 1, L.hairHi); }
+    else if (HSX==="updo"){ p(-3, hy+11, 6, 5, L.hair); p(-2, hy+12, 2, 1, L.hairHi); }
     p(-9, hy+7, 2, 4, L.skinSh); p(7, hy+7, 2, 4, L.skinSh);
     if (HS!=="long") p(-6, hy+14, 12, 2, L.skinSh);
   } else if (side){
@@ -1515,6 +1524,13 @@ function drawPerson(g, X, Y, L, A){
     else { p(-8, hy, 15, 5, L.hair); p(fx>0? -8:-1, hy+2, 8, 9, L.hair); }
     if (HS==="curly"){ p(-9, hy-2, 17, 5, L.hair); p(fx>0?-6:-1, hy-1, 2, 1, L.hairHi); p(fx>0?-1:3, hy, 2, 1, L.hairHi); }
     if (HS==="long"){ p(fx>0?-9:1, hy+2, 8, 22, L.hair); p(fx>0?-8:2, hy+4, 2, 16, L.hairHi); p(fx>0?2:-7, hy+2, 5, 3, L.hair); }
+    if (HSX==="hollywood"){ p(-8, hy-2, 14, 3, L.hair); p(fx>0?-5:-1, hy-2, 6, 1, L.hairHi); }
+    else if (HSX==="curlylong"){ p(-9, hy-2, 17, 4, L.hair); p(fx>0?-11:3, hy, 9, 26, L.hair); p(fx>0?-10:4, hy+5, 2, 2, L.hairHi); p(fx>0?-7:7, hy+12, 2, 2, L.hairHi); p(fx>0?-10:4, hy+19, 2, 2, L.hairHi); }
+    else if (HSX==="bangs"){ p(fx>0?0:-6, hy+2, 6, 3, L.hair); }
+    else if (HSX==="bob"){ p(fx>0?-9:1, hy+1, 8, 13, L.hair); p(fx>0?-8:2, hy+3, 2, 8, L.hairHi); p(fx>0?1:-7, hy+1, 6, 2, L.hair); }
+    else if (HSX==="ponytail"){ const sw = moving ? (f % 2) : 0; p(fx>0?-11:7, hy+3+sw, 4, 3, L.hair); p(fx>0?-13:9, hy+5+sw, 4, 10, L.hair); p(fx>0?-12:10, hy+7+sw, 1, 6, L.hairHi); }
+    else if (HSX==="bun"){ p(fx>0?-11:6, hy-1, 5, 5, L.hair); p(fx>0?-10:7, hy, 2, 1, L.hairHi); }
+    else if (HSX==="updo"){ p(fx>0?-11:6, hy+6, 5, 5, L.hair); p(fx>0?-10:7, hy+7, 2, 1, L.hairHi); }
     if (HS!=="none" && HS!=="buzz") p(fx>0? -6:-3, hy+1, 6, 1, L.hairHi);
     if (HS!=="long"){ p(fx>0? -2:0, hy+7, 2, 4, L.skinSh); p(fx>0? -2:0, hy+8, 1, 2, L.skinHi); }
     if (BS==="full"){ p(fx>0? 1:-7, hy+11, 6, 4, L.beard); p(fx>0? 2:-7, hy+13, 5, 2, L.beard); p(fx>0? 4:-5, hy+12, 2, 1, "#8a5a45"); }
@@ -1552,6 +1568,13 @@ function drawPerson(g, X, Y, L, A){
       p(-9, hy-1, 18, 5, L.hair); p(-10, hy+2, 3, 17, L.hair); p(7, hy+2, 3, 17, L.hair); p(-9, hy+18, 3, 3, L.hair); p(6, hy+18, 3, 3, L.hair);
       p(-8, hy+4, 7, 2, L.hair); p(-3, hy+3, 4, 1, L.hair); p(-5, hy, 5, 1, L.hairHi); p(-9, hy+6, 1, 10, L.hairHi);
     }
+    if (HSX==="hollywood"){ p(-8, hy-3, 15, 3, L.hair); p(-5, hy-3, 6, 1, L.hairHi); p(1, hy+3, 6, 2, L.hair); }
+    else if (HSX==="curlylong"){ p(-10, hy-2, 20, 4, L.hair); p(-12, hy+1, 3, 22, L.hair); p(9, hy+1, 3, 22, L.hair); p(-11, hy+5, 1, 1, L.hairHi); p(10, hy+9, 1, 1, L.hairHi); p(-11, hy+14, 1, 1, L.hairHi); p(10, hy+18, 1, 1, L.hairHi); p(-6, hy-1, 1, 1, L.hairHi); p(3, hy-2, 1, 1, L.hairHi); }
+    else if (HSX==="bangs"){ p(-7, hy+2, 14, 3, L.hair); p(-6, hy+4, 2, 1, L.hair); p(1, hy+4, 3, 1, L.hair); p(-4, hy+2, 4, 1, L.hairHi); }
+    else if (HSX==="bob"){ p(-10, hy+1, 3, 12, L.hair); p(7, hy+1, 3, 12, L.hair); p(-10, hy+12, 4, 2, L.hair); p(6, hy+12, 4, 2, L.hair); p(-9, hy+3, 1, 7, L.hairHi); }
+    else if (HSX==="ponytail"){ p(8, hy+9, 2, 7, L.hair); }
+    else if (HSX==="bun"){ p(-3, hy-5, 6, 4, L.hair); p(-2, hy-5, 2, 1, L.hairHi); }
+    else if (HSX==="updo"){ p(-9, hy+7, 2, 3, L.hair); p(7, hy+7, 2, 3, L.hair); }
     const lk = look;
     const brow = (HS==="bald" || HS==="none" || HS==="buzz") ? L.beard : L.hair;
     p(-5, hy+6+lk, 3, 1, brow); p(2, hy+6+lk, 3, 1, brow);
@@ -1658,10 +1681,53 @@ const TEAM = [
     acts:{ work:7, coffee:2, bathroom:1, visit:2, lounge:2, gallery:1 }, visits:["yassin","yassin","zeina","mohamed"],
     lines:["Kerning is a lifestyle.","Send me the brief and I'm on it.","That frame on the gallery wall is crooked.","Give me ten minutes on this layout.","Karim, which one, A or B?","More contrast. Always more contrast."] },
   { id:"amr", name:"Amr Fawzy", role:"Office manager", room:6, seat:[456,190], arrive:[540,570], leave:[1050,1110], visitor:true,
-    look:{ skin:"medium", hairStyle:"receding", hair:"#4d4842", hairHi:"#8b857c", beardStyle:"mustache", beard:"#55504a", glasses:"#2a2523", top:"shirt", topC:"#e8e4da", topSh:"#cbc6ba", topHi:"#f4f1ea",
-      accent:"#f4f1ea", pocket:true, bottom:"#3a3a3f", bottomSh:"#2b2b30", bottomHi:"#47474d", shoe:"#2a1d18", sole:"#120c0a", w:11 },
-    acts:{ work:5, coffee:1, rounds:3, lab:2, visit:2, window:1 }, visits:["osama","mohamed","zeina"],
+    look:{ skin:"medium", hairStyle:"short", hair:"#2b2420", hairHi:"#4a3f37", beardStyle:"none", top:"blazer", topC:"#1f2a3d", topSh:"#172030", topHi:"#2b3850",
+      accent:"#f2efe8", tie:"#6e2430", bottom:"#2b2d33", bottomSh:"#202226", bottomHi:"#383a41", shoe:"#3a2418", sole:"#160d08", w:11 },
+    acts:{ work:4, coffee:1, rounds:3, lab:1, visit:3, window:1, brief:2 }, visits:["osama","mohamed","zeina","yassin","nour","karim"],
     lines:["Sabah el kheir, everyone!","Just passing through from the other branch.","Meeting room in five minutes.","I'm only here for an hour.","The lab stays locked, my friend.","Make sure the invoices go out today."] },
+  // ---- from the other branch: drop in now and then, for Amr's briefs, tasks and a chat ----
+  { id:"ehab", branch:true, visitor:true, designer:true, name:"Ehab", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Hey hey! Visiting from the other branch.","Good morning, everyone! Don't mind the hair."],
+    look:{ skin:"fair", hairStyle:"hollywood", hair:"#6b4a2e", hairHi:"#9a7048", top:"shirt", topC:"#f1eee6", topSh:"#d6d1c5", topHi:"#ffffff", accent:"#ffffff",
+      bottom:"#2f3e5c", bottomSh:"#243049", bottomHi:"#3c4d70", shoe:"#4a3222", sole:"#1a110b" },
+    acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["rawda","karim","yassin","zeina","amr"],
+    lines:["Hair's on point today, if anyone's wondering.","Rawda, have you eaten? You get stressed when you don't eat.","This office feels like home.","Who's up for lunch later?","Relax, relax, it'll be fine.","Amr wants the report tonight. No pressure."] },
+  { id:"aya", branch:true, visitor:true, designer:true, bath:1, name:"Aya", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Hi! Yes, I'm here. You're welcome.","Morning! Who's making me coffee?"],
+    look:{ female:true, w:9, skin:"warm", hairStyle:"curlylong", hair:"#2a1a12", hairHi:"#4d3324", top:"shirt", topC:"#b4532f", topSh:"#913f22", topHi:"#c96a45", accent:"#e9d3c0", necklace:"#d4af37",
+      bottom:"#1f2026", bottomSh:"#16171b", bottomHi:"#2a2b33", shoe:"#1a1414", sole:"#0a0808", lips:"#9c3b35" },
+    acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["zeina","osama","nour","dina","amr"],
+    lines:["Don't look at me like that, I was right.","Honestly? I'd do it differently.","Cute office. Small, but cute.","I'm not bossy, I just know better.","If it's late, I will say something.","Coffee. Now. Please."] },
+  { id:"dina", branch:true, visitor:true, designer:true, bath:1, name:"Dina", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Good morning, everyone. Lovely to see you all.","Hello, darlings. I'll only stay a little while."],
+    look:{ female:true, w:9, skin:"fair", hairStyle:"updo", hair:"#2a1c16", hairHi:"#4a342a", top:"blazer", topC:"#e8e0cc", topSh:"#cfc5ae", topHi:"#f4eee0", accent:"#ffffff", necklace:"#f2efe8",
+      bottom:"#1d1d22", bottomSh:"#141418", bottomHi:"#28282f", shoe:"#1a1414", sole:"#0a0808", lips:"#8f4a46" },
+    acts:{ visit:2, coffee:1, lounge:2, window:1, work:4 }, visits:["amr","zeina","aya","osama"],
+    lines:["Let's keep things elegant, shall we?","Presentation is everything.","A little more polish, darling.","One doesn't rush quality.","I'll take my tea in the meeting room, thank you.","Is this the good china? No? Pity."] },
+  { id:"rana", branch:true, visitor:true, designer:true, bath:1, name:"Rana", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Guess who's back!","Hiii everyone! I brought sweets!"],
+    look:{ female:true, w:9, skin:"medium", hairStyle:"ponytail", hair:"#5e321c", hairHi:"#8a4f2e", top:"tee", topC:"#e3b23c", topSh:"#c4962a", topHi:"#efc65c",
+      bottom:"#3d5a86", bottomSh:"#2f476b", bottomHi:"#4c6b9b", shoe:"#ecebe6", sole:"#a9a7a0", lace:"#e58fa8", lips:"#b0605a" },
+    acts:{ visit:4, coffee:2, lounge:1, window:1, work:3 }, visits:["yassin","nour","karim","joy","yassin3am"],
+    lines:["I brought sweets. Don't tell Amr.","Okay, but who's coming to lunch?","This is the best day ever. Again.","Can we put some music on? Please?","I love it here, it's so fun!","Wait, wait, I have gossip."] },
+  { id:"joy", branch:true, visitor:true, designer:true, bath:1, name:"Joy", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Hey, everyone. Don't get up.","Morning. Nice and quiet in here, I like it."],
+    look:{ female:true, w:9, skin:"light", hairStyle:"bob", hair:"#3a2a1f", hairHi:"#5c4434", top:"sweater", topC:"#8fa58a", topSh:"#74896f", topHi:"#a7bba2",
+      bottom:"#4a4f5a", bottomSh:"#3a3e47", bottomHi:"#5a606c", shoe:"#d8d3c8", sole:"#9a958b", lips:"#a0605a" },
+    acts:{ visit:2, coffee:2, lounge:2, window:1, work:4 }, visits:["rana","nour","mohamed","nourk"],
+    lines:["No stress, no rush.","It'll get done. It always does.","I'll just chill here for a bit.","Tea? Sure, why not.","Deadlines are just suggestions with dates.","Breathe. It's only work."] },
+  { id:"nourk", branch:true, visitor:true, designer:true, name:"Nour Khaled", call:"Nour Khaled", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Morning! Mind if I watch how you all work?","Hey! I'm here to learn something today."],
+    look:{ skin:"warm", hairStyle:"bun", hair:"#1c140f", hairHi:"#3a2b20", top:"tee", topC:"#5d6b4a", topSh:"#4a563b", topHi:"#6f7f59",
+      bottom:"#2e2c2a", bottomSh:"#22211f", bottomHi:"#3b3936", shoe:"#ecebe6", sole:"#a9a7a0" },
+    acts:{ visit:4, coffee:1, lounge:1, window:1, work:4 }, visits:["mohamed","karim","nour","osama","joy"],
+    lines:["Wait, how did you do that? Show me.","I watched a tutorial on this last night.","Every day is a school day.","Can I sit in on that? Just to learn.","Interesting. Very interesting.","I'm taking notes, don't mind me."] },
+  { id:"rawda", branch:true, visitor:true, bath:1, name:"Rawda", role:"Account manager, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Hi everyone! Sorry, I'm a bit all over the place today.","Morning! Okay, I'm here, I'm here."],
+    look:{ female:true, w:9, skin:"medium", hairStyle:"bangs", hair:"#3a2219", hairHi:"#5e3b2a", top:"shirt", topC:"#a99bd1", topSh:"#8c7eb6", topHi:"#bdb2de", accent:"#ece6f6",
+      bottom:"#2a2730", bottomSh:"#1f1d24", bottomHi:"#36323d", shoe:"#2a1d18", sole:"#120c0a", lips:"#a3544b" },
+    acts:{ visit:4, coffee:2, lounge:1, window:1, work:4 }, visits:["ehab","zeina","rana","aya"],
+    lines:["Okay, okay, okay. I'm calm. I'm calm.","Ehab, where's the file? Ehab!","Why does everything happen at once?","I'm fine! Totally fine!","Haha, sorry, I'm a bit stressed today.","Quick, someone tell me it'll be okay."] },
   { id:"mohamed", name:"Mohamed Ali", role:"IT", room:11, seat:[1270,212], arrive:[545,600], leave:[1030,1100],
     look:{ skin:"warm", hairStyle:"buzz", hair:"#2a2521", hairHi:"#6e675f", beardStyle:"full", beard:"#4a4540", glasses:"#16171a", top:"polo", topC:"#2f3d52", topSh:"#24303f", topHi:"#3c4c64",
       accent:"#d8d4c9", bottom:"#3a4256", bottomSh:"#2c3344", bottomHi:"#485168", shoe:"#2a2622", sole:"#16130f", w:11 },
@@ -1797,7 +1863,7 @@ const seatTaken = new Map();
 
 // ---------- clock ----------
 const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday"];
-const AMR_VISIT_CHANCE = 0.1;      // Amr works from another branch: about one day in ten
+const AMR_VISIT_CHANCE = 0.75;     // Amr splits his time with the other branch: in on most days, for a good part of the day
 const clock = { min: 600, day: 0, lastMeeting: 0 };
 const hhmm = m => { const h = Math.floor(m/60)%24, mm = Math.floor(m%60), h12 = h % 12 || 12; return h12 + ":" + (mm<10?"0":"") + mm + " " + (h < 12 ? "am" : "pm"); };
 const hr12 = h => (h % 12 || 12) + " " + (h % 24 < 12 ? "am" : "pm");
@@ -1823,10 +1889,11 @@ function newDay(first){
     n.lunchAt = rnd(780, 870); n.q = []; n.cur = null; n.sit = null; n.hidden = false; n.pose = "stand";
     if (n.visitor){
       // works from another branch: comes in very rarely, for a meeting or one quick task, then leaves
-      if (Math.random() < AMR_VISIT_CHANCE){ n.arriveAt = rnd(650, 930); n.leaveAt = n.arriveAt + rnd(25, 50); n.visitKind = Math.random() < 0.55 ? "meeting" : "task"; }
-      else { n.arriveAt = Infinity; n.leaveAt = -1; }
+      n.arriveAt = Infinity; n.leaveAt = -1;
+      if (n.id === "amr" && Math.random() < AMR_VISIT_CHANCE){ n.arriveAt = rnd(600, 840); n.leaveAt = n.arriveAt + rnd(110, 220); n.visitKind = Math.random() < 0.6 ? "meeting" : "task"; }
     }
   });
+  scheduleBranch();
   seatTaken.clear();
   if (first){
     // the game opens at 10:00 with the team already at work (one or two may still be on their way in)
@@ -1872,6 +1939,7 @@ const PLANS = {
   rounds: n => { const pts = [...POI.rounds].sort(() => Math.random()-.5).slice(0, 3); const out = [];
     pts.forEach(p => { out.push(go(p[0], p[1]), wait(rnd(3,6), "stand", p[2], {say: Math.random()<0.5 ? pick(["Everything good?","Sabah el kheir!","Keep it up."]) : null})); }); return [...out, ...homeWork(n)]; },
   visit: n => visitPlan(n, pick(n.visits)),
+  brief: n => (clock.min - (clock.lastMeeting || -999) > 150 && callMeeting(n)) || homeWork(n),
   checkteam: n => visitPlan(n, pick(["hany","sherif","magdy","tarek","wael"]), ["Show me the numbers.","Is this final?","Good. Send it."]),
   fixpc: n => { const t = pick(npcs.filter(m => m!==n && !m.kitchen && busySeated(m))); if (!t) return homeWork(n);
     return [{do:"visit", who:t.id, t:rnd(12,18), pose:"type", script: scriptFor(n, t)}, ...homeWork(n)]; },
@@ -1912,14 +1980,41 @@ const PLANS = {
   mop: n => { const a = Math.random()<0.5; const A = a ? POI.hallW : POI.hallE, B = a ? POI.hallE : POI.hallW;
     return [go(A[0], A[1]), wait(2, "mop", a ? "right" : "left"), go(B[0], B[1], {pose:"mop", speed:16}), wait(2, "mop"), go(...POI.counter.slice(0,2))]; }
 };
+// people from the other branch drop in now and then: some come with Amr for his brief, Ehab and Rawda usually come together
+function scheduleBranch(){
+  const br = npcs.filter(n => n.branch), on = n => n.arriveAt < Infinity;
+  const set = (n, a, stay) => { n.arriveAt = a; n.leaveAt = a + stay; };
+  br.forEach(n => { if (Math.random() < 0.2) set(n, rnd(650, 960), rnd(45, 120)); });
+  const amr = npcById("amr");
+  if (amr && on(amr) && amr.visitKind === "meeting"){
+    br.filter(n => !on(n)).sort(() => Math.random() - .5).slice(0, 1 + Math.floor(Math.random()*2)).forEach(n => set(n, amr.arriveAt - rnd(2, 12), rnd(60, 150)));
+  }
+  const e = npcById("ehab"), r = npcById("rawda");
+  if (e && r){
+    if (on(e) && !on(r) && Math.random() < 0.65) set(r, e.arriveAt + rnd(0, 6), e.leaveAt - e.arriveAt + rnd(-10, 10));
+    else if (on(r) && !on(e) && Math.random() < 0.65) set(e, r.arriveAt + rnd(0, 6), r.leaveAt - r.arriveAt + rnd(-10, 10));
+  }
+  // never more than four in one day
+  br.filter(on).sort(() => Math.random() - .5).slice(4).forEach(n => { n.arriveAt = Infinity; n.leaveAt = -1; });
+}
+// designers from the other branch work at the spare computers in Karim & Nour's studio; Rawda (accounts) sits with Zeina
+function branchSeat(n){
+  const mine = s => npcs.some(m => m !== n && visible(m) && m.seat && Math.hypot(m.seat[0]-s.x, m.seat[1]-s.y) < 8);
+  const hasScreen = s => props.some(q => (q.type==="monitor" || q.type==="dualMonitor" || q.type==="imac" || q.type==="laptop") && Math.hypot(q.x-s.x, q.y-s.y) < 30);
+  let list = (n.id === "rawda" ? seatsIn(4, "officeChair") : seatsIn(5, "officeChair")).filter(s => hasScreen(s) && !mine(s) && !s.locked);
+  if (!list.length) list = seatsIn(3).concat(seatsIn(18)).filter(s => !mine(s));
+  const s = list.length ? pick(list) : null;
+  if (s){ n.seat = [s.x, s.y]; n.room = propRoom(s); }
+}
 function visitorPlan(n){
-  const out = [go(...POI.door), {do:"leave"}];
-  if (n.visitKind === "meeting"){ const pl = callMeeting(n); if (pl) return [pl[0], pl[1], ...out]; }
+  if (n.branch) return visitPlan(n);
+  if (n.visitKind === "meeting"){ const pl = callMeeting(n); if (pl) return pl; }
+  if (Math.random() < 0.5) return homeWork(n);
   const task = pick(["rounds","lab","visit","checkdesk"]);
   let body;
   if (task === "checkdesk") body = [sitAt(n.seat[0], n.seat[1]), wait(rnd(15, 30), "type")];
   else { const pl = PLANS[task](n), home = homeWork(n).length; body = pl.slice(0, pl.length - home); }
-  return [...body, ...out];
+  return [...body, ...homeWork(n)];
 }
 function freeSeat(list){ const f = list.filter(s => !seatTaken.has(s.id)); return f.length ? pick(f) : null; }
 function visitPlan(n, id, lines){
@@ -1940,13 +2035,12 @@ function chooseNext(n){
   if (n.pending){ const p = n.pending; n.pending = null; return p; }
   const m = clock.min;
   if (m >= n.leaveAt) return [go(...POI.door), {do:"leave"}];
-  if (!n.kitchen && !n.lunch && m >= n.lunchAt){
+  if (!n.kitchen && !n.visitor && !n.lunch && m >= n.lunchAt){
     n.lunch = true; const r = Math.random();
     if (r < 0.35) return [go(...POI.door), {do:"hide", t:rnd(40,90)}, ...homeWork(n)];
     if (r < 0.65){ const s = freeSeat(seatsIn(8)); if (s) return [sitAt(s.x, s.y), wait(rnd(25,40), "drink", null, {say: pick(["Lunch break, finally.","Koshary today.","Five quiet minutes."])}), ...homeWork(n)]; }
     return [sitAt(n.seat[0], n.seat[1]), wait(rnd(25,40), "drink")];
   }
-  if (n.visitor) return [go(...POI.door), {do:"leave"}];
   if (n.kitchen && m >= 790 && m <= 860 && Math.random() < 0.5) return PLANS.bring(n);
   const entries = Object.entries(n.acts); let tot = 0; entries.forEach(([,w]) => tot += w);
   let r = Math.random()*tot; for (const [k,w] of entries){ r -= w; if (r <= 0) return PLANS[k](n); }
@@ -1954,11 +2048,13 @@ function chooseNext(n){
 }
 function callMeeting(lead){
   const seats = seatsIn(7, "officeChair"); if (seats.length < 3) return null;
-  const pool = ["zeina","osama","mohamed","yassin","nour","karim"].map(npcById).filter(m => m && visible(m) && !m.pending);
-  const who = pool.sort(() => Math.random()-.5).slice(0, 2 + Math.floor(Math.random()*2)); if (who.length < 2) return null;
+  const avail = m => m && visible(m) && !m.pending && !m.blur && m !== lead;
+  const guests = npcs.filter(m => m.branch && avail(m)).sort(() => Math.random()-.5).slice(0, 3);
+  const pool = ["zeina","osama","mohamed","yassin","nour","karim"].map(npcById).filter(avail).sort(() => Math.random()-.5);
+  const who = guests.concat(pool.slice(0, Math.max(1, 2 + Math.floor(Math.random()*2) - guests.length))).slice(0, Math.min(4, seats.length - 1)); if (who.length < 2) return null;
   clock.lastMeeting = clock.min;
-  const first = p => p.name.split(" ")[0];
-  const lines = [[lead, pick(["Okay, let's start.","Right, let's begin. Quick updates, please."])]];
+  const first = p => p.call || p.name.split(" ")[0];
+  const lines = [[lead, pick(guests.length ? ["Okay, let's start. Good to have the other branch here too.","Right, both branches in one room. Quick updates, please."] : ["Okay, let's start.","Right, let's begin. Quick updates, please."])]];
   who.forEach(m => {
     const pair = pick(MEET_PAIRS[m.id] || [["All good on my side.","Good."]]);
     lines.push([lead, pick([`${first(m)}, how are things on your side?`, `${first(m)}, any updates?`, `${first(m)}, go ahead.`]), m], [m, pair[0], m], [lead, pair[1], m]);
@@ -2046,7 +2142,8 @@ function updateNpc(n, dt){
   if (n.replyAt && state.t >= n.replyAt){ if (visible(n) && !n.blur && Math.hypot(n.x - P.x, n.y - P.y) < 60) say(n, n.replyText, 2.6); else if (P.follow && P.follow.n === n) P.follow = null; n.replyAt = 0; }
   if (n.gone){
     if (clock.min >= n.arriveAt && clock.min < n.leaveAt){ n.gone = false; n.hidden = false; [n.x, n.y] = POI.door; n.dir = "up"; n.q = n.visitor ? visitorPlan(n) : homeWork(n); n.cur = null;
-      if (n.visitor) say(n, "Sabah el kheir! Just visiting today.", 3);
+      if (n.branch) branchSeat(n);
+      if (n.visitor) say(n, n.hello ? pick(n.hello) : "Sabah el kheir, everyone!", 3);
       else if (Math.random()<0.5) say(n, pick(["Sabah el kheir!","Good morning!","Morning, everyone."]), 2.5); }
     return;
   }
@@ -2205,7 +2302,7 @@ function npcNear(){
   for (const n of npcs){ if (!visible(n)) continue; const d = Math.hypot(n.x - P.x, (n.y - P.y)*1.2); if (d < bd){ bd = d; best = n; } }
   return best;
 }
-const TEAM_NAMES = /\b(Karim|Zeina|Yassin|Nour|Osama|Hany|Sherif|Magdy|Tarek|Wael|Amr|Ahmed|Mohamed|Ostaz)\b/;
+const TEAM_NAMES = /\b(Karim|Zeina|Yassin|Nour|Osama|Hany|Sherif|Magdy|Tarek|Wael|Amr|Ahmed|Mohamed|Ostaz|Ehab|Aya|Dina|Rana|Joy|Rawda)\b/;
 function soloLine(n){ const all = (n.lines || []).filter(l => !TEAM_NAMES.test(l)); return pick(all.length ? all : (n.lines || ["..."])); }
 function holdForPlayer(n, secs){
   n.holdT = Math.max(n.holdT || 0, state.t + secs);
@@ -2419,13 +2516,13 @@ function placeHint(cx, cy){
 let hintItem = null;
 
 // ---------- conversations: lines per person, and short scripts by who is talking to whom ----------
-const GROUP = { zeina:"accounts", yassin:"accounts", nour:"design", amr:"amr", mohamed:"it", osama:"financeLead",
+const GROUP = { ehab:"branch", aya:"branch", dina:"branch", rana:"branch", joy:"branch", nourk:"branch", rawda:"branch", zeina:"accounts", yassin:"accounts", nour:"design", amr:"amr", mohamed:"it", osama:"financeLead",
   hany:"finance", sherif:"finance", magdy:"finance", tarek:"finance", wael:"finance", yassin3am:"boys", ahmed:"boys", nescafe:"boys" };
 const LINES = {
   zeina:["Yassin, the deck. Today, please.","The client moved the call to three.","Coffee first, then emails.","Karim, can we have the logo by Thursday?","Who's joining the client call?","Let's keep it short, I have a meeting.","Three clients, one afternoon. Fun.","If the client calls, I'm in a meeting.","Karim, the client loved the moodboard.","We're pitching on Sunday. Be ready.","Nobody sends anything without my review.","Where's the signed contract?"],
   yassin:["On it, Zeina!","The client wants the logo bigger. Again.","Has anyone seen my charger?","Nour, got a minute?","I'll send it in five.","Who's ordering lunch?","Karim, quick question about the posts.","The client says 'make it pop'.","I've been on hold for twenty minutes.","Zeina approved it! Well, almost.","Two calls and a deadline before lunch.","Karim, can you export it in PNG too?"],
   nour:["Kerning is a lifestyle.","Send me the brief and I'm on it.","That frame on the gallery wall is crooked.","Give me ten minutes on this layout.","Karim, which one, A or B?","More contrast. Always more contrast.","The client's JPEG is 200 pixels wide.","Comic Sans? Over my dead body.","Karim, have you seen my Pantone book?","I need coffee and silence.","Grid first, then everything else.","This shade of red is not the brand red."],
-  amr:["Sabah el kheir, everyone!","Just passing through from the other branch.","Meeting room in five minutes.","I'm only here for an hour.","The lab stays locked, my friend.","Make sure the invoices go out today.","How's everything here? Any problems?","Karim, keep up the good work.","The other branch says hi."],
+  amr:["Sabah el kheir, everyone!","I'm here more often now. Get used to it.","Meeting room in five minutes.","Good work this week. Keep it up.","Who has an update for me?","The lab stays locked, my friend.","Make sure the invoices go out today.","How's everything here? Any problems?","Karim, keep up the good work.","The other branch says hi."],
   mohamed:["Did you try restarting it?","The Wi-Fi is fine. It's you.","The servers are running hot today.","Don't install anything without asking me.","Give me the password, I'll sort it.","New cable's coming tomorrow.","Karim, your laptop needs an update.","Nine printer tickets. Nine.","Who plugged a kettle into the server room?","Backups ran fine last night.","Please stop clicking 'remind me later'.","I see everything on the network. Everything."],
   osama:["Invoices before Thursday, please.","Who approved this expense?","The numbers don't lie.","Hany, where's the bank statement?","Bring me the receipts, all of them.","We close the month on Sunday.","Karim, your taxi receipts, please.","No receipt, no refund.","The budget is tight this quarter.","Who left the AC on all weekend?","Every pound counts.","I'll sign it after I check it. Twice."],
   hany:["Almost done with the report.","Ostaz Osama, I sent it.","Long day.","Tea would be great right now.","The bank statement doesn't match. Again.","Twenty years in finance, still checking twice.","I'm counting the minutes to lunch."],
@@ -2578,6 +2675,16 @@ const MORE_SCRIPTS = {
   "*>*":[["Lunch plans?","Koshary. You?","Same. Let's go at two."],["Is it hot in here or is it me?","It's the AC again.","Call IT."],["Long day?","The longest.","It's only noon."]]
 };
 Object.entries(MORE_SCRIPTS).forEach(([k, v]) => { if (!SCRIPTS[k]) SCRIPTS[k] = []; SCRIPTS[k].push(...v); });
+// the other branch
+Object.assign(SCRIPTS, {
+  "ehab>rawda":[["Habibti, calm down, it's one email.","One email with forty attachments, Ehab!","Okay, that's a lot."],["Lunch together?","If I finish this. Which I won't.","I'll bring it to you then."]],
+  "rawda>ehab":[["Did you send the file?","Which file?","Ehab!","Kidding! I sent it this morning."],["Is my hair okay?","Perfect. Is mine?","Always, apparently."]],
+  "branch>branch":[["Their coffee is better than ours.","Their music is better too.","Don't tell our branch."],["Is Amr in today?","He said he'd pass by.","Look busy, then."]],
+  "branch>*":[["Visiting from the other branch. Missed you all!","Missed you too. How's it over there?","Chaos, as usual."],["Do you have a spare charger?","Second drawer.","Lifesaver."],["Is it always this quiet here?","Only until Zeina's phone rings.","Ha!"]],
+  "*>branch":[["Back again? Is Amr with you?","He's on his way.","Better look busy then."],["How's the other branch?","Busy. We need a holiday.","Don't we all."]],
+  "amr>branch":[["Glad you came over. Stay for the brief.","Wouldn't miss it.","Good."]],
+  "branch>amr":[["Amr, can we talk after the brief?","Of course. Five minutes.","Thank you."]]
+});
 // Karim argues a lot
 const KARIM_ARGUES = {
   "karim>accounts":[["The client wants it bigger? It's already huge.","That's what they asked for.","Then they asked for the wrong thing.","Karim..."],
@@ -2597,6 +2704,15 @@ SCRIPTS["karim>design"] = KARIM_ARGUES["karim>design"].concat(SCRIPTS["design>de
 SCRIPTS["design>karim"] = KARIM_ARGUES["design>karim"].concat(SCRIPTS["design>design"] || []);
 SCRIPTS["karim>it"] = KARIM_ARGUES["karim>it"].concat(SCRIPTS["*>it"] || []);
 SCRIPTS["it>karim"] = KARIM_ARGUES["it>karim"].concat(SCRIPTS["it>*"] || []);
+Object.assign(MEET_PAIRS, {
+  ehab:[["The new campaign launches Sunday.","Good. Send me the schedule."],["The other branch hit its targets this month.","Excellent. Lunch is on me."]],
+  aya:[["The supplier is late again. I told them off.","Good. Polite, but firm."],["I fixed the client's mess. Again.","That's why you're here."]],
+  dina:[["The client loved the presentation.","Of course they did. You presented it."],["Our reception area needs a refresh.","Put it in writing and I'll look at it."]],
+  rana:[["Our social media numbers are up!","Great job. Keep it going."],["I planned the team outing!","As long as it's after the deadline."]],
+  joy:[["Everything's on track. No drama.","My favourite kind of update."],["I finished the report early.","Early? Well done."]],
+  nourk:[["I finished the analytics course.","Good. Teach the others what you learned."],["I have a question about the process.","Stay after and I'll walk you through it."]],
+  rawda:[["Three deadlines this week, but it's under control. I think.","Breathe. Ask for help if you need it."],["The client changed everything last night.","We'll sort it out. One step at a time."]]
+});
 MEET_PAIRS.zeina.push(["The new client wants a full rebrand.","Big job. Make sure we price it right."]);
 MEET_PAIRS.yassin.push(["The posts are scheduled until the end of the month.","Good. Check the comments every day."]);
 MEET_PAIRS.nour.push(["We're testing three logo directions.","Show me the strongest one next time."]);
@@ -2779,7 +2895,7 @@ function serialize(){
   return { v:1, props: props.map(p => { const o = {id:p.id, type:p.type, x:p.x, y:p.y, rot:p.rot||0, sx:p.sx||1, sy:p.sy||1}; if (typeof p.z==="number") o.z = p.z; if (p.locked) o.locked = true; return o; }),
            doors: doors.map(d => ({n:d.n, i:d.i, j:d.j, v:d.v, glass:!!d.glass, locked:!!d.locked, kind:d.kind||"", off:d.off||0})),
            art: art.map(a => ({id:a.id, kind:a.kind, x:a.x, j:a.j, w:a.w, img:a.img||""})),
-           walls: {add:[...wallEdits.add], rem:[...wallEdits.rem]}, floors: {...floorOverrides}, furnished:1, ms:MS };
+           walls: {add:[...wallEdits.add], rem:[...wallEdits.rem]}, floors: {...floorOverrides}, furnished:1, branchDesks:1, ms:MS };
 }
 // one-time upgrade of a saved layout: add the furniture for every room (ids f1...) without touching anything already placed
 function mergeFurniture(L){
@@ -2895,8 +3011,9 @@ async function connect(){
   if (db){
     try { const snap = await db.doc("layout/main").get();
       if (snap.exists){
-        let L = snap.data(); const add = !L.furnished;
-        if (add) L = mergeFurniture(L);
+        let L = snap.data(); const add = !L.furnished || !L.branchDesks;
+        if (!L.furnished) L = mergeFurniture(L);
+        L = withBranchDesks(L);
         applyLayout(L); unstick();
         if (add && ed.canEdit) scheduleSave();
       } } catch(e){}
@@ -2906,6 +3023,13 @@ async function connect(){
 // ======================================================================
 // EDITOR
 // ======================================================================
+// spare computers for the people from the other branch (5 in the studio, Rawda's desk with Zeina & Yassin)
+const BRANCH_DESKS = [{"id":"n1","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":114,"y":478,"z":18.5},{"id":"n2","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":163,"y":478,"z":18.5},{"id":"n3","rot":2,"sx":1,"sy":1,"type":"monitor","x":130,"y":585,"z":77.5},{"id":"n4","rot":2,"sx":1,"sy":1,"type":"monitor","x":202,"y":585,"z":77.5},{"id":"n5","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":478,"z":77.5},{"id":"n6","rot":0,"sx":1,"sy":1,"type":"desk","x":128,"y":384},{"id":"n7","rot":0,"sx":1,"sy":1,"type":"laptop","x":124,"y":374},{"id":"n8","rot":0,"sx":1,"sy":1,"type":"papers","x":138,"y":377},{"id":"n9","rot":2,"sx":1,"sy":1,"type":"officeChair","x":128,"y":402}];
+function withBranchDesks(L){
+  if (L.branchDesks) return L;
+  const have = new Set((L.props||[]).map(q => q.id));
+  return {...L, branchDesks:1, props:(L.props||[]).concat(BRANCH_DESKS.filter(q => !have.has(q.id)))};
+}
 function snapshot(){ ed.undo.push(JSON.stringify(serialize())); if (ed.undo.length > 80) ed.undo.shift(); syncEdUI(); }
 function undo(){
   const s = ed.undo.pop(); if (!s) return;
@@ -3493,7 +3617,7 @@ if (matchMedia("(pointer:coarse)").matches){
   document.getElementById("keysText").textContent = "Drag on the left to walk · A to interact";
 }
 alignTitle();
-const DEFAULT_LAYOUT = {"art":[{"id":"a20","img":"","j":17,"kind":"gasmask","w":1,"x":536},{"id":"a22","img":"","j":17,"kind":"frameTall","w":1,"x":320},{"id":"a23","img":"","j":17,"kind":"frameTall","w":1,"x":347},{"id":"a24","img":"","j":17,"kind":"frameTall","w":1,"x":375},{"id":"a25","img":"","j":17,"kind":"frameTall","w":1,"x":404},{"id":"a27","img":"","j":17,"kind":"frameW","w":1,"x":738},{"id":"a28","img":"","j":17,"kind":"frameW","w":1,"x":953},{"id":"a29","img":"","j":17,"kind":"frameW","w":1,"x":1060},{"id":"a30","img":"","j":17,"kind":"frameW","w":1,"x":1194},{"id":"a31","img":"","j":17,"kind":"wardrobe","w":2,"x":603},{"id":"a32","img":"","j":3,"kind":"window","w":3,"x":58},{"id":"a33","img":"","j":3,"kind":"window","w":4,"x":352},{"id":"a34","img":"","j":3,"kind":"window","w":6,"x":580},{"id":"a35","img":"","j":6,"kind":"window","w":5,"x":796},{"id":"a36","img":"","j":6,"kind":"window","w":5,"x":1068},{"id":"a37","img":"","j":6,"kind":"window","w":7,"x":1280},{"id":"a38","img":"","j":28,"kind":"shelf","w":10,"x":74},{"id":"a1","img":"","j":3,"kind":"window","w":5,"x":176}],"doors":[{"glass":false,"i":76,"j":23,"kind":"","locked":false,"n":1,"off":0,"v":0},{"glass":false,"i":66,"j":23,"kind":"","locked":false,"n":2,"off":0,"v":0},{"glass":false,"i":9,"j":20,"kind":"","locked":false,"n":4,"off":0,"v":1},{"glass":false,"i":15,"j":28,"kind":"","locked":false,"n":5,"off":0,"v":0},{"glass":false,"i":9,"j":6,"kind":"","locked":false,"n":6,"off":0,"v":1},{"glass":false,"i":17,"j":6,"kind":"","locked":false,"n":7,"off":0,"v":1},{"glass":false,"i":30,"j":13,"kind":"","locked":false,"n":8,"off":0,"v":1},{"glass":false,"i":41,"j":17,"kind":"","locked":false,"n":9,"off":0,"v":0},{"glass":false,"i":53,"j":17,"kind":"","locked":false,"n":10,"off":0,"v":0},{"glass":false,"i":70,"j":17,"kind":"","locked":false,"n":11,"off":0,"v":0},{"glass":true,"i":79,"j":20,"kind":"","locked":false,"n":12,"off":0,"v":1},{"glass":false,"i":57,"j":23,"kind":"","locked":false,"n":13,"off":0,"v":0},{"glass":false,"i":40,"j":23,"kind":"","locked":false,"n":14,"off":0,"v":0},{"glass":false,"i":47,"j":23,"kind":"","locked":false,"n":15,"off":0,"v":0},{"glass":false,"i":33,"j":34,"kind":"exit","locked":false,"n":0,"off":-8,"v":0}],"floors":{"1":{"c":"#c49a6c","p":"laminate"},"10":{"c":"#c49a6c","p":"laminate"},"11":{"c":"#c49a6c","p":"laminate"},"12":{"c":"#c49a6c","p":"laminate"},"13":{"c":"#c49a6c","p":"laminate"},"14":{"c":"#7a5a40","p":"tiles"},"15":{"c":"#c49a6c","p":"laminate"},"17":{"c":"#3e4a5e","p":"tiles"},"18":{"c":"#c49a6c","p":"laminate"},"2":{"c":"#c49a6c","p":"laminate"},"3":{"c":"#c49a6c","p":"laminate"},"4":{"c":"#c49a6c","p":"laminate"},"5":{"c":"#c49a6c","p":"laminate"},"6":{"c":"#c49a6c","p":"laminate"},"7":{"c":"#c49a6c","p":"laminate"},"8":{"c":"#e3d8bf","p":"bigtiles"}},"furnished":1,"ms":0.85,"props":[{"id":"p1","rot":0,"sx":2.6,"sy":1.5,"type":"floorLamp","x":184,"y":428},{"id":"p2","rot":1,"sx":1.25,"sy":1.25,"type":"cabinet","x":171,"y":377},{"id":"p3","rot":0,"sx":1,"sy":1,"type":"shelving","x":291,"y":311},{"id":"p4","rot":0,"sx":1,"sy":1,"type":"eames","x":445,"y":399},{"id":"p5","rot":2,"sx":1,"sy":1,"type":"eames","x":440,"y":437},{"id":"p6","rot":3,"sx":1,"sy":1,"type":"eames","x":464,"y":419},{"id":"p7","rot":0,"sx":1,"sy":1,"type":"sideTable","x":439,"y":419},{"id":"p9","rot":0,"sx":1,"sy":1,"type":"bench","x":402,"y":450},{"id":"p11","rot":0,"sx":1,"sy":1,"type":"rugBrown","x":1340,"y":262},{"id":"p12","rot":0,"sx":1,"sy":1,"type":"rugBrown","x":1345,"y":408},{"id":"p13","rot":0,"sx":1,"sy":1,"type":"rugYellow","x":964,"y":209},{"id":"p14","rot":0,"sx":0.95,"sy":1.15,"type":"mat","x":536,"y":547},{"id":"p15","rot":0,"sx":1,"sy":1,"type":"rugBrown","x":86,"y":399},{"id":"p24","rot":0,"sx":1.8,"sy":1.45,"type":"woodDesk","x":116,"y":493,"z":-1},{"id":"p29","rot":1,"sx":0.9,"sy":2.05,"type":"sofa","x":40,"y":551},{"id":"p30","rot":1,"sx":0.75,"sy":1.55,"type":"cabinet","x":39,"y":502},{"id":"p31","locked":true,"rot":2,"sx":1,"sy":1,"type":"officeChair","x":208,"y":496},{"id":"p32","rot":0,"sx":1.8,"sy":1.45,"type":"woodDesk","x":193,"y":493,"z":-0.5},{"id":"p33","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":325,"y":597},{"id":"p34","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":250,"y":597},{"id":"p35","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":174,"y":597},{"id":"p36","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":119,"y":597},{"id":"p37","rot":3,"sx":1.45,"sy":1.8,"type":"woodDesk","x":365,"y":592},{"id":"p38","rot":3,"sx":1.45,"sy":1.8,"type":"woodDesk","x":365,"y":541},{"id":"p39","rot":1,"sx":1,"sy":1,"type":"officeChair","x":351,"y":526},{"id":"p40","rot":1,"sx":1,"sy":1,"type":"officeChair","x":351,"y":489},{"id":"p41","rot":3,"sx":1,"sy":1,"type":"officeChair","x":351,"y":569},{"id":"p42","rot":0,"sx":1,"sy":1,"type":"officeChair","x":278,"y":581},{"id":"p43","rot":0,"sx":1,"sy":1,"type":"officeChair","x":202,"y":581},{"id":"p44","rot":0,"sx":1,"sy":1,"type":"officeChair","x":130,"y":581},{"id":"p45","locked":true,"rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":208,"y":478,"z":18.5},{"id":"p46","rot":2,"sx":1,"sy":1,"type":"officeChair","x":114,"y":497},{"id":"p47","rot":1,"sx":1,"sy":1,"type":"officeChair","x":163,"y":497},{"id":"p48","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":515,"z":77.5},{"id":"p49","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":562,"z":77.5},{"id":"p50","rot":2,"sx":1,"sy":1,"type":"monitor","x":278,"y":585,"z":77.5},{"id":"f1","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":42,"y":326},{"id":"f2","rot":0,"sx":1,"sy":1,"type":"printer","x":59,"y":326},{"id":"f3","rot":0,"sx":1,"sy":1,"type":"desk","x":108,"y":334},{"id":"f4","rot":0,"sx":1,"sy":1,"type":"imac","x":108,"y":324},{"id":"f5","rot":0,"sx":1,"sy":1,"type":"keyboard","x":108,"y":330},{"id":"f6","rot":0,"sx":1,"sy":1,"type":"mug","x":122,"y":328},{"id":"f7","rot":2,"sx":1,"sy":1,"type":"officeChair","x":108,"y":352},{"id":"f8","rot":0,"sx":1,"sy":1,"type":"desk","x":60,"y":384},{"id":"f9","rot":0,"sx":1,"sy":1,"type":"laptop","x":54,"y":374},{"id":"f10","rot":0,"sx":1,"sy":1,"type":"papers","x":70,"y":376},{"id":"f11","rot":0,"sx":1,"sy":1,"type":"books","x":46,"y":378},{"id":"f12","rot":2,"sx":1,"sy":1,"type":"officeChair","x":60,"y":402},{"id":"f13","rot":0,"sx":1.3,"sy":1,"type":"sideTable","x":105,"y":425},{"id":"f14","rot":0,"sx":1,"sy":1,"type":"armchair","x":136,"y":438},{"id":"f15","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":39,"y":446},{"id":"f16","rot":0,"sx":1,"sy":1,"type":"trashBin","x":88,"y":346},{"id":"f17","rot":0,"sx":1.3,"sy":1,"type":"desk","x":88,"y":127},{"id":"f18","rot":0,"sx":1,"sy":1,"type":"dualMonitor","x":88,"y":117},{"id":"f19","rot":0,"sx":1,"sy":1,"type":"keyboard","x":88,"y":123},{"id":"f20","rot":0,"sx":1,"sy":1,"type":"deskPhone","x":110,"y":121},{"id":"f21","rot":2,"sx":1,"sy":1,"type":"officeChair","x":88,"y":145},{"id":"f22","rot":1,"sx":1,"sy":1,"type":"bookshelf","x":45,"y":114},{"id":"f23","rot":3,"sx":1,"sy":1,"type":"filingCabinet","x":145,"y":186},{"id":"f24","rot":2,"sx":1,"sy":1,"type":"loveseat","x":88,"y":265},{"id":"f25","rot":0,"sx":0.9,"sy":1,"type":"woodCoffeeTable","x":88,"y":239},{"id":"f26","rot":0,"sx":1,"sy":1,"type":"bigPlant","x":43,"y":270},{"id":"f27","rot":0,"sx":1,"sy":1,"type":"floorLamp","x":135,"y":263},{"id":"f28","rot":0,"sx":1,"sy":1,"type":"coatRack","x":46,"y":169},{"id":"f29","rot":0,"sx":1,"sy":1,"type":"officeChair","x":388,"y":153},{"id":"f30","rot":0,"sx":1.6,"sy":1.1,"type":"desk","x":388,"y":173},{"id":"f31","rot":2,"sx":1,"sy":1,"type":"laptop","x":378,"y":163},{"id":"f32","rot":0,"sx":1,"sy":1,"type":"papers","x":406,"y":163},{"id":"f33","rot":0,"sx":1,"sy":1,"type":"deskLamp","x":416,"y":161},{"id":"f34","rot":2,"sx":1,"sy":1,"type":"eames","x":379,"y":192},{"id":"f35","rot":2,"sx":1,"sy":1,"type":"eames","x":403,"y":192},{"id":"f36","rot":3,"sx":1,"sy":1,"type":"eames","x":432,"y":177},{"id":"f37","rot":0,"sx":1.2,"sy":1.2,"type":"bistroTable","x":391,"y":221},{"id":"f38","rot":0,"sx":1,"sy":1,"type":"floorLamp","x":302,"y":174},{"id":"f39","rot":0,"sx":1,"sy":1,"type":"bookshelf","x":468,"y":109},{"id":"f40","rot":0,"sx":1,"sy":1,"type":"sideboard","x":344,"y":115},{"id":"f41","rot":0,"sx":1,"sy":1,"type":"bigPlant","x":467,"y":265},{"id":"f42","rot":0,"sx":1,"sy":1,"type":"trashBin","x":360,"y":168},{"id":"f43","rot":0,"sx":2.2,"sy":1.7,"type":"meetingTable","x":617,"y":204},{"id":"f44","rot":0,"sx":1,"sy":1,"type":"officeChair","x":575,"y":168},{"id":"f45","rot":0,"sx":1,"sy":1,"type":"officeChair","x":603,"y":168},{"id":"f46","rot":0,"sx":1,"sy":1,"type":"officeChair","x":631,"y":168},{"id":"f47","rot":0,"sx":1,"sy":1,"type":"officeChair","x":659,"y":168},{"id":"f48","rot":2,"sx":1,"sy":1,"type":"officeChair","x":575,"y":220},{"id":"f49","rot":2,"sx":1,"sy":1,"type":"officeChair","x":603,"y":220},{"id":"f50","rot":2,"sx":1,"sy":1,"type":"officeChair","x":631,"y":220},{"id":"f51","rot":2,"sx":1,"sy":1,"type":"officeChair","x":659,"y":220},{"id":"f52","rot":1,"sx":1,"sy":1,"type":"officeChair","x":545,"y":196},{"id":"f53","rot":3,"sx":1,"sy":1,"type":"officeChair","x":689,"y":196},{"id":"f54","rot":1,"sx":1,"sy":1,"type":"couch3Black","x":516,"y":155},{"id":"f55","rot":3,"sx":1,"sy":1,"type":"tvStand","x":720,"y":198},{"id":"f56","rot":0,"sx":1,"sy":1,"type":"shelving","x":720,"y":115},{"id":"f57","rot":0,"sx":1.4,"sy":1,"type":"bench","x":618,"y":103},{"id":"f58","rot":0,"sx":1,"sy":1,"type":"plant","x":512,"y":265},{"id":"f59","rot":0,"sx":1,"sy":1,"type":"floorLamp","x":721,"y":256},{"id":"f60","rot":0,"sx":1,"sy":1,"type":"officeChair","x":961,"y":162},{"id":"f61","rot":0,"sx":1.4,"sy":1.1,"type":"desk","x":961,"y":180},{"id":"f62","rot":2,"sx":1,"sy":1,"type":"dualMonitor","x":961,"y":168},{"id":"f63","rot":0,"sx":1,"sy":1,"type":"keyboard","x":961,"y":176},{"id":"f64","rot":0,"sx":1,"sy":1,"type":"deskPhone","x":941,"y":172},{"id":"f65","rot":0,"sx":1,"sy":1,"type":"papers","x":981,"y":172},{"id":"f66","rot":2,"sx":1,"sy":1,"type":"chair","x":964,"y":195},{"id":"f67","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":768,"y":164},{"id":"f68","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":782,"y":164},{"id":"f69","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":795,"y":164},{"id":"f70","rot":0,"sx":1,"sy":1,"type":"sideboard","x":895,"y":148},{"id":"f71","rot":3,"sx":1,"sy":1,"type":"printer","x":997,"y":217},{"id":"f72","rot":3,"sx":1,"sy":1,"type":"bookshelf","x":995,"y":267},{"id":"f73","rot":0,"sx":1,"sy":1,"type":"desk","x":784,"y":197},{"id":"f74","rot":0,"sx":1,"sy":1,"type":"monitor","x":722,"y":172},{"id":"f75","rot":0,"sx":1,"sy":1,"type":"keyboard","x":784,"y":193},{"id":"f76","rot":2,"sx":1,"sy":1,"type":"officeChair","x":784,"y":213},{"id":"f77","rot":0,"sx":1,"sy":1,"type":"desk","x":817,"y":197},{"id":"f78","rot":0,"sx":1,"sy":1,"type":"monitor","x":817,"y":187},{"id":"f79","rot":0,"sx":1,"sy":1,"type":"keyboard","x":817,"y":193},{"id":"f80","rot":2,"sx":1,"sy":1,"type":"officeChair","x":817,"y":213},{"id":"f81","rot":0,"sx":1,"sy":1,"type":"desk","x":850,"y":197},{"id":"f82","rot":0,"sx":1,"sy":1,"type":"monitor","x":850,"y":187},{"id":"f83","rot":0,"sx":1,"sy":1,"type":"keyboard","x":850,"y":193},{"id":"f84","rot":2,"sx":1,"sy":1,"type":"officeChair","x":850,"y":213},{"id":"f85","rot":0,"sx":1,"sy":1,"type":"desk","x":784,"y":240},{"id":"f86","rot":0,"sx":1,"sy":1,"type":"monitor","x":784,"y":230},{"id":"f87","rot":0,"sx":1,"sy":1,"type":"keyboard","x":784,"y":236},{"id":"f88","rot":2,"sx":1,"sy":1,"type":"officeChair","x":784,"y":256},{"id":"f89","rot":0,"sx":1,"sy":1,"type":"desk","x":905,"y":240},{"id":"f90","rot":0,"sx":1,"sy":1,"type":"monitor","x":905,"y":230},{"id":"f91","rot":0,"sx":1,"sy":1,"type":"keyboard","x":905,"y":236},{"id":"f92","rot":2,"sx":1,"sy":1,"type":"officeChair","x":905,"y":256},{"id":"f93","rot":0,"sx":1,"sy":1,"type":"papers","x":860,"y":189},{"id":"f94","rot":0,"sx":1,"sy":1,"type":"mug","x":794,"y":191},{"id":"f95","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":764,"y":264},{"id":"f96","rot":0,"sx":1,"sy":1,"type":"trashBin","x":937,"y":253},{"id":"f97","rot":0,"sx":1.6,"sy":1.2,"type":"woodDesk","x":1102,"y":168},{"id":"f98","rot":0,"sx":1,"sy":1,"type":"dualMonitor","x":1082,"y":156},{"id":"f99","rot":0,"sx":1,"sy":1,"type":"laptop","x":1122,"y":160},{"id":"f100","rot":0,"sx":1,"sy":1,"type":"keyboard","x":1082,"y":164},{"id":"f101","rot":0,"sx":1,"sy":1,"type":"headphones","x":1138,"y":162},{"id":"f102","rot":2,"sx":1,"sy":1,"type":"officeChair","x":1082,"y":184},{"id":"f103","rot":0,"sx":1,"sy":1,"type":"pcTower","x":1141,"y":173},{"id":"f104","rot":0,"sx":1,"sy":1,"type":"shelving","x":1251,"y":164},{"id":"f105","rot":3,"sx":1,"sy":1,"type":"shelving","x":1252,"y":197},{"id":"f106","rot":0,"sx":1,"sy":1,"type":"printer","x":1039,"y":167},{"id":"f107","rot":0,"sx":1,"sy":1,"type":"standingDesk","x":1206,"y":182},{"id":"f108","rot":0,"sx":1,"sy":1,"type":"monitor","x":1206,"y":166},{"id":"f109","rot":0,"sx":1,"sy":1,"type":"whiteboard","x":1222,"y":244},{"id":"f110","rot":0,"sx":1,"sy":1,"type":"trashBin","x":1066,"y":179},{"id":"f111","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":1255,"y":279},{"id":"f112","rot":0,"sx":1,"sy":1,"type":"desk","x":1339,"y":163},{"id":"f113","rot":2,"sx":1,"sy":1,"type":"officeChair","x":1339,"y":181},{"id":"f114","rot":0,"sx":1.4,"sy":1.3,"type":"bistroTable","x":1371,"y":378},{"id":"f115","rot":1,"sx":1,"sy":1,"type":"foldChair","x":1357,"y":379},{"id":"f116","rot":0,"sx":1,"sy":1,"type":"foldChair","x":1382,"y":393},{"id":"f117","rot":0,"sx":1,"sy":1,"type":"trashBin","x":1385,"y":344},{"id":"f118","rot":0,"sx":1,"sy":1,"type":"beanBag","x":1324,"y":283},{"id":"f119","rot":0,"sx":1,"sy":1,"type":"beanBag","x":1363,"y":283},{"id":"f120","rot":0,"sx":1,"sy":1,"type":"plant","x":1299,"y":446},{"id":"f121","rot":0,"sx":1,"sy":1,"type":"counter","x":845,"y":404},{"id":"f122","rot":0,"sx":1,"sy":1,"type":"counterMicro","x":877,"y":404},{"id":"f123","rot":0,"sx":1,"sy":1,"type":"sinkCounter","x":960,"y":404},{"id":"f124","rot":0,"sx":1,"sy":1,"type":"counter","x":992,"y":404},{"id":"f125","rot":1,"sx":1,"sy":1,"type":"fridge","x":829,"y":459},{"id":"f126","rot":0,"sx":1,"sy":1,"type":"waterCooler","x":1001,"y":444},{"id":"f127","rot":0,"sx":1.6,"sy":1.3,"type":"bistroTable","x":912,"y":475},{"id":"f128","rot":1,"sx":1,"sy":1,"type":"chair","x":895,"y":475},{"id":"f129","rot":3,"sx":1,"sy":1,"type":"chair","x":929,"y":475},{"id":"f130","rot":2,"sx":1,"sy":1,"type":"chair","x":912,"y":493},{"id":"f131","rot":0,"sx":1,"sy":1,"type":"serverRack","x":749,"y":428},{"id":"f132","rot":0,"sx":1,"sy":1,"type":"serverRack","x":788,"y":428},{"id":"f133","rot":0,"sx":1,"sy":1,"type":"serverRack","x":749,"y":475},{"id":"f134","rot":0,"sx":1,"sy":1,"type":"serverRack","x":788,"y":475},{"id":"f135","rot":0,"sx":1,"sy":1,"type":"washbasin","x":612,"y":405},{"id":"f137","rot":0,"sx":1,"sy":1,"type":"toilet","x":697,"y":502},{"id":"f138","rot":0,"sx":1,"sy":1,"type":"trashBin","x":710,"y":405},{"id":"f139","rot":0,"sx":1,"sy":1,"type":"plant","x":602,"y":505},{"id":"f140","rot":0,"sx":1,"sy":1,"type":"washbasin","x":1040,"y":405},{"id":"f141","rot":0,"sx":1,"sy":1,"type":"toilet","x":1088,"y":532},{"id":"f142","rot":0,"sx":1,"sy":1,"type":"trashBin","x":1036,"y":531},{"id":"f143","rot":0,"sx":1.5,"sy":1.1,"type":"woodDesk","x":1175,"y":411},{"id":"f144","rot":0,"sx":1,"sy":1,"type":"laptop","x":1159,"y":401},{"id":"f145","rot":0,"sx":1,"sy":1,"type":"deskLamp","x":1197,"y":399},{"id":"f146","rot":0,"sx":1,"sy":1,"type":"books","x":1183,"y":403},{"id":"f147","rot":2,"sx":1,"sy":1,"type":"officeChair","x":1169,"y":427},{"id":"f148","rot":1,"sx":1,"sy":1,"type":"shelving","x":1142,"y":502},{"id":"f149","rot":3,"sx":1,"sy":1,"type":"bookshelf","x":1253,"y":502},{"id":"f150","rot":0,"sx":1,"sy":1,"type":"sinkCounter","x":1195,"y":538},{"id":"f151","rot":0,"sx":1,"sy":1,"type":"standingDesk","x":1229,"y":459},{"id":"f152","rot":0,"sx":1,"sy":1,"type":"imac","x":1229,"y":443},{"id":"f153","rot":0,"sx":1,"sy":1,"type":"whiteboard","x":1155,"y":472},{"id":"f154","rot":0,"sx":1,"sy":1,"type":"waterCooler","x":1255,"y":412},{"id":"f155","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":1142,"y":539}],"v":1,"walls":{"add":["30:22","31:22","29:22","28:22","27:22"],"rem":[]}};
+const DEFAULT_LAYOUT = {"art":[{"id":"a20","img":"","j":17,"kind":"gasmask","w":1,"x":536},{"id":"a22","img":"","j":17,"kind":"frameTall","w":1,"x":320},{"id":"a23","img":"","j":17,"kind":"frameTall","w":1,"x":347},{"id":"a24","img":"","j":17,"kind":"frameTall","w":1,"x":375},{"id":"a25","img":"","j":17,"kind":"frameTall","w":1,"x":404},{"id":"a27","img":"","j":17,"kind":"frameW","w":1,"x":738},{"id":"a28","img":"","j":17,"kind":"frameW","w":1,"x":953},{"id":"a29","img":"","j":17,"kind":"frameW","w":1,"x":1060},{"id":"a30","img":"","j":17,"kind":"frameW","w":1,"x":1194},{"id":"a31","img":"","j":17,"kind":"wardrobe","w":2,"x":603},{"id":"a32","img":"","j":3,"kind":"window","w":3,"x":58},{"id":"a33","img":"","j":3,"kind":"window","w":4,"x":352},{"id":"a34","img":"","j":3,"kind":"window","w":6,"x":580},{"id":"a35","img":"","j":6,"kind":"window","w":5,"x":796},{"id":"a36","img":"","j":6,"kind":"window","w":5,"x":1068},{"id":"a37","img":"","j":6,"kind":"window","w":7,"x":1280},{"id":"a38","img":"","j":28,"kind":"shelf","w":10,"x":74},{"id":"a1","img":"","j":3,"kind":"window","w":5,"x":176}],"doors":[{"glass":false,"i":76,"j":23,"kind":"","locked":false,"n":1,"off":0,"v":0},{"glass":false,"i":66,"j":23,"kind":"","locked":false,"n":2,"off":0,"v":0},{"glass":false,"i":9,"j":20,"kind":"","locked":false,"n":4,"off":0,"v":1},{"glass":false,"i":15,"j":28,"kind":"","locked":false,"n":5,"off":0,"v":0},{"glass":false,"i":9,"j":6,"kind":"","locked":false,"n":6,"off":0,"v":1},{"glass":false,"i":17,"j":6,"kind":"","locked":false,"n":7,"off":0,"v":1},{"glass":false,"i":30,"j":13,"kind":"","locked":false,"n":8,"off":0,"v":1},{"glass":false,"i":41,"j":17,"kind":"","locked":false,"n":9,"off":0,"v":0},{"glass":false,"i":53,"j":17,"kind":"","locked":false,"n":10,"off":0,"v":0},{"glass":false,"i":70,"j":17,"kind":"","locked":false,"n":11,"off":0,"v":0},{"glass":true,"i":79,"j":20,"kind":"","locked":false,"n":12,"off":0,"v":1},{"glass":false,"i":57,"j":23,"kind":"","locked":false,"n":13,"off":0,"v":0},{"glass":false,"i":40,"j":23,"kind":"","locked":false,"n":14,"off":0,"v":0},{"glass":false,"i":47,"j":23,"kind":"","locked":false,"n":15,"off":0,"v":0},{"glass":false,"i":33,"j":34,"kind":"exit","locked":false,"n":0,"off":-8,"v":0}],"floors":{"1":{"c":"#c49a6c","p":"laminate"},"10":{"c":"#c49a6c","p":"laminate"},"11":{"c":"#c49a6c","p":"laminate"},"12":{"c":"#c49a6c","p":"laminate"},"13":{"c":"#c49a6c","p":"laminate"},"14":{"c":"#7a5a40","p":"tiles"},"15":{"c":"#c49a6c","p":"laminate"},"17":{"c":"#3e4a5e","p":"tiles"},"18":{"c":"#c49a6c","p":"laminate"},"2":{"c":"#c49a6c","p":"laminate"},"3":{"c":"#c49a6c","p":"laminate"},"4":{"c":"#c49a6c","p":"laminate"},"5":{"c":"#c49a6c","p":"laminate"},"6":{"c":"#c49a6c","p":"laminate"},"7":{"c":"#c49a6c","p":"laminate"},"8":{"c":"#e3d8bf","p":"bigtiles"}},"furnished":1,"ms":0.85,"props":[{"id":"p1","rot":0,"sx":2.6,"sy":1.5,"type":"floorLamp","x":184,"y":428},{"id":"p2","rot":1,"sx":1.25,"sy":1.25,"type":"cabinet","x":171,"y":377},{"id":"p3","rot":0,"sx":1,"sy":1,"type":"shelving","x":291,"y":311},{"id":"p4","rot":0,"sx":1,"sy":1,"type":"eames","x":445,"y":399},{"id":"p5","rot":2,"sx":1,"sy":1,"type":"eames","x":440,"y":437},{"id":"p6","rot":3,"sx":1,"sy":1,"type":"eames","x":464,"y":419},{"id":"p7","rot":0,"sx":1,"sy":1,"type":"sideTable","x":439,"y":419},{"id":"p9","rot":0,"sx":1,"sy":1,"type":"bench","x":402,"y":450},{"id":"p11","rot":0,"sx":1,"sy":1,"type":"rugBrown","x":1340,"y":262},{"id":"p12","rot":0,"sx":1,"sy":1,"type":"rugBrown","x":1345,"y":408},{"id":"p13","rot":0,"sx":1,"sy":1,"type":"rugYellow","x":964,"y":209},{"id":"p14","rot":0,"sx":0.95,"sy":1.15,"type":"mat","x":536,"y":547},{"id":"p15","rot":0,"sx":1,"sy":1,"type":"rugBrown","x":86,"y":399},{"id":"p24","rot":0,"sx":1.8,"sy":1.45,"type":"woodDesk","x":116,"y":493,"z":-1},{"id":"p29","rot":1,"sx":0.9,"sy":2.05,"type":"sofa","x":40,"y":551},{"id":"p30","rot":1,"sx":0.75,"sy":1.55,"type":"cabinet","x":39,"y":502},{"id":"p31","locked":true,"rot":2,"sx":1,"sy":1,"type":"officeChair","x":208,"y":496},{"id":"p32","rot":0,"sx":1.8,"sy":1.45,"type":"woodDesk","x":193,"y":493,"z":-0.5},{"id":"p33","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":325,"y":597},{"id":"p34","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":250,"y":597},{"id":"p35","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":174,"y":597},{"id":"p36","rot":2,"sx":1.8,"sy":1.45,"type":"woodDesk","x":119,"y":597},{"id":"p37","rot":3,"sx":1.45,"sy":1.8,"type":"woodDesk","x":365,"y":592},{"id":"p38","rot":3,"sx":1.45,"sy":1.8,"type":"woodDesk","x":365,"y":541},{"id":"p39","rot":1,"sx":1,"sy":1,"type":"officeChair","x":351,"y":526},{"id":"p40","rot":1,"sx":1,"sy":1,"type":"officeChair","x":351,"y":489},{"id":"p41","rot":3,"sx":1,"sy":1,"type":"officeChair","x":351,"y":569},{"id":"p42","rot":0,"sx":1,"sy":1,"type":"officeChair","x":278,"y":581},{"id":"p43","rot":0,"sx":1,"sy":1,"type":"officeChair","x":202,"y":581},{"id":"p44","rot":0,"sx":1,"sy":1,"type":"officeChair","x":130,"y":581},{"id":"p45","locked":true,"rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":208,"y":478,"z":18.5},{"id":"p46","rot":2,"sx":1,"sy":1,"type":"officeChair","x":114,"y":497},{"id":"p47","rot":1,"sx":1,"sy":1,"type":"officeChair","x":163,"y":497},{"id":"p48","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":515,"z":77.5},{"id":"p49","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":562,"z":77.5},{"id":"p50","rot":2,"sx":1,"sy":1,"type":"monitor","x":278,"y":585,"z":77.5},{"id":"f1","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":42,"y":326},{"id":"f2","rot":0,"sx":1,"sy":1,"type":"printer","x":59,"y":326},{"id":"f3","rot":0,"sx":1,"sy":1,"type":"desk","x":108,"y":334},{"id":"f4","rot":0,"sx":1,"sy":1,"type":"imac","x":108,"y":324},{"id":"f5","rot":0,"sx":1,"sy":1,"type":"keyboard","x":108,"y":330},{"id":"f6","rot":0,"sx":1,"sy":1,"type":"mug","x":122,"y":328},{"id":"f7","rot":2,"sx":1,"sy":1,"type":"officeChair","x":108,"y":352},{"id":"f8","rot":0,"sx":1,"sy":1,"type":"desk","x":60,"y":384},{"id":"f9","rot":0,"sx":1,"sy":1,"type":"laptop","x":54,"y":374},{"id":"f10","rot":0,"sx":1,"sy":1,"type":"papers","x":70,"y":376},{"id":"f11","rot":0,"sx":1,"sy":1,"type":"books","x":46,"y":378},{"id":"f12","rot":2,"sx":1,"sy":1,"type":"officeChair","x":60,"y":402},{"id":"f13","rot":0,"sx":1.3,"sy":1,"type":"sideTable","x":105,"y":425},{"id":"f14","rot":0,"sx":1,"sy":1,"type":"armchair","x":136,"y":438},{"id":"f15","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":39,"y":446},{"id":"f16","rot":0,"sx":1,"sy":1,"type":"trashBin","x":88,"y":346},{"id":"f17","rot":0,"sx":1.3,"sy":1,"type":"desk","x":88,"y":127},{"id":"f18","rot":0,"sx":1,"sy":1,"type":"dualMonitor","x":88,"y":117},{"id":"f19","rot":0,"sx":1,"sy":1,"type":"keyboard","x":88,"y":123},{"id":"f20","rot":0,"sx":1,"sy":1,"type":"deskPhone","x":110,"y":121},{"id":"f21","rot":2,"sx":1,"sy":1,"type":"officeChair","x":88,"y":145},{"id":"f22","rot":1,"sx":1,"sy":1,"type":"bookshelf","x":45,"y":114},{"id":"f23","rot":3,"sx":1,"sy":1,"type":"filingCabinet","x":145,"y":186},{"id":"f24","rot":2,"sx":1,"sy":1,"type":"loveseat","x":88,"y":265},{"id":"f25","rot":0,"sx":0.9,"sy":1,"type":"woodCoffeeTable","x":88,"y":239},{"id":"f26","rot":0,"sx":1,"sy":1,"type":"bigPlant","x":43,"y":270},{"id":"f27","rot":0,"sx":1,"sy":1,"type":"floorLamp","x":135,"y":263},{"id":"f28","rot":0,"sx":1,"sy":1,"type":"coatRack","x":46,"y":169},{"id":"f29","rot":0,"sx":1,"sy":1,"type":"officeChair","x":388,"y":153},{"id":"f30","rot":0,"sx":1.6,"sy":1.1,"type":"desk","x":388,"y":173},{"id":"f31","rot":2,"sx":1,"sy":1,"type":"laptop","x":378,"y":163},{"id":"f32","rot":0,"sx":1,"sy":1,"type":"papers","x":406,"y":163},{"id":"f33","rot":0,"sx":1,"sy":1,"type":"deskLamp","x":416,"y":161},{"id":"f34","rot":2,"sx":1,"sy":1,"type":"eames","x":379,"y":192},{"id":"f35","rot":2,"sx":1,"sy":1,"type":"eames","x":403,"y":192},{"id":"f36","rot":3,"sx":1,"sy":1,"type":"eames","x":432,"y":177},{"id":"f37","rot":0,"sx":1.2,"sy":1.2,"type":"bistroTable","x":391,"y":221},{"id":"f38","rot":0,"sx":1,"sy":1,"type":"floorLamp","x":302,"y":174},{"id":"f39","rot":0,"sx":1,"sy":1,"type":"bookshelf","x":468,"y":109},{"id":"f40","rot":0,"sx":1,"sy":1,"type":"sideboard","x":344,"y":115},{"id":"f41","rot":0,"sx":1,"sy":1,"type":"bigPlant","x":467,"y":265},{"id":"f42","rot":0,"sx":1,"sy":1,"type":"trashBin","x":360,"y":168},{"id":"f43","rot":0,"sx":2.2,"sy":1.7,"type":"meetingTable","x":617,"y":204},{"id":"f44","rot":0,"sx":1,"sy":1,"type":"officeChair","x":575,"y":168},{"id":"f45","rot":0,"sx":1,"sy":1,"type":"officeChair","x":603,"y":168},{"id":"f46","rot":0,"sx":1,"sy":1,"type":"officeChair","x":631,"y":168},{"id":"f47","rot":0,"sx":1,"sy":1,"type":"officeChair","x":659,"y":168},{"id":"f48","rot":2,"sx":1,"sy":1,"type":"officeChair","x":575,"y":220},{"id":"f49","rot":2,"sx":1,"sy":1,"type":"officeChair","x":603,"y":220},{"id":"f50","rot":2,"sx":1,"sy":1,"type":"officeChair","x":631,"y":220},{"id":"f51","rot":2,"sx":1,"sy":1,"type":"officeChair","x":659,"y":220},{"id":"f52","rot":1,"sx":1,"sy":1,"type":"officeChair","x":545,"y":196},{"id":"f53","rot":3,"sx":1,"sy":1,"type":"officeChair","x":689,"y":196},{"id":"f54","rot":1,"sx":1,"sy":1,"type":"couch3Black","x":516,"y":155},{"id":"f55","rot":3,"sx":1,"sy":1,"type":"tvStand","x":720,"y":198},{"id":"f56","rot":0,"sx":1,"sy":1,"type":"shelving","x":720,"y":115},{"id":"f57","rot":0,"sx":1.4,"sy":1,"type":"bench","x":618,"y":103},{"id":"f58","rot":0,"sx":1,"sy":1,"type":"plant","x":512,"y":265},{"id":"f59","rot":0,"sx":1,"sy":1,"type":"floorLamp","x":721,"y":256},{"id":"f60","rot":0,"sx":1,"sy":1,"type":"officeChair","x":961,"y":162},{"id":"f61","rot":0,"sx":1.4,"sy":1.1,"type":"desk","x":961,"y":180},{"id":"f62","rot":2,"sx":1,"sy":1,"type":"dualMonitor","x":961,"y":168},{"id":"f63","rot":0,"sx":1,"sy":1,"type":"keyboard","x":961,"y":176},{"id":"f64","rot":0,"sx":1,"sy":1,"type":"deskPhone","x":941,"y":172},{"id":"f65","rot":0,"sx":1,"sy":1,"type":"papers","x":981,"y":172},{"id":"f66","rot":2,"sx":1,"sy":1,"type":"chair","x":964,"y":195},{"id":"f67","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":768,"y":164},{"id":"f68","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":782,"y":164},{"id":"f69","rot":0,"sx":1,"sy":1,"type":"filingCabinet","x":795,"y":164},{"id":"f70","rot":0,"sx":1,"sy":1,"type":"sideboard","x":895,"y":148},{"id":"f71","rot":3,"sx":1,"sy":1,"type":"printer","x":997,"y":217},{"id":"f72","rot":3,"sx":1,"sy":1,"type":"bookshelf","x":995,"y":267},{"id":"f73","rot":0,"sx":1,"sy":1,"type":"desk","x":784,"y":197},{"id":"f74","rot":0,"sx":1,"sy":1,"type":"monitor","x":722,"y":172},{"id":"f75","rot":0,"sx":1,"sy":1,"type":"keyboard","x":784,"y":193},{"id":"f76","rot":2,"sx":1,"sy":1,"type":"officeChair","x":784,"y":213},{"id":"f77","rot":0,"sx":1,"sy":1,"type":"desk","x":817,"y":197},{"id":"f78","rot":0,"sx":1,"sy":1,"type":"monitor","x":817,"y":187},{"id":"f79","rot":0,"sx":1,"sy":1,"type":"keyboard","x":817,"y":193},{"id":"f80","rot":2,"sx":1,"sy":1,"type":"officeChair","x":817,"y":213},{"id":"f81","rot":0,"sx":1,"sy":1,"type":"desk","x":850,"y":197},{"id":"f82","rot":0,"sx":1,"sy":1,"type":"monitor","x":850,"y":187},{"id":"f83","rot":0,"sx":1,"sy":1,"type":"keyboard","x":850,"y":193},{"id":"f84","rot":2,"sx":1,"sy":1,"type":"officeChair","x":850,"y":213},{"id":"f85","rot":0,"sx":1,"sy":1,"type":"desk","x":784,"y":240},{"id":"f86","rot":0,"sx":1,"sy":1,"type":"monitor","x":784,"y":230},{"id":"f87","rot":0,"sx":1,"sy":1,"type":"keyboard","x":784,"y":236},{"id":"f88","rot":2,"sx":1,"sy":1,"type":"officeChair","x":784,"y":256},{"id":"f89","rot":0,"sx":1,"sy":1,"type":"desk","x":905,"y":240},{"id":"f90","rot":0,"sx":1,"sy":1,"type":"monitor","x":905,"y":230},{"id":"f91","rot":0,"sx":1,"sy":1,"type":"keyboard","x":905,"y":236},{"id":"f92","rot":2,"sx":1,"sy":1,"type":"officeChair","x":905,"y":256},{"id":"f93","rot":0,"sx":1,"sy":1,"type":"papers","x":860,"y":189},{"id":"f94","rot":0,"sx":1,"sy":1,"type":"mug","x":794,"y":191},{"id":"f95","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":764,"y":264},{"id":"f96","rot":0,"sx":1,"sy":1,"type":"trashBin","x":937,"y":253},{"id":"f97","rot":0,"sx":1.6,"sy":1.2,"type":"woodDesk","x":1102,"y":168},{"id":"f98","rot":0,"sx":1,"sy":1,"type":"dualMonitor","x":1082,"y":156},{"id":"f99","rot":0,"sx":1,"sy":1,"type":"laptop","x":1122,"y":160},{"id":"f100","rot":0,"sx":1,"sy":1,"type":"keyboard","x":1082,"y":164},{"id":"f101","rot":0,"sx":1,"sy":1,"type":"headphones","x":1138,"y":162},{"id":"f102","rot":2,"sx":1,"sy":1,"type":"officeChair","x":1082,"y":184},{"id":"f103","rot":0,"sx":1,"sy":1,"type":"pcTower","x":1141,"y":173},{"id":"f104","rot":0,"sx":1,"sy":1,"type":"shelving","x":1251,"y":164},{"id":"f105","rot":3,"sx":1,"sy":1,"type":"shelving","x":1252,"y":197},{"id":"f106","rot":0,"sx":1,"sy":1,"type":"printer","x":1039,"y":167},{"id":"f107","rot":0,"sx":1,"sy":1,"type":"standingDesk","x":1206,"y":182},{"id":"f108","rot":0,"sx":1,"sy":1,"type":"monitor","x":1206,"y":166},{"id":"f109","rot":0,"sx":1,"sy":1,"type":"whiteboard","x":1222,"y":244},{"id":"f110","rot":0,"sx":1,"sy":1,"type":"trashBin","x":1066,"y":179},{"id":"f111","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":1255,"y":279},{"id":"f112","rot":0,"sx":1,"sy":1,"type":"desk","x":1339,"y":163},{"id":"f113","rot":2,"sx":1,"sy":1,"type":"officeChair","x":1339,"y":181},{"id":"f114","rot":0,"sx":1.4,"sy":1.3,"type":"bistroTable","x":1371,"y":378},{"id":"f115","rot":1,"sx":1,"sy":1,"type":"foldChair","x":1357,"y":379},{"id":"f116","rot":0,"sx":1,"sy":1,"type":"foldChair","x":1382,"y":393},{"id":"f117","rot":0,"sx":1,"sy":1,"type":"trashBin","x":1385,"y":344},{"id":"f118","rot":0,"sx":1,"sy":1,"type":"beanBag","x":1324,"y":283},{"id":"f119","rot":0,"sx":1,"sy":1,"type":"beanBag","x":1363,"y":283},{"id":"f120","rot":0,"sx":1,"sy":1,"type":"plant","x":1299,"y":446},{"id":"f121","rot":0,"sx":1,"sy":1,"type":"counter","x":845,"y":404},{"id":"f122","rot":0,"sx":1,"sy":1,"type":"counterMicro","x":877,"y":404},{"id":"f123","rot":0,"sx":1,"sy":1,"type":"sinkCounter","x":960,"y":404},{"id":"f124","rot":0,"sx":1,"sy":1,"type":"counter","x":992,"y":404},{"id":"f125","rot":1,"sx":1,"sy":1,"type":"fridge","x":829,"y":459},{"id":"f126","rot":0,"sx":1,"sy":1,"type":"waterCooler","x":1001,"y":444},{"id":"f127","rot":0,"sx":1.6,"sy":1.3,"type":"bistroTable","x":912,"y":475},{"id":"f128","rot":1,"sx":1,"sy":1,"type":"chair","x":895,"y":475},{"id":"f129","rot":3,"sx":1,"sy":1,"type":"chair","x":929,"y":475},{"id":"f130","rot":2,"sx":1,"sy":1,"type":"chair","x":912,"y":493},{"id":"f131","rot":0,"sx":1,"sy":1,"type":"serverRack","x":749,"y":428},{"id":"f132","rot":0,"sx":1,"sy":1,"type":"serverRack","x":788,"y":428},{"id":"f133","rot":0,"sx":1,"sy":1,"type":"serverRack","x":749,"y":475},{"id":"f134","rot":0,"sx":1,"sy":1,"type":"serverRack","x":788,"y":475},{"id":"f135","rot":0,"sx":1,"sy":1,"type":"washbasin","x":612,"y":405},{"id":"f137","rot":0,"sx":1,"sy":1,"type":"toilet","x":697,"y":502},{"id":"f138","rot":0,"sx":1,"sy":1,"type":"trashBin","x":710,"y":405},{"id":"f139","rot":0,"sx":1,"sy":1,"type":"plant","x":602,"y":505},{"id":"f140","rot":0,"sx":1,"sy":1,"type":"washbasin","x":1040,"y":405},{"id":"f141","rot":0,"sx":1,"sy":1,"type":"toilet","x":1088,"y":532},{"id":"f142","rot":0,"sx":1,"sy":1,"type":"trashBin","x":1036,"y":531},{"id":"f143","rot":0,"sx":1.5,"sy":1.1,"type":"woodDesk","x":1175,"y":411},{"id":"f144","rot":0,"sx":1,"sy":1,"type":"laptop","x":1159,"y":401},{"id":"f145","rot":0,"sx":1,"sy":1,"type":"deskLamp","x":1197,"y":399},{"id":"f146","rot":0,"sx":1,"sy":1,"type":"books","x":1183,"y":403},{"id":"f147","rot":2,"sx":1,"sy":1,"type":"officeChair","x":1169,"y":427},{"id":"f148","rot":1,"sx":1,"sy":1,"type":"shelving","x":1142,"y":502},{"id":"f149","rot":3,"sx":1,"sy":1,"type":"bookshelf","x":1253,"y":502},{"id":"f150","rot":0,"sx":1,"sy":1,"type":"sinkCounter","x":1195,"y":538},{"id":"f151","rot":0,"sx":1,"sy":1,"type":"standingDesk","x":1229,"y":459},{"id":"f152","rot":0,"sx":1,"sy":1,"type":"imac","x":1229,"y":443},{"id":"f153","rot":0,"sx":1,"sy":1,"type":"whiteboard","x":1155,"y":472},{"id":"f154","rot":0,"sx":1,"sy":1,"type":"waterCooler","x":1255,"y":412},{"id":"f155","rot":0,"sx":1,"sy":1,"type":"snakePlant","x":1142,"y":539},{"id":"n1","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":114,"y":478,"z":18.5},{"id":"n2","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":163,"y":478,"z":18.5},{"id":"n3","rot":2,"sx":1,"sy":1,"type":"monitor","x":130,"y":585,"z":77.5},{"id":"n4","rot":2,"sx":1,"sy":1,"type":"monitor","x":202,"y":585,"z":77.5},{"id":"n5","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":478,"z":77.5},{"id":"n6","rot":0,"sx":1,"sy":1,"type":"desk","x":128,"y":384},{"id":"n7","rot":0,"sx":1,"sy":1,"type":"laptop","x":124,"y":374},{"id":"n8","rot":0,"sx":1,"sy":1,"type":"papers","x":138,"y":377},{"id":"n9","rot":2,"sx":1,"sy":1,"type":"officeChair","x":128,"y":402}],"v":1,"walls":{"add":["30:22","31:22","29:22","28:22","27:22"],"rem":[]}};
 // ======================================================================
 // GAME MODE: choose a character, a workday of tasks played as minigames, a guided tutorial
 // ======================================================================
@@ -3842,7 +3966,7 @@ function beginDay(cid, withTut){
   cam.x = P.x - VW/2; cam.y = P.y - 12 - VH/2;
   SPEED = cid === "yassin" ? 84 : 62;
   setLocks(true);
-  G.tasks = buildDayTasks(cid).map(t => Object.assign({}, t, {done:false, stars:0, expired:false}));
+  G.tasks = buildDayTasks(cid).concat(visitorTasks(cid)).map(t => Object.assign({}, t, {done:false, stars:0, expired:false}));
   G.fx = {}; G.evUsed = {}; G.nextGen = clock.min + rnd(35, 60); G.greeted = {}; G.exUsed = {}; G.exCool = {}; G.itBoost = false;
   G.track = null; G.stars = 0; G.meter = G.char.meter.start; G.lastPanel = ""; G.allDoneShown = false;
   G.smoothUses = (G.char.abilities.find(a => a.uses) || {}).uses || 0; G.burst = false; G.cool = {}; G.talkCool = {};
@@ -4670,14 +4794,51 @@ function buildDayTasks(cid){
   return tasks;
 }
 
+// ---------- bonus tasks when Amr or someone from the other branch is in ----------
+const BRANCH_TASK = {
+  ehab:{title:"Help Ehab find the {c} files", game:"findfile"},
+  aya:{title:"Check the {c} expenses Aya brought", game:"receipts"},
+  dina:{title:"Walk Dina through the {c} proof", game:"proof"},
+  rana:{title:"Rana's challenge: export the {c} sizes", game:"sizes"},
+  joy:{title:"Tidy Joy's shared {c} folder", game:"memory"},
+  nourk:{title:"Show Nour Khaled the {c} workflow", talk:["Want to see how we run {c} here?","Yes! Show me everything. I'm taking notes."]},
+  rawda:{title:"Find Rawda a meeting slot, fast", game:"meeting"}
+};
+function visitorTasks(cid){
+  const out = [], cl = shuffle(CLIENTS); let i = 0;
+  const c = CHARS[cid], fits = n => n && n.arriveAt < c.end - 25 && n.leaveAt > c.start + 15;
+  const amr = npcById("amr");
+  if (fits(amr)){
+    const a = cl[i++ % cl.length], from = Math.round(Math.max(amr.arriveAt + 5, c.start)), until = Math.round(Math.min(amr.leaveAt - 3, c.end));
+    out.push({id:"vamr1", title:`Give Amr the ${a} update`, where:"npc:amr", client:a, opt:true, from, expires:until, missMeter:3, miss:"Amr left before you could update him.",
+      talk:[`Amr, a quick update on ${a}: we're on track.`, "Good. That's what I like to hear. Keep me posted."]});
+    if (Math.random() < 0.6) out.push({id:"vamr2", title:`Get the ${a} numbers ready for Amr`, where:"desk", game:pick(["receipts","findfile","typos"]), client:a, opt:true, from, expires:until, missMeter:3, miss:"Amr left without the numbers."});
+  }
+  npcs.filter(n => n.branch && fits(n)).forEach(n => {
+    const t = BRANCH_TASK[n.id]; if (!t) return;
+    const a = cl[i++ % cl.length], fill = x => x.replace(/\{c\}/g, a);
+    out.push(Object.assign({}, t, {id:"v" + n.id, title:fill(t.title), talk: t.talk ? t.talk.map(fill) : undefined, client:a, opt:true, where:"npc:" + n.id,
+      from:Math.round(Math.max(n.arriveAt + 3, c.start)), expires:Math.round(Math.min(n.leaveAt - 2, c.end)), missMeter:3,
+      miss:`${n.call || n.name} went back to the other branch.`}));
+  });
+  return out;
+}
+
 // ---------- conversations the player starts ----------
 const DIALOG = {
   "*>zeina":[{l:["Zeina, need anything from me?","Yes. Everything. By three.","...On it."]},{l:["How was the client call?","Long. They want a new direction.","Again?"]},{l:["You look stressed.","I'm not stressed. I'm efficient."]}],
   "*>yassin":[{l:["Yassin, what are you watching?","Research. For the client.","Sure it is."]},{l:["Lunch later?","Always. Koshary?","Deal."]},{l:["Did the client reply?","They sent a thumbs up. That's a yes, right?"]}],
   "*>nour":[{l:["Nour, what are you working on?","Something beautiful. Don't look yet."]},{l:["Coffee?","Only if it's strong.","Is there another kind?"]},{l:["Can I see the poster?","Two more minutes. Then you'll be amazed."]}],
   "*>karim":[{l:["Karim, the client wants it bigger.","Bigger? It's already huge. Who said that?","...the client."]},{l:["Can I suggest something?","Go on. I'll probably disagree, but go on."]},{l:["Karim, what's playing?","Something chill. Want me to turn it up?","Maybe a bit."]},{l:["How's the logo?","Almost there. The client will love it.","Or ask for it bigger."]},{l:["Vape break later?","Already had one. OK, maybe one more."]}],
-  "*>amr":[{l:["Welcome back, Amr!","Thank you, {me}. Everything good here?","All good."], fx:"amr"},{l:["How's the other branch?","Busy, but not as fun as here."], fx:"amr"}],
+  "*>amr":[{l:["Amr! Good to see you here again.","I'll be around more often now. Somebody has to keep you all in line.","Ha. Welcome back."], fx:"amr"},{l:["Anything you need from me today?","Just good news. And the numbers.","On it."], fx:"amr"},{l:["Welcome back, Amr!","Thank you, {me}. Everything good here?","All good."], fx:"amr"},{l:["How's the other branch?","Busy, but not as fun as here."], fx:"amr"}],
   "*>mohamed":[{l:["Mohamed, my laptop is so slow.","Give it here. Your next task will run smoother.","You're a hero."], fx:"it"},{l:["Can you fix the Wi-Fi?","It's not broken. It's busy.","Busy with what?"]},{l:["Any chance of a second monitor?","Fill in the form. Then wait. Then wait more."]}],
+  "*>ehab":[{l:["Ehab, nice hair today.","Every day, my friend. Every day."]},{l:["How's the other branch?","Busy. Rawda's stressed, so, normal."]},{l:["Where's Rawda?","Never far. Probably looking for me right now."]}],
+  "*>aya":[{l:["Aya, how's it going?","Honestly? Better than your deadline.","...Fair."]},{l:["Love the outfit.","I know. Thank you."]},{l:["Any advice for me?","Yes. Do it my way."]}],
+  "*>dina":[{l:["Good morning, Dina.","Good morning. Lovely office. Mostly."]},{l:["Can I get you some tea?","Earl Grey, if you have it. No sugar."]},{l:["How's everything at the other branch?","Elegant, as always."]}],
+  "*>rana":[{l:["Rana! What's up?","Everything! Guess what I just found out.","What?","I'll tell you at lunch."]},{l:["You look happy today.","I'm always happy. It's my job."]},{l:["Did you bring sweets?","Kitchen. Second shelf. You're welcome."]}],
+  "*>joy":[{l:["Hey Joy, all good?","All good. No rush, no stress."]},{l:["Busy day?","Is it? I hadn't noticed."]},{l:["How do you stay so calm?","Tea, and not reading my emails."]}],
+  "*>nourk":[{l:["What are you up to?","Learning how your team does things. Fascinating."]},{l:["Need a hand with anything?","Teach me one new thing today and we're even."]},{l:["Still taking notes?","Page twelve. You're all very quotable."]}],
+  "*>rawda":[{l:["Rawda, are you okay?","Three deadlines, one laptop, zero time.","Breathe."]},{l:["Where's Ehab?","Probably fixing his hair. Again."]},{l:["It'll be fine, you know.","Thank you. Say it again in an hour."]}],
   "*>osama":[{l:["Osama, any news on the payment?","It came in this morning. Finally."]},{l:["Need any receipts from me?","All of them. Every single one.","I'll look."]},{l:["How are the numbers this month?","Good. Don't spend anything."]}],
   "*>finance":[{l:["How's it going in finance?","Numbers, numbers, numbers.","Sounds fun.","It's not."]},{l:["Busy day?","Month end. Always busy."]},{l:["Need anything from us?","Just the receipts, please."]}],
   "*>boys":[{l:["Can I get a tea, please?","Right away, {me}. Mint or no mint?","Mint, please."], fx:"tea"},{l:["Thanks for cleaning up earlier.","Anytime, ya basha."]},{l:["What's for lunch today?","Rice, chicken and molokhia.","Perfect."]},{l:["Could I get a Nescafe?","Three sugars, as usual?","You know me."], fx:"tea"}],
@@ -4776,6 +4937,12 @@ const EVENTS = [
   {id:"amrcall", run(){
     evTask({title:"Call back Amr", where:"anywhere", game:"call", expires: clock.min + 25, note:"Walk and talk: answer anywhere", miss:"Amr left a voice note. A long one."});
     toast(`<span class="k">Ring ring.</span> Amr is calling from the other branch.`); }},
+  {id:"sweets", ok:() => npcs.some(n => n.branch && visible(n)), run(){
+    const n = pick(npcs.filter(n => n.branch && visible(n)));
+    evTask({title:`Grab one of ${n.call || n.name}'s sweets`, where:"kitchen", expires: clock.min + 40, quick:{meter:10, pose:"drink", text:"Basbousa from the other branch. Excellent."}, miss:"The sweets are gone. Of course they are.", missMeter:2});
+    toast(`${esc(n.call || n.name)} brought sweets from the other branch. They're in the <b>kitchen</b>.`); }},
+  {id:"amrrounds", ok:() => { const a = npcById("amr"); return a && visible(a); }, run(){
+    goodMeter(-4); toast("Amr is doing his rounds. Everyone suddenly looks very busy."); }},
   {id:"praise", run(){ goodMeter(10); toast("The client loved yesterday's work. Everyone's in a good mood."); }},
   {id:"battery", run(){
     evTask({title:"Grab your charger", where:"desk", expires: clock.min + 30, quick:{meter:4, pose:"type", text:"Plugged in. Crisis avoided."}, miss:"Your laptop died. Ten minutes to get it back.", missMeter:6});
@@ -5123,7 +5290,7 @@ function gmFrame(dt){ animMenu(dt); tickGame(dt); updateDay(dt);
 
 Object.assign(G, { openMenu, beginDay, onInteract, onTalk, placeTaskHint, drawWorld, syncMeTag, onKey, gmFrame, rate:clockRate, lockMsg, endDay, CHARS, MG, openGame, completeTask, taskById });
 
-applyLayout(DEFAULT_LAYOUT);
+applyLayout(withBranchDesks(DEFAULT_LAYOUT));
 buildPalette();
 syncEdUI();
 connect();
