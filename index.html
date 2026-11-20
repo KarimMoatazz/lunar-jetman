@@ -150,7 +150,19 @@ canvas.logo{image-rendering:pixelated;image-rendering:crisp-edges}
 .menu[hidden],.pause[hidden],.ghud[hidden],.tcard[hidden],.mg[hidden],.sum[hidden],.abil[hidden]{display:none!important}
 .menu h2{margin:0;font-size:clamp(18px,3.4vh,26px);font-weight:600;letter-spacing:.14em;color:var(--amber);text-shadow:0 3px 0 #000}
 .menu .sub{margin:-4px 0 0;font-size:clamp(11px,1.9vh,14px);color:var(--dim);letter-spacing:.04em}
-.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(6px,1.2vw,12px);width:min(940px,100%)}
+.cards{display:flex;gap:clamp(6px,1.2vw,12px);width:min(940px,100%);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 2px 4px;--per:4}
+.cards::-webkit-scrollbar{display:none}
+.cards .cc{flex:0 0 calc((100% - (var(--per) - 1) * clamp(6px,1.2vw,12px)) / var(--per));scroll-snap-align:start}
+@media (max-width:760px){ .cards{--per:3} }
+@media (max-width:520px){ .cards{--per:2.15} .carw .cn{display:none} }
+.carw{position:relative;display:flex;align-items:center;gap:6px;width:min(1010px,100%)}
+.carw .cn{flex:0 0 auto;width:30px;height:44px;border-radius:6px;border:1px solid #2a2f37;background:rgba(14,18,24,.92);color:var(--amber);font:inherit;font-size:18px;cursor:pointer}
+.carw .cn:disabled{opacity:.3;cursor:default}
+.carw .cn:hover:not(:disabled){border-color:var(--amber)}
+.cdots{display:flex;gap:5px;justify-content:center;margin-top:2px}
+.cdots i{width:6px;height:6px;border-radius:50%;background:#3a414c}
+.cdots i.on{background:var(--amber)}
 .cc{display:flex;flex-direction:column;align-items:stretch;gap:4px;min-width:0;padding:clamp(6px,1.4vh,10px) clamp(6px,1vw,10px);background:rgba(14,18,24,.92);border:1px solid #2a2f37;border-radius:6px;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
 .cc:hover{border-color:#4a515c}
 .cc.on{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber) inset}
@@ -587,7 +599,7 @@ html.lj-gate .title,html.lj-gate .rotate,html.lj-gate .inst{display:none!importa
   <div class="mscr" id="charScr" hidden>
     <h2>CHOOSE YOUR CHARACTER</h2>
     <p class="sub" id="charSub">Every character has their own hours, tasks, meter and abilities.</p>
-    <div class="cards" id="cards"></div>
+    <div class="carw"><button class="cn" id="cPrev" aria-label="Previous characters">‹</button><div class="cards" id="cards"></div><button class="cn" id="cNext" aria-label="More characters">›</button></div><div class="cdots" id="cDots"></div>
     <div class="mrow">
       <button class="ghost" id="mBack">Back</button>
       <label class="tog" id="tutTog"><input type="checkbox" id="tutOn"> Play the tutorial</label>
@@ -3848,9 +3860,58 @@ const CHARS = {
       {id:"k6", title:"Fix the jammed printer", where:"printer", game:"wires", from:870},
       {id:"k7", title:"Lay out the client's post", where:"desk", game:"align", after:["k5"]},
       {id:"k8", title:"Send the logo to Zeina", where:"npc:zeina", talk:["Zeina, the logo's in your inbox.","Perfect. The client will love it."], after:["k4"]}
-    ] }
+    ] },
+  // ---- from the other branch (playable) ----
+  ehab:{ name:"Ehab", role:"Designer, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
+    blurb:"Hollywood hair, big smile, never stressed. Rawda's husband.",
+    meter:{ name:"Swagger", good:"high", start:80, decay:0.14, low:35,
+      tip:"Ehab runs on swagger. It fades over the day. Chat with people to top it up. Low swagger means less time in tasks." },
+    abilities:[{id:"hairflip", kind:"timeboost", games:["align","sizes"], name:"Hair flip", desc:"50% more time in layout and export tasks."},
+               {id:"charmer", kind:"chatty", name:"Charmer", desc:"Chatting with anyone tops up his swagger."}] },
+  aya:{ name:"Aya", role:"Designer, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
+    blurb:"Sassy, sharp and always right. Just ask her.",
+    meter:{ name:"Sass", good:"high", start:85, decay:0.16, low:35,
+      tip:"Aya's sass keeps her going. It wears down over the day. Coffee and quick wins bring it back. Low sass means less time in tasks." },
+    abilities:[{id:"sharpeye", kind:"timeboost", games:["proof","typos"], name:"Sharp eye", desc:"50% more time in proofs and proofreading."},
+               {id:"nononsense", kind:"quick", name:"No-nonsense", desc:"Walks fast. Places to be."}] },
+  dina:{ name:"Dina", role:"Designer, other branch", branch:true, start:660, end:1110, room:5, hours:"11 am to 6:30 pm",
+    blurb:"Aristocratic, elegant, never in a hurry.",
+    meter:{ name:"Poise", good:"high", start:80, decay:0.12, low:35,
+      tip:"Dina keeps her poise. Rushing around wears it down. Sitting in the lounge with a tea restores it. Low poise means less time in tasks." },
+    abilities:[{id:"elegance", kind:"timeboost", games:["color","pixel"], name:"Eye for elegance", desc:"50% more time in colour and drawing tasks."},
+               {id:"teatime", kind:"lounger", name:"Tea time", desc:"Sitting in the lounge restores her poise."}] },
+  rana:{ name:"Rana", role:"Designer, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
+    blurb:"Playful and fun. Brings sweets, starts parties.",
+    meter:{ name:"Fun", good:"high", start:85, decay:0.2, low:35,
+      tip:"Rana needs fun. It drops fast. Chat with people to top it up. Low fun means less time in tasks." },
+    abilities:[{id:"butterfly", kind:"chatty", name:"Social butterfly", desc:"Chatting with anyone tops up her fun."},
+               {id:"bouncy", kind:"quick", name:"Bouncy", desc:"Walks faster than everyone."}] },
+  joy:{ name:"Joy", role:"Designer, other branch", branch:true, start:630, end:1110, room:5, hours:"10:30 am to 6:30 pm",
+    blurb:"Chill. Nothing gets to her. Deadlines are suggestions.",
+    meter:{ name:"Chill", good:"high", start:90, decay:0.06, low:30,
+      tip:"Joy is chill, and it barely drops all day. The lounge keeps it topped up. Low chill means less time in tasks." },
+    abilities:[{id:"unbothered", kind:"lounger", name:"Unbothered", desc:"Her chill barely drops, and the lounge tops it up."},
+               {id:"organizer", kind:"timeboost", games:["memory","findfile"], name:"Organizer", desc:"50% more time sorting and finding files."}] },
+  nourk:{ name:"Nour Khaled", role:"Designer, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
+    blurb:"Chill, curious, loves to learn. Takes notes on everything.",
+    meter:{ name:"Curiosity", good:"high", start:80, decay:0.13, low:35,
+      tip:"Nour Khaled lives to learn. Curiosity fades when nothing's new. Chatting with people and finishing tasks bring it back. Low curiosity means less time in tasks." },
+    abilities:[{id:"learner", kind:"timeboost", games:["pixel","align","sizes"], name:"Fast learner", desc:"50% more time in drawing, layout and export tasks."},
+               {id:"notes", kind:"chatty", name:"Note taker", desc:"Every chat teaches him something and tops up his curiosity."}] },
+  salma:{ name:"Salma", role:"Account manager, other branch", branch:true, start:600, end:1080, room:4, hours:"10 am to 6 pm",
+    blurb:"Posh and cool. Old friends with Yassin.",
+    meter:{ name:"Cool", good:"high", start:85, decay:0.14, low:35,
+      tip:"Salma stays cool, until she doesn't. Chats and coffee keep her cool. Low cool means less time in tasks." },
+    abilities:[{id:"posh", kind:"timeboost", games:["call","meeting"], name:"Posh network", desc:"50% more time on client calls and scheduling."},
+               {id:"buddy", kind:"chatty", name:"Old friends", desc:"Chatting with people keeps her cool."}] },
+  rawda:{ name:"Rawda", role:"Account manager, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
+    blurb:"Playful, but stresses easily. Ehab's wife.",
+    meter:{ name:"Stress", good:"low", start:30, decay:-0.15, low:70,
+      tip:"Rawda stresses easily. It creeps up all day. Chatting with people calms her down. High stress means less time in tasks." },
+    abilities:[{id:"multitask", kind:"timeboost", games:["inbox","meeting","receipts"], name:"Multitasker", desc:"50% more time in inbox, scheduling and receipts."},
+               {id:"talkitout", kind:"chatty", name:"Talk it out", desc:"Chatting with anyone calms her down."}] }
 };
-const ORDER = ["karim","zeina","nour","yassin"];
+const ORDER = ["karim","zeina","nour","yassin","ehab","aya","dina","rana","joy","nourk","salma","rawda"];
 const SEAT_OF = { karim:mapR(239,575), nour:mapR(428,626), zeina:mapR(136,406), yassin:mapR(78,470) };
 const PLAYER = { id:"karim", name:"Karim", L:KARIM_LOOK };
 const DESIGN_GAMES = new Set(["pixel","color","align","proof"]);
@@ -3908,7 +3969,7 @@ function lockMsg(d){
 
 // ---------- task targets ----------
 function myNpc(id){ return npcs.find(n => n.id === id); }
-function deskSeat(){ const s = SEAT_OF[G.cid]; return seatNear(s[0], s[1], 34); }
+function deskSeat(){ const s = SEAT_OF[G.cid] || BRANCH_DESK[G.cid]; return s ? seatNear(s[0], s[1], 34) : null; }
 const PRN = mapR(78,378);
 function printerProp(){ let best = null, bd = 1e9; for (const p of props){ if (p.type !== "printer") continue; const d = (p.x-PRN[0])**2 + (p.y-PRN[1])**2; if (d < bd){ bd = d; best = p; } } return best; }
 function robertSpot(){
@@ -4016,12 +4077,15 @@ function renderMeter(){
 }
 function DESIGN_OR_STARRED(t){ return !t.talk && !t.quick && t.game !== "errand" && t.game !== "music"; }
 function bumpMeter(d){ G.meter = Math.max(0, Math.min(100, G.meter + d)); }
+const hasKind = k => !!(G.char && G.char.abilities.some(a => a.kind === k));
+const walkSpeed = cid => (cid === "yassin" || (CHARS[cid] && CHARS[cid].abilities.some(a => a.kind === "quick"))) ? 84 : 62;
 // how well the character is doing changes the time in minigames
 function timeFactor(kind){
   let f = meterBad() ? (G.cid === "yassin" ? 0.8 : 0.75) : 1;
   if (G.cid === "zeina" && kind === "print") f *= 1.5;
   if (G.cid === "karim" && kind === "wires") f *= 1.5;
   if (G.cid === "yassin" && kind === "coffee") f *= 1.5;
+  if (G.char && G.char.abilities.some(a => a.kind === "timeboost" && a.games.includes(kind))) f *= 1.5;
   if (G.burst && DESIGN_GAMES.has(kind)) f *= 1.5;
   if (G.fx && G.fx.slowUntil > clock.min) f *= 0.85;
   if (G.itBoost) f *= 1.15;
@@ -4114,7 +4178,7 @@ function beginDay(cid, withTut){
   if (P.sit) standKarim();
   [P.x, P.y] = POI.door; P.y -= 4; P.dir = "up"; P.vx = P.vy = 0; P.act = null; P.phone = false; P.sayT = 0;
   cam.x = P.x - VW/2; cam.y = P.y - 12 - VH/2;
-  SPEED = cid === "yassin" ? 84 : 62;
+  SPEED = walkSpeed(cid);
   setLocks(true);
   G.tasks = buildDayTasks(cid).concat(visitorTasks(cid)).map(t => Object.assign({}, t, {done:false, stars:0, expired:false}));
   G.fx = {}; G.evUsed = {}; G.nextGen = clock.min + rnd(35, 60); G.greeted = {}; G.exUsed = {}; G.exCool = {}; G.itBoost = false;
@@ -4220,7 +4284,7 @@ function updateDay(dt){
   if (P.sayT > 0) P.sayT -= dt;
   if (G.mode !== "day" || G.paused) return;
   const rate = clockRate(), dm = dt * rate, m = G.char.meter;
-  if (G.cid === "yassin") SPEED = 84 * (meterBad() ? 0.82 : 1);
+  if (walkSpeed(G.cid) > 62) SPEED = 84 * (meterBad() ? 0.82 : 1);
   // the meter
   if (rate > 0){
     bumpMeter(-m.decay * dm);
@@ -4228,6 +4292,7 @@ function updateDay(dt){
     if (G.cid === "karim" && moving) bumpMeter(0.35 * dt);
     if (G.cid === "zeina" && P.sit) bumpMeter(-1.2 * dt);
     if (G.cid === "yassin" && P.sit && P.room === 18) bumpMeter(1.4 * dt);
+    if (hasKind("lounger") && P.sit && P.room === 18) goodMeter(1.2 * dt);
     if (G.cid === "nour" && P.sit && P.room === 18) bumpMeter(0.6 * dt);
   }
   // expiring calls
@@ -4280,6 +4345,7 @@ function onTalk(n){
   if (G.mode !== "day") return;
   if (G.tut) tutEvent("talk", n);
   if (G.cid === "yassin" && (G.talkCool[n.id] || 0) <= clock.min){ G.talkCool[n.id] = clock.min + 30; bumpMeter(6); }
+  else if (hasKind("chatty") && (G.talkCool[n.id] || 0) <= clock.min){ G.talkCool[n.id] = clock.min + 30; goodMeter(n.id === "yassin" && G.cid === "salma" ? 10 : n.id === "ehab" && G.cid === "rawda" ? 12 : 6); }
 }
 function taskHintText(){
   if (G.mode === "roam" && !G.paused && !ed.on && G.outage && G.outage.game && !G.outage.game.done && !npcNear()) return {label:`${KEY()} Join the shadow puppets`, x:P.x, y:P.y - 34};
@@ -4375,7 +4441,21 @@ function openChars(m){
       <span class="mt">Meter: <b>${c.meter.name}</b><span class="bl">. ${esc(c.blurb)}</span></span>` : `<span class="mt">${esc(c.blurb)}</span>`}</button>`; }).join("");
   ORDER.forEach(id => { const box = $("cards").querySelector(`[data-p="${id}"]`); box.appendChild(portrait(lookOf(id), 0, false)); });
   $("mainScr").hidden = true; $("charScr").hidden = false;
+  requestAnimationFrame(() => { showSel(false); carNav(); });
 }
+// the character carousel: arrows, swipe, dots, and the picked card always in view
+function carPage(){ const c = $("cards"), card = c.querySelector(".cc"); return card ? card.offsetWidth + parseFloat(getComputedStyle(c).columnGap || 8) : 200; }
+function carNav(){
+  const c = $("cards"); if (!c) return;
+  $("cPrev").disabled = c.scrollLeft <= 2; $("cNext").disabled = c.scrollLeft + c.clientWidth >= c.scrollWidth - 2;
+  const per = Math.max(1, Math.round(c.clientWidth / carPage())), pages = Math.max(1, Math.ceil(ORDER.length / per)), at = Math.round(c.scrollLeft / (carPage() * per));
+  $("cDots").innerHTML = Array.from({length:pages}, (_, i) => `<i class="${i === Math.min(pages-1, at) ? "on" : ""}"></i>`).join("");
+}
+function showSel(smooth){ const b = $("cards").querySelector(`.cc[data-c="${menuSel}"]`); if (b) b.scrollIntoView({behavior: smooth ? "smooth" : "auto", inline:"nearest", block:"nearest"}); }
+$("cPrev").addEventListener("click", () => { const c = $("cards"); c.scrollBy({left: -c.clientWidth, behavior:"smooth"}); });
+$("cNext").addEventListener("click", () => { const c = $("cards"); c.scrollBy({left: c.clientWidth, behavior:"smooth"}); });
+$("cards").addEventListener("scroll", () => carNav(), {passive:true});
+addEventListener("resize", () => { if (!$("charScr").hidden) carNav(); });
 $("modes").addEventListener("click", e => { const b = e.target.closest(".mode"); if (b) openChars(b.dataset.m); });
 $("mBack").addEventListener("click", () => { $("charScr").hidden = true; $("mainScr").hidden = false; });
 $("cards").addEventListener("click", e => { const b = e.target.closest(".cc"); if (!b) return; menuSel = b.dataset.c; $("cards").querySelectorAll(".cc").forEach(x => x.classList.toggle("on", x.dataset.c === menuSel)); });
@@ -4391,7 +4471,7 @@ function beginRoam(cid){
   if (P.sit) standKarim();
   [P.x, P.y] = POI.door; P.y -= 4; P.dir = "up"; P.vx = P.vy = 0; P.act = null; P.phone = false; P.sayT = 0;
   cam.x = P.x - VW/2; cam.y = P.y - 12 - VH/2;
-  SPEED = cid === "yassin" ? 84 : 62;
+  SPEED = walkSpeed(cid);
   setLocks(false);
   G.fx = {}; G.greeted = {}; G.exUsed = {}; G.exCool = {}; G.nextRoam = clock.min + rnd(40, 70);
   G.mode = "roam"; G.paused = false; G.outage = null; G.roamDay = -1;
@@ -4874,6 +4954,85 @@ const HANDLE = c => "@" + c.toLowerCase().replace(/[^a-z]/g, "");
 // Each pool is a list of chains. A chain's tasks run in order; "p" is the chance a chain is always in the day,
 // every chain gets one client for the day; the minigames are drawn for that client.
 const POOLS = {
+  ehab:[
+    {p:0.8, first:true, n:[{title:"Check on Rawda", where:"npc:rawda", talk:["Habibti, you okay?","Three deadlines, Ehab. Three."]}]},
+    {keep:true, n:[{title:"Lay out the {c} festival poster", where:"desk", game:"align"},{title:"Export the {c} poster sizes", where:"desk", game:"sizes"}]},
+    {n:[{title:"Show Karim the {c} poster", where:"npc:karim", talk:["Karim, what do you think of this {c} poster?","Bold. I'd argue with the font, but bold."]}]},
+    {n:[{title:"Draw the {c} title card", where:"desk", game:"pixel"}]},
+    {n:[{title:"Pick the {c} poster colours", where:"desk", game:"color"}]},
+    {n:[{title:"Find the {c} film stills", where:"desk", game:"findfile"}]},
+    {n:[{title:"Get a coffee for Rawda", where:"kitchen", game:"coffee"}]},
+    {n:[{title:"Print the {c} poster proof", where:"printer", game:"proof"}]},
+    {n:[{title:"Brief Amr on {c}", where:"npc:amr", talk:["Amr, {c} is coming together nicely.","Good. Send me the poster tonight."]}]}
+  ],
+  aya:[
+    {p:0.8, first:true, n:[{title:"Coffee. Now.", where:"kitchen", game:"coffee"}]},
+    {keep:true, n:[{title:"Proofread the {c} brochure", where:"desk", game:"typos"},{title:"Check the {c} brochure proof", where:"printer", game:"proof"}]},
+    {n:[{title:"Tell Nour his kerning is off", where:"npc:nour", talk:["Nour, the kerning on that {c} post. Fix it.","...You're right. I hate that you're right."]}]},
+    {n:[{title:"Redraw the {c} icon set", where:"desk", game:"pixel"}]},
+    {n:[{title:"Lay out the {c} catalogue", where:"desk", game:"align"}]},
+    {n:[{title:"Sort out the {c} file mess", where:"desk", game:"memory"}]},
+    {n:[{title:"Hand Osama the {c} invoices", where:"npc:osama", game:"receipts"}]},
+    {n:[{title:"Set Zeina straight on {c}", where:"npc:zeina", talk:["Zeina, {c} wants it my way. I checked.","Fine. Your way. This once."]}]}
+  ],
+  dina:[
+    {p:0.8, first:true, n:[{title:"Earl Grey, no sugar", where:"kitchen", game:"coffee"}]},
+    {keep:true, n:[{title:"Choose the {c} colour story", where:"desk", game:"color"},{title:"Draw the {c} monogram", where:"desk", game:"pixel"}]},
+    {n:[{title:"Approve the {c} foil proof", where:"printer", game:"proof"}]},
+    {n:[{title:"Lay out the {c} lookbook", where:"desk", game:"align"}]},
+    {n:[{title:"Refine the {c} invitation copy", where:"desk", game:"typos"}]},
+    {n:[{title:"Walk Amr through {c}", where:"npc:amr", talk:["Amr, the {c} lookbook. Elegant, as promised.","Beautiful work, Dina."]}]},
+    {n:[{title:"A word with Zeina about {c}", where:"npc:zeina", talk:["Zeina, darling, {c} deserves better paper.","Then they'll pay for better paper."]}]},
+    {n:[{title:"Book a fitting room for the {c} shoot", where:"desk", game:"meeting"}]}
+  ],
+  rana:[
+    {p:0.9, first:true, n:[{title:"Hand out the sweets", where:"kitchen", game:"coffee"}]},
+    {keep:true, n:[{title:"Make the {c} sticker pack", where:"desk", game:"pixel"},{title:"Export the {c} stickers for socials", where:"desk", game:"sizes"}]},
+    {n:[{title:"Pick candy colours for {c}", where:"desk", game:"color"}]},
+    {n:[{title:"Put the music on", where:"desk", game:"music"}]},
+    {n:[{title:"Plan the team outing with Yassin", where:"npc:yassin", talk:["Yassin! Team outing. Thursday. You in?","Only if there's food. There's food, right?"]}]},
+    {n:[{title:"Match the {c} reel frames", where:"desk", game:"memory"}]},
+    {n:[{title:"Lay out the {c} party flyer", where:"desk", game:"align"}]},
+    {n:[{title:"Gossip with Nour", where:"npc:nour", talk:["Nour, guess what I heard!","Tell me everything."]}]}
+  ],
+  joy:[
+    {p:0.7, first:true, n:[{title:"Make a calm tea", where:"kitchen", game:"coffee"}]},
+    {keep:true, n:[{title:"Tidy the {c} shared folder", where:"desk", game:"memory"},{title:"Find the {c} final files", where:"desk", game:"findfile"}]},
+    {n:[{title:"Lay out the {c} packaging", where:"desk", game:"align"}]},
+    {n:[{title:"Pick the {c} pastel palette", where:"desk", game:"color"}]},
+    {n:[{title:"Tell Rawda it'll be fine", where:"npc:rawda", talk:["Rawda. Breathe. It'll be fine.","How are you always so calm?!"]}]},
+    {n:[{title:"Proofread the {c} label copy", where:"desk", game:"typos"}]},
+    {n:[{title:"Export the {c} label sizes", where:"desk", game:"sizes"}]}
+  ],
+  nourk:[
+    {p:0.8, first:true, n:[{title:"Ask Karim how he works", where:"npc:karim", talk:["Karim, how do you start a logo?","Coffee, music, then an argument with Zeina."]}]},
+    {keep:true, n:[{title:"Sketch the {c} course icons", where:"desk", game:"pixel"},{title:"Lay out the {c} course page", where:"desk", game:"align"}]},
+    {n:[{title:"Learn the printer from Mohamed Ali", where:"npc:mohamed", game:"wires"}]},
+    {n:[{title:"Export the {c} ad sizes", where:"desk", game:"sizes"}]},
+    {n:[{title:"Take notes in Amr's brief", where:"npc:amr", talk:["Amr, mind if I take notes?","Take all the notes you want."]}]},
+    {n:[{title:"Organise the {c} tutorial frames", where:"desk", game:"memory"}]},
+    {n:[{title:"Try a new palette for {c}", where:"desk", game:"color"}]}
+  ],
+  salma:[
+    {p:0.9, first:true, n:[{title:"Iced latte, oat milk", where:"kitchen", game:"coffee"}]},
+    {keep:true, n:[{title:"Client call: {c}", where:"anywhere", game:"call", note:"Walk and talk: answer anywhere"},{title:"Book the {c} launch meeting", where:"desk", game:"meeting"}]},
+    {n:[{title:"Finish the {c} brief with Yassin", where:"npc:yassin", talk:["Yassin, our {c} brief. Now.","You type, I'll talk. Like old times."]}]},
+    {n:[{title:"Answer the {c} emails", where:"desk", game:"inbox"}]},
+    {n:[{title:"Get the {c} artwork from Nour", where:"npc:nour", talk:["Nour, darling, the {c} artwork?","Tonight. Tomorrow morning at the latest."]}]},
+    {n:[{title:"Approve the {c} spa menu proof", where:"printer", game:"proof"}]},
+    {n:[{title:"Expense the client lunch with Osama", where:"npc:osama", game:"receipts"}]},
+    {p:0.6, n:[{title:"Second {c} call", where:"anywhere", game:"call", from:900, note:"Walk and talk: answer anywhere"}]}
+  ],
+  rawda:[
+    {p:0.9, first:true, n:[{title:"Clear the overflowing inbox", where:"desk", game:"inbox"}]},
+    {keep:true, n:[{title:"Find a {c} viewing slot", where:"desk", game:"meeting"},{title:"Call {c} back, fast", where:"anywhere", game:"call", note:"Walk and talk: answer anywhere"}]},
+    {n:[{title:"Find Ehab", where:"npc:ehab", talk:["Ehab! There you are. I need you.","Always here, habibti. What's up?"]}]},
+    {n:[{title:"Add up the {c} receipts", where:"desk", game:"receipts"}]},
+    {n:[{title:"Get the {c} brochure from Aya", where:"npc:aya", talk:["Aya, the {c} brochure, please, please, please.","Breathe. It's in your inbox."]}]},
+    {n:[{title:"Print the {c} contract", where:"printer", game:"print"}]},
+    {n:[{title:"A calming tea", where:"kitchen", game:"coffee"}]},
+    {n:[{title:"Update Amr on {c}", where:"npc:amr", talk:["Amr, {c} is... mostly under control.","Mostly is a start. Ask for help if you need it."]}]}
+  ],
   karim:[
     {p:1, first:true, n:[{title:"Put the music on", where:"desk", game:"music"}]},
     {p:0.7, first:true, n:[{title:"Coffee for the studio", where:"kitchen", game:"coffee"}]},
@@ -4935,7 +5094,7 @@ const POOLS = {
   ]
 };
 function buildDayTasks(cid){
-  const pool = POOLS[cid] || [], want = cid === "zeina" || cid === "yassin" ? 8 : 7 + (Math.random() < 0.5 ? 1 : 0);
+  const pool = POOLS[cid] || [], want = cid === "zeina" || cid === "yassin" || cid === "salma" || cid === "rawda" ? 8 : 7 + (Math.random() < 0.5 ? 1 : 0);
   const sh = a => shuffle(a);
   let chosen = pool.filter(c => c.p && Math.random() < c.p);
   let count = chosen.reduce((a, c) => a + c.n.length, 0);
@@ -5551,8 +5710,8 @@ function onKey(k, e){
     if (k === "escape" || k === "backspace"){ $("mBack").click(); return true; }
     if (k === "enter"){ goDay(); return true; }
     const i = ORDER.indexOf(menuSel);
-    if (k === "arrowright" || k === "d"){ menuSel = ORDER[(i+1) % 4]; } else if (k === "arrowleft" || k === "a"){ menuSel = ORDER[(i+3) % 4]; } else return true;
-    $("cards").querySelectorAll(".cc").forEach(x => x.classList.toggle("on", x.dataset.c === menuSel)); return true;
+    if (k === "arrowright" || k === "d"){ menuSel = ORDER[(i+1) % ORDER.length]; } else if (k === "arrowleft" || k === "a"){ menuSel = ORDER[(i+ORDER.length-1) % ORDER.length]; } else return true;
+    $("cards").querySelectorAll(".cc").forEach(x => x.classList.toggle("on", x.dataset.c === menuSel)); showSel(true); return true;
   }
   if (G.mode === "summary"){ if (k === "enter") $("sAgain").click(); return true; }
   if (G.mode === "day"){
