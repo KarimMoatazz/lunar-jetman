@@ -163,6 +163,12 @@ canvas.logo{image-rendering:pixelated;image-rendering:crisp-edges}
 .cc .hr{font-size:clamp(10px,1.7vh,12px);color:var(--dim);line-height:1.25}
 .cc .ab{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
 .cc .ab span{font-size:clamp(9px,1.5vh,11px);line-height:1.2;padding:2px 5px;border:1px solid #2a2f37;border-radius:3px;color:var(--ink);background:#141920}
+.cc .abx{display:flex;flex-direction:column;gap:5px;margin-top:3px}
+.cc .ai{font-size:clamp(9px,1.5vh,11px);line-height:1.3;color:var(--dim);text-align:left;border-left:2px solid #3a414c;padding-left:6px}
+.cc .ai b{color:var(--ink);font-weight:600}
+.cc .ai i{font-style:normal;font-size:.85em;letter-spacing:.03em;color:var(--amber);margin-left:5px}
+.cc.on .ai{border-left-color:var(--amber)}
+@media (max-height:430px){.cc .mt .bl{display:none}}
 .cc .mt{font-size:clamp(9px,1.5vh,11px);color:var(--dim);line-height:1.25}
 .cc .mt b{color:var(--ink);font-weight:600}
 .mrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center}
@@ -214,6 +220,10 @@ body.editing .ghud,body.editing .abil,body.editing .tcard,body.editing .menu{dis
 .tcard{position:fixed;z-index:9;left:max(12px,env(safe-area-inset-left));top:max(46px,calc(env(safe-area-inset-top) + 34px));width:min(440px,calc(100vw - 230px));min-width:240px;background:rgba(12,16,22,.95);border:1px solid var(--amber);border-radius:7px;padding:10px 13px 11px;pointer-events:auto;display:grid;gap:6px}
 .tcard.low{top:auto;left:auto;right:max(12px,env(safe-area-inset-right));bottom:max(58px,calc(env(safe-area-inset-bottom) + 46px));width:min(390px,calc(100vw - min(250px,34vw) - 44px))}
 .touch .tcard.low{bottom:max(96px,calc(env(safe-area-inset-bottom) + 86px))}
+.tcard .abl{display:block;margin:7px 0 0}
+.tcard .abl:first-child{margin-top:2px}
+.tcard .abl b:first-child{color:var(--amber)}
+.tcard .abl em{font-style:normal;font-size:.8em;letter-spacing:.04em;color:var(--dim);border:1px solid #2a2f37;border-radius:3px;padding:0 4px;margin-left:4px}
 .tcard.mid{top:50%;left:50%;transform:translate(-50%,-50%);width:min(460px,calc(100vw - 40px))}
 .tcard .tk{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase}
 .tcard h3{margin:0;font-size:17px;font-weight:600;color:var(--amber);line-height:1.15}
@@ -4022,6 +4032,16 @@ function openMenu(){
   $("mReset").hidden = !SAVE.days;
   $("menu").hidden = false; syncMenuBtn();
 }
+const ABIL_CARD = {
+  smooth:"Twice a day, finish a talk task by message from anywhere.",
+  tech:"50% more time when fixing tech.",
+  keycard:"The only one who can open Robert's office.",
+  print:"50% more time in printing tasks.",
+  burst:"Focus over 60: next design task gets 50% more time and a bonus star.",
+  gossip:"Your task list shows where everyone is.",
+  speed:"Walks faster than everyone else.",
+  coffee:"50% more time and a bonus star in coffee tasks."
+};
 function openChars(m){
   menuMode = m;
   if (m === "day" && SAVE.last && !openChars.picked){ menuSel = SAVE.last; openChars.picked = true; }
@@ -4032,8 +4052,8 @@ function openChars(m){
   $("charSub").textContent = m === "day" ? "Every character has their own hours, tasks, meter and abilities." : "Pick who you want to walk around as. The others carry on with their day.";
   $("cards").innerHTML = ORDER.map(id => { const c = CHARS[id];
     return `<button class="cc${id===menuSel?" on":""}" data-c="${id}"><div class="por" data-p="${id}"></div><span class="nm">${c.name}</span><span class="rl">${c.role}</span>
-      ${m === "day" ? `${progressLine(id)}<span class="hr">${c.hours}</span><span class="ab">${c.abilities.map(a => `<span title="${esc(a.desc)}">${a.name}</span>`).join("")}</span>
-      <span class="mt">Meter: <b>${c.meter.name}</b>. ${esc(c.blurb)}</span>` : `<span class="mt">${esc(c.blurb)}</span>`}</button>`; }).join("");
+      ${m === "day" ? `${progressLine(id)}<span class="hr">${c.hours}</span><span class="abx">${c.abilities.map(a => `<span class="ai"><b>${a.name}</b><i>${a.active ? (isTouch() ? "tap to use" : "Q to use") : "always on"}</i><br>${esc(ABIL_CARD[a.id] || a.desc)}</span>`).join("")}</span>
+      <span class="mt">Meter: <b>${c.meter.name}</b><span class="bl">. ${esc(c.blurb)}</span></span>` : `<span class="mt">${esc(c.blurb)}</span>`}</button>`; }).join("");
   ORDER.forEach(id => { const box = $("cards").querySelector(`[data-p="${id}"]`); box.appendChild(portrait(lookOf(id), 0, false)); });
   $("mainScr").hidden = true; $("charScr").hidden = false;
 }
@@ -4961,9 +4981,25 @@ function tutSteps(){
     {id:"use", title:"Using things", text:`Things you can use show a small label when you're close: chairs, computers, the water cooler. Press ${k} to use them. <b>Sit down</b> on any chair, couch or bean bag. Moving gets you up again.`, goal:"Sit down anywhere"},
     {id:"tasks", title:"Your task list", text:`Top left is your task list. Each task says <b>where to go</b>. The yellow arrow always points at the task you're tracking. ${touch ? "Tap" : "Click"} any task to track it instead. Greyed-out tasks open later in the day.`, next:"Got it", hl:"gTasks"},
     {id:"first", title:"Your first task", text:`Follow the arrow to <b>${esc(target(first) ? target(first).label : "your task")}</b>, then press ${k} to start "<b>${esc(first.title)}</b>". The game explains itself before it starts.`, goal:"Finish the task"},
-    {id:"meter", title:`Your ${c.meter.name.toLowerCase()} meter`, text:`${esc(c.meter.tip)}${ab ? ` <br>Your special ability: <b>${ab.name}</b>. ${esc(ab.desc)} Use it with ${touch ? "the <span class=\"k\">B</span> button" : "<span class=\"k\">Q</span>"}.` : ` Your abilities work on their own: <b>${c.abilities.map(a => a.name).join("</b> and <b>")}</b>.`}`, next:"Next", hl:"gMeter"},
+    {id:"meter", title:`Your ${c.meter.name.toLowerCase()} meter`, text:`${esc(c.meter.tip)} The meter sits under your task list. Keep it in good shape: a bad meter means <b>less time</b> in every task.`, next:"Next", hl:"gMeter"},
+    {id:"abilities", title:`${c.name}'s abilities`, text:abilityHelp(c, touch), next:"Got it", hl: ab ? "gAbil" : null},
     {id:"clock", title:"The clock is ticking", text:`From now on the office clock runs: <b>1 second is 1 office minute</b>. Some tasks only open at a certain time, some are due by a time. Better games earn more stars. Your day ends at <b>${hhmm(c.end)}</b>.`, next:"Let's go"}
   ];
+}
+// what each ability does and how to use it, in the tutorial
+function abilityHelp(c, touch){
+  const press = a => touch ? `tap the <b>${a.name}</b> button` : `press <span class="k">Q</span> (or click the <b>${a.name}</b> button)`;
+  const HOW = {
+    speed: a => `You walk faster than anyone in the office, so getting from one task to the next takes less time. You slow down when your fun runs low.`,
+    coffee: a => `Coffee tasks in the kitchen give you <b>50% more time</b> and a <b>bonus star</b>.`,
+    keycard: a => `Robert's office is locked during the workday and you're the only one who can get in. Just walk up to its door and your keycard opens it. Some of your tasks are in there.`,
+    print: a => `Printing tasks at the printer give you <b>50% more time</b>.`,
+    burst: a => `When your focus is <b>above 60</b>, ${press(a)}. Your next design task (sketching, colours, layout, proofs or export sizes) gets <b>50% more time</b> and a <b>bonus star</b>. It costs 25 focus, so save it for a task that matters.`,
+    gossip: a => `Your task list also shows <b>where everyone is</b> right now, so you know who's in before you walk over to talk to them.`,
+    smooth: a => `Twice a day, ${press(a)} to finish a talk task <b>by message</b>, from anywhere, without walking over. The person has to be in the office.`,
+    tech: a => `Fixing tech (connecting the cables) gives you <b>50% more time</b>.`
+  };
+  return c.abilities.map(a => `<span class="abl"><b>${a.name}</b>${a.active ? ` <em>use it</em>` : ` <em>always on</em>`}<br>${(HOW[a.id] || (() => esc(a.desc)))(a)}</span>`).join("");
 }
 function tutStart(){
   G.tut = {i:-1, steps:tutSteps(), clockOn:false, marker:null};
