@@ -62,6 +62,9 @@ body.immersive #bFull{opacity:.55;padding:4px 8px;font-size:11px}
 .bub.near b,.bub.me b{color:rgba(242,181,82,.8)}
 .bub span:empty{display:none}
 .bub.show{opacity:1}
+.bub.show.under{opacity:.18}
+.bub.talk.lifted:before{content:"";position:absolute;left:50%;top:100%;width:1px;height:var(--lift,0);margin-left:-.5px;background:rgba(233,227,214,.45)}
+.bub.talk.lifted:after{display:none}
 .bub.talk{align-items:flex-start;background:rgba(10,13,18,.86);border-color:#2a2f37;padding:3px 7px 4px}
 .bub.talk b{font-weight:600;font-size:11px;color:var(--amber);text-shadow:none}
 .bub.talk span{color:var(--ink);font-size:13px}
@@ -2208,12 +2211,46 @@ function talkTo(n){
   G.onTalk(n);
 }
 let karimTag = null;
+// Speech bubbles never overlap: the lowest one keeps its place, any bubble that would cover it moves up,
+// with a thin line down to the person who's talking. Name tags under a bubble fade out.
+function layoutBubbles(list){
+  const GAP = 4, placed = [], talk = [], tags = [];
+  for (const it of list){
+    const el = it.el;
+    if (el._txt !== el.textContent || el._cls !== el.className){ el._txt = el.textContent; el._cls = el.className; el._w = el.offsetWidth; el._h = el.offsetHeight; }
+    it.w = el._w; it.h = el._h;
+    (el.classList.contains("talk") ? talk : tags).push(it);
+  }
+  talk.sort((a, b) => b.y - a.y);   // the one nearest the bottom of the screen settles first
+  for (const it of talk){
+    let top = it.y - it.h, moved = true, guard = 0;
+    const l = it.x - it.w/2, r = it.x + it.w/2;
+    while (moved && guard++ < 20){
+      moved = false;
+      for (const o of placed){
+        if (r + GAP > o.l && l - GAP < o.r && top < o.b + GAP && top + it.h + GAP > o.t){ top = o.t - GAP - it.h; moved = true; }
+      }
+    }
+    const lift = Math.max(0, Math.round(it.y - it.h - top));
+    placed.push({l, r, t: top, b: top + it.h});
+    it.el.style.transform = `translate(${it.x}px, ${it.y - lift}px) translate(-50%, -100%)`;
+    if (it.el._lift !== lift){ it.el._lift = lift; it.el.style.setProperty("--lift", lift + "px"); it.el.classList.toggle("lifted", lift > 0); }
+  }
+  for (const it of tags){
+    it.el.style.transform = `translate(${it.x}px, ${it.y}px) translate(-50%, -100%)`;
+    const l = it.x - it.w/2, r = it.x + it.w/2, t = it.y - it.h;
+    const under = placed.some(o => r > o.l && l < o.r && t < o.b && it.y > o.t);
+    if (it.el._under !== under){ it.el._under = under; it.el.classList.toggle("under", under); }
+    if (it.el._lift){ it.el._lift = 0; it.el.classList.remove("lifted"); }
+  }
+}
 function placeBubbles(cx, cy){
   const r = cv.getBoundingClientRect(), kx = r.width / VW, ky = r.height / VH, show = !ed.on && state.started;
   if (!karimTag){ karimTag = document.createElement("div"); karimTag.className = "bub me"; karimTag.innerHTML = "<b>Karim</b><span></span>"; document.getElementById("people").appendChild(karimTag); }
+  const items = new Map();
   const place = (el, x, y, on) => {
-    if (!on){ if (el.classList.contains("show")) el.classList.remove("show"); return; }
-    el.style.transform = `translate(${Math.round((x - cx) * kx)}px, ${Math.round((y - cy) * ky)}px) translate(-50%, -100%)`;
+    if (!on){ if (el.classList.contains("show")) el.classList.remove("show"); items.delete(el); return; }
+    items.set(el, {el, x: Math.round((x - cx) * kx), y: Math.round((y - cy) * ky)});
     if (!el.classList.contains("show")) el.classList.add("show");
   };
   place(karimTag, P.x + ((ed.on || camFX === null) ? 0 : cx - camFX), P.y - 27, show);
@@ -2231,6 +2268,7 @@ function placeBubbles(cx, cy){
   G.syncMeTag(karimTag);
   const tgx = (ed.on || camFX === null) ? 0 : cx - camFX, tgy = (ed.on || camFY === null) ? 0 : cy - camFY;
   place(karimTag, P.x + tgx, P.y + tgy - (P.sit ? (P.sit.rot===2 ? 37 : 25) : 27), show);
+  layoutBubbles([...items.values()]);
   placeHint(cx, cy);
   G.placeTaskHint(cx, cy);
 }
