@@ -1800,12 +1800,12 @@ const TEAM = [
     acts:{ work:4, coffee:1, rounds:3, lab:1, visit:2, window:1, brief:2, team:2 }, visits:["osama","mohamed","zeina","yassin","nour","karim"],
     lines:["Sabah el kheir, everyone!","Just passing through from the other branch.","Meeting room in five minutes.","I'm only here for an hour.","The lab stays locked, my friend.","Make sure the invoices go out today."] },
   // ---- from the other branch: drop in now and then, for Amr's briefs, tasks and a chat ----
-  { id:"ehab", branch:true, visitor:true, designer:true, name:"Ahmed Ehab", call:"Ehab", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
-    hello:["Hey hey! Visiting from the other branch.","Good morning, everyone! Don't mind the hair."],
+  { id:"ehab", branch:true, visitor:true, designer:true, name:"Ahmed Ehab", call:"Ehab", role:"Art director, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+    hello:["Morning, everyone! Designers, five minutes, then I want to see screens.","Hey hey! Art director in the building. Show me something beautiful."],
     look:{ skin:"fair", hairStyle:"hollywood", hair:"#33241a", hairHi:"#54402f", w:11, top:"shirt", topC:"#f1eee6", topSh:"#d6d1c5", topHi:"#ffffff", accent:"#ffffff",
       bottom:"#2f3e5c", bottomSh:"#243049", bottomHi:"#3c4d70", shoe:"#4a3222", sole:"#1a110b" },
-    acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["rawda","karim","yassin","zeina","amr"],
-    lines:["Hair's on point today, if anyone's wondering.","Rawda, have you eaten? You get stressed when you don't eat.","This office feels like home.","Who's up for lunch later?","Relax, relax, it'll be fine.","Amr wants the report tonight. No pressure."] },
+    acts:{ visit:5, coffee:2, lounge:1, window:1, work:3 }, visits:["rawda","aya","dina","rana","joy","nourk","karim","nour","amr"],
+    lines:["Love it. Now make it simpler.","More white space. Trust me.","Who picked this font? Okay, it works.","Rawda, have you eaten? You get stressed when you don't eat.","Relax, relax, we'll make the deadline.","Good idea. Show me three versions.","Amr wants the designs tonight. No pressure.","Design review at four, everyone!","Hair's on point today, if anyone's wondering."] },
   { id:"aya", branch:true, visitor:true, designer:true, bath:1, name:"Aya Hosny", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hi! Yes, I'm here. You're welcome.","Morning! Who's making me coffee?"],
     look:{ female:true, w:9, skin:"warm", hairStyle:"curlylong", hair:"#2a1a12", hairHi:"#4d3324", top:"shirt", topC:"#b4532f", topSh:"#913f22", topHi:"#c96a45", accent:"#e9d3c0", necklace:"#d4af37",
@@ -2839,6 +2839,14 @@ Object.entries(MORE_SCRIPTS).forEach(([k, v]) => { if (!SCRIPTS[k]) SCRIPTS[k] =
 // the other branch
 Object.assign(SCRIPTS, {
   "ehab>rawda":[["Habibti, calm down, it's one email.","One email with forty attachments, Ehab!","Okay, that's a lot."],["Lunch together?","If I finish this. Which I won't.","I'll bring it to you then."]],
+  "ehab>aya":[["Aya, the brochure?","Done. Perfect. You\'re welcome.","Approved. Don\'t change a thing."]],
+  "ehab>dina":[["Dina, can I see the deck?","When it\'s ready. Elegance takes time.","Lunch time?","Fine. Before lunch."]],
+  "ehab>rana":[["Rana, fewer emojis on the posts.","Fewer? That\'s not my brand, Ehab.","Half. Deal?","Deal."]],
+  "ehab>joy":[["Joy, how far are you?","Finished an hour ago.","Why didn\'t you say?","You didn\'t ask."]],
+  "ehab>nourk":[["Nour, come, I\'ll show you a trick in the grid.","Wait, let me open my notebook.","Page thirteen?","Fourteen."]],
+  "ehab>karim":[["Karim, love the logo. One note.","Here we go.","Just one!","You always say one."]],
+  "ehab>nour":[["Nour, those illustrations are fire.","I know. Thank you, though.","Now make the client version."]],
+  "branch>ehab":[["Ehab, got five minutes to look at this?","For you? Ten. Show me.","Be honest.","Always. It\'s good. Push the type."],["The client wants changes again.","Of course they do. We\'ll handle it."],["Is the design review still at four?","Four sharp. Bring your screens."]],
   "rawda>ehab":[["Did you send the file?","Which file?","Ehab!","Kidding! I sent it this morning."],["Is my hair okay?","Perfect. Is mine?","Always, apparently."]],
   "salma>yassin":[["Yassin! Remember our first job? You cried over a spreadsheet.","I did not cry. I sweated.","Same thing."],["Lunch? The usual place?","Only if you don't order for me again.","No promises."],["Did you finish your part?","Almost.","Yassin.","Okay, half."]],
   "yassin>salma":[["Salma, your stuff is on my side again.","Our desk, Yassin. Our desk.","Fine. Our desk."],["Want a coffee?","Iced latte, oat milk.","I know, I know. Ten years, I know."]],
@@ -2868,7 +2876,7 @@ SCRIPTS["design>karim"] = KARIM_ARGUES["design>karim"].concat(SCRIPTS["design>de
 SCRIPTS["karim>it"] = KARIM_ARGUES["karim>it"].concat(SCRIPTS["*>it"] || []);
 SCRIPTS["it>karim"] = KARIM_ARGUES["it>karim"].concat(SCRIPTS["it>*"] || []);
 Object.assign(MEET_PAIRS, {
-  ehab:[["The new campaign launches Sunday.","Good. Send me the schedule."],["The other branch hit its targets this month.","Excellent. Lunch is on me."]],
+  ehab:[["The team finished all three campaigns this month.","Good. Your team, your win."],["I want a design review every Thursday.","Do it. Send me the highlights."],["The new campaign launches Sunday.","Good. Send me the designs first."]],
   aya:[["The supplier is late again. I told them off.","Good. Polite, but firm."],["I fixed the client's mess. Again.","That's why you're here."]],
   dina:[["The client loved the presentation.","Of course they did. You presented it."],["Our reception area needs a refresh.","Put it in writing and I'll look at it."]],
   rana:[["Our social media numbers are up!","Great job. Keep it going."],["I planned the team outing!","As long as it's after the deadline."]],
@@ -3873,7 +3881,7 @@ const CHARS = {
       {id:"k8", title:"Send the logo to Zeina", where:"npc:zeina", talk:["Zeina, the logo's in your inbox.","Perfect. The client will love it."], after:["k4"]}
     ] },
   // ---- from the other branch (playable) ----
-  ehab:{ name:"Ahmed Ehab", call:"Ehab", role:"Designer, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
+  ehab:{ name:"Ahmed Ehab", call:"Ehab", role:"Art director, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
     blurb:"Art Director, big smile, never stressed. Rawda's husband.",
     meter:{ name:"Swagger", good:"high", start:80, decay:0.14, low:35,
       tip:"Ehab runs on swagger. It fades over the day. Chat with people to top it up. Low swagger means less time in tasks." },
@@ -5007,15 +5015,16 @@ const HANDLE = c => "@" + c.toLowerCase().replace(/[^a-z]/g, "");
 // every chain gets one client for the day; the minigames are drawn for that client.
 const POOLS = {
   ehab:[
-    {p:0.8, first:true, n:[{title:"Check on Rawda", where:"npc:rawda", talk:["Habibti, you okay?","Three deadlines, Ehab. Three."]}]},
-    {keep:true, n:[{title:"Lay out the {c} festival poster", where:"desk", game:"align"},{title:"Export the {c} poster sizes", where:"desk", game:"sizes"}]},
-    {n:[{title:"Show Karim the {c} poster", where:"npc:karim", talk:["Karim, what do you think of this {c} poster?","Bold. I'd argue with the font, but bold."]}]},
-    {n:[{title:"Draw the {c} title card", where:"desk", game:"pixel"}]},
-    {n:[{title:"Pick the {c} poster colours", where:"desk", game:"color"}]},
-    {n:[{title:"Find the {c} film stills", where:"desk", game:"findfile"}]},
-    {n:[{title:"Get a coffee for Rawda", where:"kitchen", game:"coffee"}]},
-    {n:[{title:"Print the {c} poster proof", where:"printer", game:"proof"}]},
-    {n:[{title:"Brief Amr on {c}", where:"npc:amr", talk:["Amr, {c} is coming together nicely.","Good. Send me the poster tonight."]}]}
+    {p:0.85, first:true, n:[{title:"Plan the design team's week", where:"desk", game:"meeting"}]},
+    {keep:true, n:[{title:"Set the {c} campaign layout", where:"desk", game:"align"},{title:"Approve the {c} export sizes", where:"desk", game:"sizes"}]},
+    {p:0.6, n:[{title:"Ask Rawda what the {c} client said", where:"npc:rawda", talk:["Habibti, what did the {c} client say about the designs?","They love it! Mostly. Okay, they want changes.","We'll handle it. My team always does."]}]},
+    {n:[{title:"Give Karim notes on the {c} logo", where:"npc:karim", talk:["Karim, the {c} logo. I love it. One note.","Here we go. Only one?","Just one. The kerning."]}]},
+    {n:[{title:"Review Nour's {c} illustrations", where:"npc:nour", talk:["Nour, let me see the {c} illustrations.","Ready to be amazed?","Always. ...Okay, these are great. Approved."]}]},
+    {n:[{title:"Set the {c} colour direction", where:"desk", game:"color"}]},
+    {n:[{title:"Sign off the {c} print proof", where:"printer", game:"proof"}]},
+    {n:[{title:"Find the {c} brand guidelines for the team", where:"desk", game:"findfile"}]},
+    {n:[{title:"Coffee for the design team", where:"kitchen", game:"coffee"}]},
+    {n:[{title:"Present the {c} concept to Amr", where:"npc:amr", talk:["Amr, here's where the team took {c}.","Strong. Who did the type?","The team. I just pushed them."]}]}
   ],
   aya:[
     {p:0.8, first:true, n:[{title:"Coffee. Now.", where:"kitchen", game:"coffee"}]},
@@ -5179,8 +5188,16 @@ function buildDayTasks(cid){
 }
 
 // ---------- bonus tasks when Amr or someone from the other branch is in ----------
+// when you play Ehab, the art director: review whoever from his design team is in today
+const EHAB_REVIEW = {
+  aya:{title:"Sign off Aya's {c} brochure", talk:["Aya, the {c} brochure. Show me.","It's perfect. Obviously.","...It is. Approved."]},
+  dina:{title:"Review Dina's {c} presentation", talk:["Dina, how's the {c} deck coming?","Elegant, as always.","Approved. Beautiful work."]},
+  rana:{title:"Check Rana's {c} social posts", talk:["Rana, let's see the {c} posts.","Don't judge the emojis!","Cut half the emojis. Then it's great."]},
+  joy:{title:"Check where Joy is on {c}", talk:["Joy, where are we on {c}?","Finished yesterday. Didn't want to make a fuss.","Joy, you're a legend."]},
+  nourk:{title:"Show Nour Khaled how you build the {c} grid", talk:["Nour, come. Let me show you the {c} grid.","Wait, let me open my notebook.","Of course you have a notebook."]}
+};
 const BRANCH_TASK = {
-  ehab:{role:"design", title:"Help Ehab find the {c} files", game:"findfile"},
+  ehab:{role:"design", title:"Get Ehab's sign-off on the {c} design", talk:["Ehab, can you sign off the {c} design?","Love it. One note: more white space.","On it, boss."]},
   aya:{role:"design", title:"Review Aya's {c} moodboard", game:"color"},
   dina:{role:"design", title:"Walk Dina through the {c} proof", game:"proof"},
   rana:{role:"design", title:"Rana's challenge: export the {c} sizes", game:"sizes"},
@@ -5201,8 +5218,9 @@ function visitorTasks(cid){
     if (Math.random() < 0.6) out.push({id:"vamr2", title:`Get the ${a} numbers ready for Amr`, where:"desk", game:pick(["receipts","findfile","typos"]), client:a, opt:true, from, expires:until, missMeter:3, miss:"Amr left without the numbers."});
   }
   npcs.filter(n => n.branch && fits(n)).forEach(n => {
-    const t0 = BRANCH_TASK[n.id]; if (!t0) return;
-    const myRole = (cid === "karim" || cid === "nour") ? "design" : "accounts";
+    const lead = cid === "ehab" && EHAB_REVIEW[n.id];
+    const t0 = lead ? Object.assign({role:"design"}, EHAB_REVIEW[n.id]) : BRANCH_TASK[n.id]; if (!t0) return;
+    const myRole = /designer|art director/i.test(c.role) ? "design" : "accounts";
     if (t0.role !== myRole && Math.random() > 0.2) return;           // mostly tasks that fit your own job
     const t = Object.assign({}, t0); if (cid === "yassin" && t.titleYassin){ t.title = t.titleYassin; t.talk = t.talkYassin; }
     delete t.titleYassin; delete t.talkYassin; delete t.role;
@@ -5270,13 +5288,17 @@ function drawOutage(cx, cy){
 
 // ---------- conversations the player starts ----------
 const DIALOG = {
+  "ehab>branch":[{l:["How's it going over here?","Good! Want to see it?","Show me. ...Nice. Ship it."]},{l:["Design review at four. Bring your screens.","Four sharp?","Four sharp."]},{l:["Need anything from me today?","Just your sign-off later.","You'll have it."]}],
+  "ehab>nour":[{l:["Nour, show me what you've got.","Something beautiful. Two more minutes.","Take three. Make it perfect."]}],
+  "ehab>karim":[{l:["Karim, the logo. I have one note.","Only one? Go on.","The kerning.","...Fine. You're right."]}],
+  "ehab>rawda":[{l:["Habibti, the client feedback. How bad?","Bad. But we'll fix it. Your team will fix it.","My team always fixes it."]}],
   "*>zeina":[{l:["Zeina, need anything from me?","Yes. Everything. By three.","...On it."]},{l:["How was the client call?","Long. They want a new direction.","Again?"]},{l:["You look stressed.","I'm not stressed. I'm efficient."]}],
   "*>yassin":[{l:["Yassin, what are you watching?","Research. For the client.","Sure it is."]},{l:["Lunch later?","Always. Koshary?","Deal."]},{l:["Did the client reply?","They sent a thumbs up. That's a yes, right?"]}],
   "*>nour":[{l:["Nour, what are you working on?","Something beautiful. Don't look yet."]},{l:["Coffee?","Only if it's strong.","Is there another kind?"]},{l:["Can I see the poster?","Two more minutes. Then you'll be amazed."]}],
   "*>karim":[{l:["Karim, the client wants it bigger.","Bigger? It's already huge. Who said that?","...the client."]},{l:["Can I suggest something?","Go on. I'll probably disagree, but go on."]},{l:["Karim, what's playing?","Something chill. Want me to turn it up?","Maybe a bit."]},{l:["How's the logo?","Almost there. The client will love it.","Or ask for it bigger."]},{l:["Vape break later?","Already had one. OK, maybe one more."]}],
   "*>amr":[{l:["Amr! Good to see you here again.","I'll be around more often now. Somebody has to keep you all in line.","Ha. Welcome back."], fx:"amr"},{l:["Anything you need from me today?","Just good news. And the numbers.","On it."], fx:"amr"},{l:["Welcome back, Amr!","Thank you, {me}. Everything good here?","All good."], fx:"amr"},{l:["How's the other branch?","Busy, but not as fun as here."], fx:"amr"}],
   "*>mohamed":[{l:["Mohamed, my laptop is so slow.","Give it here. Your next task will run smoother.","You're a hero."], fx:"it"},{l:["Can you fix the Wi-Fi?","It's not broken. It's busy.","Busy with what?"]},{l:["Any chance of a second monitor?","Fill in the form. Then wait. Then wait more."]}],
-  "*>ehab":[{l:["Ehab, nice hair today.","Every day, my friend. Every day."]},{l:["How's the other branch?","Busy. Rawda's stressed, so, normal."]},{l:["Where's Rawda?","Never far. Probably looking for me right now."]}],
+  "*>ehab":[{l:["Ehab, can you look at my layout?","Love it. Now take out two things.","Which two?","You know which two."]},{l:["Any notes on my design?","One. More white space. Always more white space."]},{l:["How's the design team?","Busy, talented, a little dramatic. Perfect."]},{l:["Ehab, nice hair today.","Every day, my friend. Every day."]},{l:["How's the other branch?","Busy. Rawda's stressed, so, normal."]},{l:["Where's Rawda?","Never far. Probably looking for me right now."]}],
   "*>aya":[{l:["Aya, how's it going?","Honestly? Better than your deadline.","...Fair."]},{l:["Love the outfit.","I know. Thank you."]},{l:["Any advice for me?","Yes. Do it my way."]}],
   "*>dina":[{l:["Good morning, Dina.","Good morning. Lovely office. Mostly."]},{l:["Can I get you some tea?","Earl Grey, if you have it. No sugar."]},{l:["How's everything at the other branch?","Elegant, as always."]}],
   "*>rana":[{l:["Rana! What's up?","Everything! Guess what I just found out.","What?","I'll tell you at lunch."]},{l:["You look happy today.","I'm always happy. It's my job."]},{l:["Did you bring sweets?","Kitchen. Second shelf. You're welcome."]}],
