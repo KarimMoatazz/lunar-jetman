@@ -1847,7 +1847,7 @@ const TEAM = [
     look:{ female:true, w:9, skin:"fair", hairStyle:"bangs", hair:"#3a2219", hairHi:"#5e3b2a", top:"shirt", topC:"#a99bd1", topSh:"#8c7eb6", topHi:"#bdb2de", accent:"#ece6f6",
       bottom:"#2a2730", bottomSh:"#1f1d24", bottomHi:"#36323d", shoe:"#2a1d18", sole:"#120c0a", lips:"#a3544b" },
     acts:{ visit:4, coffee:2, lounge:1, window:1, work:4 }, visits:["ehab","zeina","rana","aya"],
-    lines:["Okay, okay, okay. I'm calm. I'm calm.","Ehab, where's the file? Ehab!","Why does everything happen at once?","I'm fine! Totally fine!","Haha, sorry, I'm a bit stressed today.","Quick, someone tell me it'll be okay."] },
+    lines:["Okay, okay, okay. I'm calm. I'm calm.","Ehab, where's the file? Ehab!","Who wrote this feedback?! Who?!","Haha! Okay, that was funny.","Make it pop?! I'll make it pop!","Why does everything happen at once?","I'm fine! Totally fine!","Haha, sorry, I'm a bit stressed today.","Quick, someone tell me it'll be okay."] },
   { id:"mohamed", name:"Mohamed Ali", role:"IT", room:11, seat:[1270,212], arrive:[545,600], leave:[1030,1100],
     look:{ skin:"warm", hairStyle:"buzz", hair:"#2a2521", hairHi:"#6e675f", beardStyle:"full", beard:"#4a4540", glasses:"#16171a", top:"polo", topC:"#2f3d52", topSh:"#24303f", topHi:"#3c4c64",
       accent:"#d8d4c9", bottom:"#3a4256", bottomSh:"#2c3344", bottomHi:"#485168", shoe:"#2a2622", sole:"#16130f", w:11 },
@@ -3916,9 +3916,9 @@ const CHARS = {
     abilities:[{id:"posh", kind:"timeboost", games:["call","meeting"], name:"Posh network", desc:"50% more time on client calls and scheduling."},
                {id:"buddy", kind:"chatty", name:"Old friends", desc:"Chatting with people keeps her cool."}] },
   rawda:{ name:"Rawda Mahmoud", role:"Account director, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
-    blurb:"Playful, but stresses easily. Ehab's wife.",
+    blurb:"Playful, joyous, fun to be around, has anger bursts from clients' feedback. Ehab's wife.",
     meter:{ name:"Stress", good:"low", start:30, decay:-0.15, low:70,
-      tip:"Rawda stresses easily. It creeps up all day. Chatting with people calms her down. High stress means less time in tasks." },
+      tip:"Rawda is fun to be around, until client feedback lands. Every client call and inbox task sets off a little anger burst that pushes her stress up, and it creeps up through the day anyway. Chatting with anyone calms her down, and a chat with Ehab calms her the most. High stress means less time in tasks." },
     abilities:[{id:"multitask", kind:"timeboost", games:["inbox","meeting","receipts"], name:"Multitasker", desc:"50% more time in inbox, scheduling and receipts."},
                {id:"talkitout", kind:"chatty", name:"Talk it out", desc:"Chatting with anyone calms her down."}] }
 };
@@ -4150,6 +4150,7 @@ function startTask(t){
 }
 function completeTask(t, stars){
   t.done = true; t.stars = stars; t.doneAt = clock.min;
+  if (G.cid === "rawda" && (t.game === "call" || t.game === "inbox")){ bumpMeter(8); meSay(pick(["Make it POP?! What does that even mean?!","They want it bigger AND smaller?!","Okay. Deep breath. It's just feedback."]), 2.8); toast(`Client feedback. Rawda has a little anger burst. <span class="k">Stress up</span>`); }
   if (t.due && clock.min > t.due && stars > 1){ t.stars = stars - 1; toast(`Done, but late. <span class="k">-1 star</span>`); }
   G.stars += t.stars;
   if (t.onDone) t.onDone(t);
