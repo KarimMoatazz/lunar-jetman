@@ -1768,17 +1768,17 @@ function unstick(){
 // ======================================================================
 const BROWN = "brown";
 const TEAM = [
-  { id:"zeina", bath:1, name:"Zeina", role:"Account manager", room:4, seat:[136,406], arrive:[555,585], leave:[1020,1080],
+  { id:"zeina", bath:1, name:"Zeina Hosny", role:"Account manager", room:4, seat:[136,406], arrive:[555,585], leave:[1020,1080],
     look:{ female:true, w:9, skin:"light", hairStyle:"long", hair:"#3b2419", hairHi:"#5e3b29", top:"blazer", topC:"#3a3d47", topSh:"#2a2c34", topHi:"#4a4e5a",
       accent:"#ece6da", necklace:"#c9a95c", bottom:"#24262c", bottomSh:"#1a1b20", bottomHi:"#30333a", shoe:"#2a1d18", sole:"#120c0a", lips:"#a3544b" },
     acts:{ work:7, coffee:2, bathroom:1, visit:3, window:2, printer:1 }, visits:["yassin","yassin","nour","osama","amr"],
     lines:["Yassin, the deck. Today, please.","The client moved the call to three.","Coffee first, then emails.","Karim, can we have the logo by Thursday?","Who's joining the client call?","Let's keep it short, I have a meeting."] },
-  { id:"yassin", bath:1, name:"Yassin", role:"Account manager", room:4, seat:[78,470], arrive:[560,625], leave:[1030,1110],
+  { id:"yassin", bath:1, name:"Yassin Mardini", role:"Account manager", room:4, seat:[78,470], arrive:[560,625], leave:[1030,1110],
     look:{ skin:"medium", hairStyle:"fade", hair:"#16110d", hairHi:"#2e241c", beardStyle:"stubble", top:"shirt", topC:"#9db8d6", topSh:"#7e9abb", topHi:"#b7cde4", accent:"#c9d9ec",
       untucked:true, bottom:"#c2ad8a", bottomSh:"#a79270", bottomHi:"#d3c09e", shoe:"#ecebe6", sole:"#a9a7a0", lace:"#c9c6be" },
     acts:{ work:5, coffee:2, bathroom:1, visit:4, lounge:2, window:2, nap:2 }, visits:["zeina","nour","nour","mohamed","osama","yassin3am"],
     lines:["On it, Zeina!","The client wants the logo bigger. Again.","Has anyone seen my charger?","Nour, got a minute?","I'll send it in five.","Who's ordering lunch?"] },
-  { id:"nour", bath:1, name:"Nour", role:"Graphic designer", room:5, seat:[428,626], arrive:[565,620], leave:[1050,1130],
+  { id:"nour", bath:1, name:"Nour Gad", role:"Graphic designer", room:5, seat:[428,626], arrive:[565,620], leave:[1050,1130],
     look:{ skin:"medium", hairStyle:"curly", hair:"#1e1611", hairHi:"#3a2b21", beardStyle:"full", beard:"#241a14", glasses:null, top:"tee", topC:"#2b2e33", topSh:"#1e2024", topHi:"#383c43",
       print:"#d6cfbf", bottom:"#1f2126", bottomSh:"#16171b", bottomHi:"#2b2e34", shoe:"#1c1d20", sole:"#e7e4dc" },
     acts:{ work:7, coffee:2, bathroom:1, visit:2, lounge:2, gallery:1 }, visits:["yassin","yassin","zeina","mohamed"],
@@ -1789,31 +1789,31 @@ const TEAM = [
     acts:{ work:4, coffee:1, rounds:3, lab:1, visit:2, window:1, brief:2, team:2 }, visits:["osama","mohamed","zeina","yassin","nour","karim"],
     lines:["Sabah el kheir, everyone!","Just passing through from the other branch.","Meeting room in five minutes.","I'm only here for an hour.","The lab stays locked, my friend.","Make sure the invoices go out today."] },
   // ---- from the other branch: drop in now and then, for Amr's briefs, tasks and a chat ----
-  { id:"ehab", branch:true, visitor:true, designer:true, name:"Ehab", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+  { id:"ehab", branch:true, visitor:true, designer:true, name:"Ahmed Ehab", call:"Ehab", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hey hey! Visiting from the other branch.","Good morning, everyone! Don't mind the hair."],
     look:{ skin:"fair", hairStyle:"hollywood", hair:"#33241a", hairHi:"#54402f", w:11, top:"shirt", topC:"#f1eee6", topSh:"#d6d1c5", topHi:"#ffffff", accent:"#ffffff",
       bottom:"#2f3e5c", bottomSh:"#243049", bottomHi:"#3c4d70", shoe:"#4a3222", sole:"#1a110b" },
     acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["rawda","karim","yassin","zeina","amr"],
     lines:["Hair's on point today, if anyone's wondering.","Rawda, have you eaten? You get stressed when you don't eat.","This office feels like home.","Who's up for lunch later?","Relax, relax, it'll be fine.","Amr wants the report tonight. No pressure."] },
-  { id:"aya", branch:true, visitor:true, designer:true, bath:1, name:"Aya", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+  { id:"aya", branch:true, visitor:true, designer:true, bath:1, name:"Aya Hosny", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hi! Yes, I'm here. You're welcome.","Morning! Who's making me coffee?"],
     look:{ female:true, w:9, skin:"warm", hairStyle:"curlylong", hair:"#2a1a12", hairHi:"#4d3324", top:"shirt", topC:"#b4532f", topSh:"#913f22", topHi:"#c96a45", accent:"#e9d3c0", necklace:"#d4af37",
       bottom:"#1f2026", bottomSh:"#16171b", bottomHi:"#2a2b33", shoe:"#1a1414", sole:"#0a0808", lips:"#9c3b35" },
     acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["zeina","osama","nour","dina","amr"],
     lines:["Don't look at me like that, I was right.","Honestly? I'd do it differently.","Cute office. Small, but cute.","I'm not bossy, I just know better.","If it's late, I will say something.","Coffee. Now. Please."] },
-  { id:"dina", branch:true, visitor:true, designer:true, bath:1, name:"Dina", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+  { id:"dina", branch:true, visitor:true, designer:true, bath:1, name:"Dina Karam", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Good morning, everyone. Lovely to see you all.","Hello, darlings. I'll only stay a little while."],
     look:{ female:true, w:9, skin:"fair", hairStyle:"updo", hair:"#2a1c16", hairHi:"#4a342a", top:"blazer", topC:"#e8e0cc", topSh:"#cfc5ae", topHi:"#f4eee0", accent:"#ffffff", necklace:"#f2efe8",
       bottom:"#1d1d22", bottomSh:"#141418", bottomHi:"#28282f", shoe:"#1a1414", sole:"#0a0808", lips:"#8f4a46" },
     acts:{ visit:2, coffee:1, lounge:2, window:1, work:4 }, visits:["amr","zeina","aya","osama"],
     lines:["Let's keep things elegant, shall we?","Presentation is everything.","A little more polish, darling.","One doesn't rush quality.","I'll take my tea in the meeting room, thank you.","Is this the good china? No? Pity."] },
-  { id:"rana", branch:true, visitor:true, designer:true, bath:1, name:"Rana", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+  { id:"rana", branch:true, visitor:true, designer:true, bath:1, name:"Rana El Shaer", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Guess who's back!","Hiii everyone! I brought sweets!"],
     look:{ female:true, w:9, skin:"medium", hairStyle:"ponytail", hair:"#5e321c", hairHi:"#8a4f2e", top:"tee", topC:"#e3b23c", topSh:"#c4962a", topHi:"#efc65c",
       bottom:"#3d5a86", bottomSh:"#2f476b", bottomHi:"#4c6b9b", shoe:"#ecebe6", sole:"#a9a7a0", lace:"#e58fa8", lips:"#b0605a" },
     acts:{ visit:4, coffee:2, lounge:1, window:1, work:3 }, visits:["yassin","nour","karim","joy","yassin3am"],
     lines:["I brought sweets. Don't tell Amr.","Okay, but who's coming to lunch?","This is the best day ever. Again.","Can we put some music on? Please?","I love it here, it's so fun!","Wait, wait, I have gossip."] },
-  { id:"joy", branch:true, visitor:true, designer:true, bath:1, name:"Joy", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+  { id:"joy", branch:true, visitor:true, designer:true, bath:1, name:"Joy Samuel", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hey, everyone. Don't get up.","Morning. Nice and quiet in here, I like it."],
     look:{ female:true, w:9, skin:"light", hairStyle:"bob", hair:"#3a2a1f", hairHi:"#5c4434", top:"sweater", topC:"#8fa58a", topSh:"#74896f", topHi:"#a7bba2",
       bottom:"#4a4f5a", bottomSh:"#3a3e47", bottomHi:"#5a606c", shoe:"#d8d3c8", sole:"#9a958b", lips:"#a0605a" },
@@ -1825,13 +1825,13 @@ const TEAM = [
       bottom:"#2e2c2a", bottomSh:"#22211f", bottomHi:"#3b3936", shoe:"#ecebe6", sole:"#a9a7a0" },
     acts:{ visit:4, coffee:1, lounge:1, window:1, work:4 }, visits:["mohamed","karim","nour","osama","joy"],
     lines:["Wait, how did you do that? Show me.","I watched a tutorial on this last night.","Every day is a school day.","Can I sit in on that? Just to learn.","Interesting. Very interesting.","I'm taking notes, don't mind me."] },
-  { id:"salma", branch:true, visitor:true, bath:1, name:"Salma", role:"Account manager, other branch", room:4, seat:[60,362], arrive:[0,0], leave:[0,0],
+  { id:"salma", branch:true, visitor:true, bath:1, name:"Salma Dorgham", role:"Account manager, other branch", room:4, seat:[60,362], arrive:[0,0], leave:[0,0],
     hello:["Hiii. Yassin, I'm here! Clear my side of the desk.","Morning, everyone. Yes, I know, the hair is new."],
     look:{ female:true, w:9, skin:"fair", hairStyle:"long", hair:"#d9b56a", hairHi:"#f0d48e", top:"blazer", topC:"#f3eee6", topSh:"#d8d1c4", topHi:"#ffffff", accent:"#1d1d22",
       bottom:"#1d1d22", bottomSh:"#141418", bottomHi:"#28282f", shoe:"#c8a27a", sole:"#7a5b3c", lips:"#c0645e", necklace:"#d4af37" },
     acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["yassin","yassin","zeina","rana","dina"],
     lines:["Yassin, move your stuff, this is my side.","Iced latte, oat milk. Obviously.","Ugh, cute. I love it.","I don't do stress. Stress does me.","Yassin and I go way back. Don't believe anything he says.","Is it Thursday yet?"] },
-  { id:"rawda", branch:true, visitor:true, bath:1, name:"Rawda", role:"Accounts director, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+  { id:"rawda", branch:true, visitor:true, bath:1, name:"Rawda Mahmoud", role:"Accounts director, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hi everyone! Sorry, I'm a bit all over the place today.","Morning! Okay, I'm here, I'm here."],
     look:{ female:true, w:9, skin:"medium", hairStyle:"bangs", hair:"#3a2219", hairHi:"#5e3b2a", top:"shirt", topC:"#a99bd1", topSh:"#8c7eb6", topHi:"#bdb2de", accent:"#ece6f6",
       bottom:"#2a2730", bottomSh:"#1f1d24", bottomHi:"#36323d", shoe:"#2a1d18", sole:"#120c0a", lips:"#a3544b" },
@@ -2454,7 +2454,7 @@ function holdForPlayer(n, secs){
   if (n.cur && n.cur.do === "go"){ n.cur.path = null; n.q.unshift(n.cur); n.cur = null; }   // pick the walk up again afterwards
 }
 function lineFor(n, toKarim){
-  const me = new RegExp("\\b" + PLAYER.name + "\\b(?! Hasabo)");
+  const me = new RegExp("\\b" + PLAYER.call + "\\b(?! Hasabo)");
   const all = n.lines || [], forK = all.filter(l => me.test(l)), rest = all.filter(l => !TEAM_NAMES.test(l));
   const recent = n.recent || (n.recent = []);
   const fresh = a => { const f = a.filter(l => !recent.includes(l)); return f.length ? f : a; };
@@ -3789,7 +3789,7 @@ const KEY = () => isTouch() ? "A" : "E";
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 // Karim as a coworker (when someone else is the player)
-const KARIM_NPC = { id:"karim", bath:2, name:"Karim", role:"Graphic designer", room:5, seat:mapR(239,575), arrive:[712,732], leave:[1120,1150],
+const KARIM_NPC = { id:"karim", bath:2, name:"Karim Moataz", call:"Karim", role:"Graphic designer", room:5, seat:mapR(239,575), arrive:[712,732], leave:[1120,1150],
   look:{ skin:"karim", hairStyle:"short", beardStyle:"full", top:"hoodie", topC:"#1d1f24", topSh:"#141519", topHi:"#2d3038",
     bottom:"#2e3750", bottomSh:"#232a3e", bottomHi:"#3d4865", shoe:"#ecebe6", sole:"#a9a7a0", lace:"#c9c6be" },
   acts:{ work:6, coffee:2, bathroom:1, visit:2, lounge:1, vape:2 }, visits:["nour","nour","yassin","zeina","mohamed"] };
@@ -3802,7 +3802,7 @@ PLANS.vape = n => { const w = POI.win[5]; return [go(w[0], w[1]), wait(rnd(6,10)
 
 // ---------- the four playable characters ----------
 const CHARS = {
-  yassin:{ name:"Yassin", role:"Account manager", start:540, end:1020, room:4, hours:"First in, first out: 9 am to 5 pm",
+  yassin:{ name:"Yassin Mardini", role:"Account manager", start:540, end:1020, room:4, hours:"First in, first out: 9 am to 5 pm",
     blurb:"Easy going, a bit lazy, always up for fun.",
     meter:{ name:"Fun", good:"high", start:80, decay:0.2, low:35,
       tip:"Yassin gets bored fast. Fun drops all day. Sit in the lounge or chat with people to top it up. When it's low he walks slower and gets less time in tasks." },
@@ -3817,7 +3817,7 @@ const CHARS = {
       {id:"y7", title:"Afternoon coffee run", where:"kitchen", game:"coffee", from:840},
       {id:"y8", title:"Send the end-of-day update", where:"desk", game:"inbox", from:930, due:1015}
     ] },
-  zeina:{ name:"Zeina", role:"Accounts director", start:600, end:1080, room:4, hours:"10 am to 6 pm, with errands outside",
+  zeina:{ name:"Zeina Hosny", role:"Accounts director", start:600, end:1080, room:4, hours:"10 am to 6 pm, with errands outside",
     blurb:"Always on the phone, loud, a little bossy.",
     meter:{ name:"Panic", good:"low", start:25, decay:-0.13, low:70,
       tip:"Zeina panics. It creeps up all day and every client call adds more. Sit down anywhere to calm down. When it's high she gets less time in tasks." },
@@ -3832,7 +3832,7 @@ const CHARS = {
       {id:"z7", title:"Print the final for the client", where:"printer", game:"print", after:["z5"]},
       {id:"z8", title:"Second client call", where:"anywhere", game:"call", from:960, note:"Walk and talk: answer anywhere"}
     ] },
-  nour:{ name:"Nour", role:"Graphic designer", start:630, end:1110, room:5, hours:"10:30 am to 6:30 pm",
+  nour:{ name:"Nour Gad", role:"Graphic designer", start:630, end:1110, room:5, hours:"10:30 am to 6:30 pm",
     blurb:"A great artist who talks a lot. Big energy, big swings.",
     meter:{ name:"Focus", good:"high", start:75, decay:0.1, low:35,
       tip:"Nour runs hot and cold. Interruptions knock his focus down, a coffee from the kitchen and good work bring it back. Low focus means less time in tasks." },
@@ -3846,7 +3846,7 @@ const CHARS = {
       {id:"n6", title:"Show Zeina the poster", where:"npc:zeina", talk:["Zeina, the poster's ready. Take a look.","Love it. Don't touch it again."], after:["n5"]},
       {id:"n7", title:"Pick logo colours with Karim", where:"npc:karim", game:"color", from:750}
     ] },
-  karim:{ name:"Karim", role:"Graphic designer", start:720, end:1140, room:5, hours:"12 pm to 7 pm",
+  karim:{ name:"Karim Moataz", call:"Karim", role:"Graphic designer", start:720, end:1140, room:5, hours:"12 pm to 7 pm",
     blurb:"Coffee as he settles in, music on the speakers. Argues a lot, about everything.",
     meter:{ name:"Vibe", good:"high", start:80, decay:0.15, low:35,
       tip:"Karim works on vibes. They fade over the day. Walk around the office, put the music on, or take a vape break at the studio window. Low vibe means less time in tasks." },
@@ -3862,31 +3862,31 @@ const CHARS = {
       {id:"k8", title:"Send the logo to Zeina", where:"npc:zeina", talk:["Zeina, the logo's in your inbox.","Perfect. The client will love it."], after:["k4"]}
     ] },
   // ---- from the other branch (playable) ----
-  ehab:{ name:"Ehab", role:"Designer, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
+  ehab:{ name:"Ahmed Ehab", call:"Ehab", role:"Designer, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
     blurb:"Hollywood hair, big smile, never stressed. Rawda's husband.",
     meter:{ name:"Swagger", good:"high", start:80, decay:0.14, low:35,
       tip:"Ehab runs on swagger. It fades over the day. Chat with people to top it up. Low swagger means less time in tasks." },
     abilities:[{id:"hairflip", kind:"timeboost", games:["align","sizes"], name:"Hair flip", desc:"50% more time in layout and export tasks."},
                {id:"charmer", kind:"chatty", name:"Charmer", desc:"Chatting with anyone tops up his swagger."}] },
-  aya:{ name:"Aya", role:"Designer, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
+  aya:{ name:"Aya Hosny", role:"Designer, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
     blurb:"Sharp and strict. Just ask her.",
     meter:{ name:"Sass", good:"high", start:85, decay:0.16, low:35,
       tip:"Aya's sass keeps her going. It wears down over the day. Coffee and quick wins bring it back. Low sass means less time in tasks." },
     abilities:[{id:"sharpeye", kind:"timeboost", games:["proof","typos"], name:"Sharp eye", desc:"50% more time in proofs and proofreading."},
                {id:"nononsense", kind:"quick", name:"No-nonsense", desc:"Walks fast. Places to be."}] },
-  dina:{ name:"Dina", role:"Designer, other branch", branch:true, start:660, end:1110, room:5, hours:"11 am to 6:30 pm",
+  dina:{ name:"Dina Karam", role:"Designer, other branch", branch:true, start:660, end:1110, room:5, hours:"11 am to 6:30 pm",
     blurb:"Aristocratic, elegant, never in a hurry.",
     meter:{ name:"Poise", good:"high", start:80, decay:0.12, low:35,
       tip:"Dina keeps her poise. Rushing around wears it down. Sitting in the lounge with a tea restores it. Low poise means less time in tasks." },
     abilities:[{id:"elegance", kind:"timeboost", games:["color","pixel"], name:"Eye for elegance", desc:"50% more time in colour and drawing tasks."},
                {id:"teatime", kind:"lounger", name:"Tea time", desc:"Sitting in the lounge restores her poise."}] },
-  rana:{ name:"Rana", role:"Designer, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
+  rana:{ name:"Rana El Shaer", role:"Designer, other branch", branch:true, start:600, end:1080, room:5, hours:"10 am to 6 pm",
     blurb:"Playful and fun. Brings sweets, starts parties.",
     meter:{ name:"Fun", good:"high", start:85, decay:0.2, low:35,
       tip:"Rana needs fun. It drops fast. Chat with people to top it up. Low fun means less time in tasks." },
     abilities:[{id:"butterfly", kind:"chatty", name:"Social butterfly", desc:"Chatting with anyone tops up her fun."},
                {id:"bouncy", kind:"quick", name:"Bouncy", desc:"Walks faster than everyone."}] },
-  joy:{ name:"Joy", role:"Designer, other branch", branch:true, start:630, end:1110, room:5, hours:"10:30 am to 6:30 pm",
+  joy:{ name:"Joy Samuel", role:"Designer, other branch", branch:true, start:630, end:1110, room:5, hours:"10:30 am to 6:30 pm",
     blurb:"Chill. Nothing gets to her.",
     meter:{ name:"Chill", good:"high", start:90, decay:0.06, low:30,
       tip:"Joy is chill, and it barely drops all day. The lounge keeps it topped up. Low chill means less time in tasks." },
@@ -3898,13 +3898,13 @@ const CHARS = {
       tip:"Nour Khaled lives to learn. Curiosity fades when nothing's new. Chatting with people and finishing tasks bring it back. Low curiosity means less time in tasks." },
     abilities:[{id:"learner", kind:"timeboost", games:["pixel","align","sizes"], name:"Fast learner", desc:"50% more time in drawing, layout and export tasks."},
                {id:"notes", kind:"chatty", name:"Note taker", desc:"Every chat teaches him something and tops up his curiosity."}] },
-  salma:{ name:"Salma", role:"Account manager, other branch", branch:true, start:600, end:1080, room:4, hours:"10 am to 6 pm",
+  salma:{ name:"Salma Dorgham", role:"Account manager, other branch", branch:true, start:600, end:1080, room:4, hours:"10 am to 6 pm",
     blurb:"Posh and cool. Old friends with Yassin.",
     meter:{ name:"Cool", good:"high", start:85, decay:0.14, low:35,
       tip:"Salma stays cool, until she doesn't. Chats and coffee keep her cool. Low cool means less time in tasks." },
     abilities:[{id:"posh", kind:"timeboost", games:["call","meeting"], name:"Posh network", desc:"50% more time on client calls and scheduling."},
                {id:"buddy", kind:"chatty", name:"Old friends", desc:"Chatting with people keeps her cool."}] },
-  rawda:{ name:"Rawda", role:"Accounts director, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
+  rawda:{ name:"Rawda Mahmoud", role:"Accounts director, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
     blurb:"Playful, but stresses easily. Ehab's wife.",
     meter:{ name:"Stress", good:"low", start:30, decay:-0.15, low:70,
       tip:"Rawda stresses easily. It creeps up all day. Chatting with people calms her down. High stress means less time in tasks." },
@@ -3913,7 +3913,7 @@ const CHARS = {
 };
 const ORDER = ["karim","zeina","nour","yassin","ehab","aya","dina","rana","joy","nourk","salma","rawda"];
 const SEAT_OF = { karim:mapR(239,575), nour:mapR(428,626), zeina:mapR(136,406), yassin:mapR(78,470) };
-const PLAYER = { id:"karim", name:"Karim", L:KARIM_LOOK };
+const PLAYER = { id:"karim", name:"Karim Moataz", call:"Karim", L:KARIM_LOOK };
 const DESIGN_GAMES = new Set(["pixel","color","align","proof"]);
 
 const G = {
@@ -3942,7 +3942,7 @@ function swapPlayer(id){
     PLAYER.L = me.L;
   }
   if (id === "karim") PLAYER.L = KARIM_LOOK;
-  PLAYER.id = id; PLAYER.name = CHARS[id].name;
+  PLAYER.id = id; PLAYER.name = CHARS[id].name; PLAYER.call = CHARS[id].call || CHARS[id].name.split(" ")[0];
   for (let k = convos.length-1; k >= 0; k--){ const c = convos[k]; c.a.convo = c.b.convo = null; convos.splice(k, 1); }
 }
 function setupNPCs(startMin){
@@ -4100,7 +4100,7 @@ function useAbility(){
     if (!t){ toast("No one to message right now."); return; }
     G.smoothUses--; const n = target(t).npc;
     completeTask(t, 0);
-    toast(`You message ${esc(n.name)}: "${esc(t.talk[0])}" ${esc(n.name.split(" ")[0])} replies: "${esc(t.talk[1])}"`);
+    toast(`You message ${esc(n.name)}: "${esc(t.talk[0])}" ${esc(n.call || n.name.split(" ")[0])} replies: "${esc(t.talk[1])}"`);
   }
   if (ab.id === "burst"){
     if (G.burst){ toast("Creative burst is ready for your next design task."); return; }
@@ -4828,7 +4828,7 @@ MG.inbox = { name:"Sort the inbox", time:28,
   build(box, api){
     const CL = clientOf(api), others = CLIENTS.filter(c => c !== CL), WHO = CONTACT[CL] || "Client";
     // client emails come from today's client (and one other), never from the player themself
-    const list = shuffle(MAILS.filter(m => m[0] !== PLAYER.name && !m[0].startsWith(PLAYER.name + " "))).slice(0, 8).map(m => m[3] !== "client" ? m : [m[0].replace("Hesham", WHO).replace("Mona", CONTACT[others[0]] || "Mona").replace("Keep", m[0].startsWith("Mona") ? others[0] : CL), m[1], m[2], m[3]]); let i = 0, good = 0;
+    const list = shuffle(MAILS.filter(m => m[0] !== PLAYER.call && !m[0].startsWith(PLAYER.call + " "))).slice(0, 8).map(m => m[3] !== "client" ? m : [m[0].replace("Hesham", WHO).replace("Mona", CONTACT[others[0]] || "Mona").replace("Keep", m[0].startsWith("Mona") ? others[0] : CL), m[1], m[2], m[3]]); let i = 0, good = 0;
     const w = el("div", "ib"); box.appendChild(w);
     function show(){
       const m = list[i];
@@ -4852,7 +4852,7 @@ const ORDERS_CF = [
 MG.coffee = { name:"Coffee run", time:36,
   how:"Read the order, <b>tap the drink, sugar, milk or mint</b> to build the cup, then <b>Serve</b>. Three orders. Made a mistake? Empty the cup.",
   build(box, api){
-    const orders = shuffle(ORDERS_CF.filter(o => o.who !== PLAYER.name)).slice(0, 3); let i = 0, good = 0, cup = null;
+    const orders = shuffle(ORDERS_CF.filter(o => o.who !== PLAYER.call)).slice(0, 3); let i = 0, good = 0, cup = null;
     const w = el("div", "cf"); box.appendChild(w);
     const desc = o => `${o.d}${o.sugar ? `, ${o.sugar} sugar` : ", no sugar"}${o.milk ? ", milk" : ""}${o.mint ? ", mint" : ""}`;
     function reset(){ cup = {d:null, sugar:0, milk:false, mint:false}; }
@@ -5257,7 +5257,7 @@ const GREET = {
 function exchange(n){
   if (G.outage) return {l: pick(OUTAGE_TALK)};
   if (Math.random() < 0.38) return null;   // sometimes they just say something
-  const me = PLAYER.id, grp = GROUP[n.id] || "*", fill = l => l.replace(/\{me\}/g, PLAYER.name).replace(/\{n\}/g, n.name.split(" ")[0]);
+  const me = PLAYER.id, grp = GROUP[n.id] || "*", fill = l => l.replace(/\{me\}/g, PLAYER.call).replace(/\{n\}/g, n.call || n.name.split(" ")[0]);
   G.greeted = G.greeted || {}; G.exUsed = G.exUsed || {};
   if (!G.greeted[n.id]){
     G.greeted[n.id] = true;
@@ -5509,7 +5509,7 @@ MG.memory = { name:"Sort the asset folder", time:42,
 MG.meeting = { name:"Book the meeting room", time:30,
   how:"Find an hour when <b>everyone is free</b> (no red) and tap it. Three meetings to book. Wrong picks cost 2 seconds.",
   build(box, api){
-    const PEOPLE = ["Zeina","Yassin","Nour","Karim","Osama","Mohamed Ali"].filter(n => n !== PLAYER.name);
+    const PEOPLE = ["Zeina","Yassin","Nour","Karim","Osama","Mohamed Ali"].filter(n => n !== PLAYER.call);
     const HOURS = [10,11,12,13,14,15,16,17]; let round = 0, good = 0;
     const w = el("div", "g2"); box.appendChild(w);
     function show(){
@@ -5684,7 +5684,7 @@ function tutFinish(skipped){
   try { localStorage.setItem("lj_tut", "done"); } catch(e){}
   $("gTasks").style.visibility = "";
   tutStop(); pickTrack(); renderPanel(true);
-  toast(skipped ? `Tutorial skipped. The clock is running: your day ends at ${hhmm(G.char.end)}.` : `The clock is running. Good luck, ${G.char.name}!`);
+  toast(skipped ? `Tutorial skipped. The clock is running: your day ends at ${hhmm(G.char.end)}.` : `The clock is running. Good luck, ${G.char.call || G.char.name.split(" ")[0]}!`);
 }
 function tutKey(k){
   const tu = G.tut; if (!tu) return false; const s = tu.steps[tu.i];
