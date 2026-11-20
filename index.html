@@ -1779,7 +1779,7 @@ function unstick(){
 // ======================================================================
 const BROWN = "brown";
 const TEAM = [
-  { id:"zeina", bath:1, name:"Zeina Hosny", role:"Account manager", room:4, seat:[136,406], arrive:[555,585], leave:[1020,1080],
+  { id:"zeina", bath:1, name:"Zeina Hosny", role:"Account director", room:4, seat:[136,406], arrive:[555,585], leave:[1020,1080],
     look:{ female:true, w:9, skin:"light", hairStyle:"long", hair:"#3b2419", hairHi:"#5e3b29", top:"blazer", topC:"#3a3d47", topSh:"#2a2c34", topHi:"#4a4e5a",
       accent:"#ece6da", necklace:"#c9a95c", bottom:"#24262c", bottomSh:"#1a1b20", bottomHi:"#30333a", shoe:"#2a1d18", sole:"#120c0a", lips:"#a3544b" },
     acts:{ work:7, coffee:2, bathroom:1, visit:3, window:2, printer:1 }, visits:["yassin","yassin","nour","osama","amr"],
@@ -1842,7 +1842,7 @@ const TEAM = [
       bottom:"#1d1d22", bottomSh:"#141418", bottomHi:"#28282f", shoe:"#c8a27a", sole:"#7a5b3c", lips:"#c0645e", necklace:"#d4af37" },
     acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["yassin","yassin","zeina","rana","dina"],
     lines:["Yassin, move your stuff, this is my side.","Iced latte, oat milk. Obviously.","Ugh, cute. I love it.","I don't do stress. Stress does me.","Yassin and I go way back. Don't believe anything he says.","Is it Thursday yet?"] },
-  { id:"rawda", branch:true, visitor:true, bath:1, name:"Rawda Mahmoud", role:"Accounts director, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
+  { id:"rawda", branch:true, visitor:true, bath:1, name:"Rawda Mahmoud", role:"Account director, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hi everyone! Sorry, I'm a bit all over the place today.","Morning! Okay, I'm here, I'm here."],
     look:{ female:true, w:9, skin:"fair", hairStyle:"bangs", hair:"#3a2219", hairHi:"#5e3b2a", top:"shirt", topC:"#a99bd1", topSh:"#8c7eb6", topHi:"#bdb2de", accent:"#ece6f6",
       bottom:"#2a2730", bottomSh:"#1f1d24", bottomHi:"#36323d", shoe:"#2a1d18", sole:"#120c0a", lips:"#a3544b" },
@@ -3828,7 +3828,7 @@ const CHARS = {
       {id:"y7", title:"Afternoon coffee run", where:"kitchen", game:"coffee", from:840},
       {id:"y8", title:"Send the end-of-day update", where:"desk", game:"inbox", from:930, due:1015}
     ] },
-  zeina:{ name:"Zeina Hosny", role:"Accounts director", start:600, end:1080, room:4, hours:"10 am to 6 pm, with errands outside",
+  zeina:{ name:"Zeina Hosny", role:"Account director", start:600, end:1080, room:4, hours:"10 am to 6 pm, with errands outside",
     blurb:"Always on the phone, loud, a little bossy.",
     meter:{ name:"Panic", good:"low", start:25, decay:-0.13, low:70,
       tip:"Zeina panics. It creeps up all day and every client call adds more. Sit down anywhere to calm down. When it's high she gets less time in tasks." },
@@ -3915,7 +3915,7 @@ const CHARS = {
       tip:"Salma stays cool, until she doesn't. Chats and coffee keep her cool. Low cool means less time in tasks." },
     abilities:[{id:"posh", kind:"timeboost", games:["call","meeting"], name:"Posh network", desc:"50% more time on client calls and scheduling."},
                {id:"buddy", kind:"chatty", name:"Old friends", desc:"Chatting with people keeps her cool."}] },
-  rawda:{ name:"Rawda Mahmoud", role:"Accounts director, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
+  rawda:{ name:"Rawda Mahmoud", role:"Account director, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
     blurb:"Playful, but stresses easily. Ehab's wife.",
     meter:{ name:"Stress", good:"low", start:30, decay:-0.15, low:70,
       tip:"Rawda stresses easily. It creeps up all day. Chatting with people calms her down. High stress means less time in tasks." },
