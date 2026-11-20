@@ -63,6 +63,7 @@ body.immersive #bFull{opacity:.55;padding:4px 8px;font-size:11px}
 .bub span:empty{display:none}
 .bub.show{opacity:1}
 .bub.show.under{opacity:.18}
+.bub.show.talk.under{opacity:1}
 .bub.talk.lifted:before{content:"";position:absolute;left:50%;top:100%;width:1px;height:var(--lift,0);margin-left:-.5px;background:rgba(233,227,214,.45)}
 .bub.talk.lifted:after{display:none}
 .bub.talk{align-items:flex-start;background:rgba(10,13,18,.86);border-color:#2a2f37;padding:3px 7px 4px}
@@ -2235,6 +2236,7 @@ function layoutBubbles(list){
     placed.push({l, r, t: top, b: top + it.h});
     it.el.style.transform = `translate(${it.x}px, ${it.y - lift}px) translate(-50%, -100%)`;
     if (it.el._lift !== lift){ it.el._lift = lift; it.el.style.setProperty("--lift", lift + "px"); it.el.classList.toggle("lifted", lift > 0); }
+    if (it.el._under){ it.el._under = false; it.el.classList.remove("under"); }   // someone talking is never faded
   }
   for (const it of tags){
     it.el.style.transform = `translate(${it.x}px, ${it.y}px) translate(-50%, -100%)`;
