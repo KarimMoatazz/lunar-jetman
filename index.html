@@ -2575,6 +2575,25 @@ const MORE_SCRIPTS = {
   "*>*":[["Lunch plans?","Koshary. You?","Same. Let's go at two."],["Is it hot in here or is it me?","It's the AC again.","Call IT."],["Long day?","The longest.","It's only noon."]]
 };
 Object.entries(MORE_SCRIPTS).forEach(([k, v]) => { if (!SCRIPTS[k]) SCRIPTS[k] = []; SCRIPTS[k].push(...v); });
+// Karim argues a lot
+const KARIM_ARGUES = {
+  "karim>accounts":[["The client wants it bigger? It's already huge.","That's what they asked for.","Then they asked for the wrong thing.","Karim..."],
+                    ["Who promised them Thursday?","We did. Last week.","Nobody asked me.","You were in the meeting!"],
+                    ["This brief makes no sense.","It's three lines long.","Three wrong lines."]],
+  "accounts>karim":[["Karim, they want one more round of changes.","One more? That's the fifth 'one more'.","Just do it, please.","Fine. Under protest."],
+                    ["Can you make the logo blue?","It's a green brand.","They want blue.","They're wrong, and I can prove it."]],
+  "karim>design":[["That shade is wrong.","It's not wrong, it's bold.","It's boldly wrong.","Agree to disagree."],
+                  ["Serif. Trust me.","Sans serif. Trust me.","We're not trusting each other, are we?"]],
+  "design>karim":[["Mine looks better, admit it.","Never.","Ask anyone.","I asked everyone. They're wrong too."]],
+  "karim>it":[["The Wi-Fi isn't busy, it's broken.","It's busy.","It's broken.","Restart your laptop."]],
+  "it>karim":[["Your speaker is on the guest network again.","It works better there.","That's not how networks work.","It is for me."]]
+};
+SCRIPTS["karim>accounts"] = KARIM_ARGUES["karim>accounts"].concat(SCRIPTS["*>*"]);
+SCRIPTS["accounts>karim"] = KARIM_ARGUES["accounts>karim"].concat(SCRIPTS["accounts>design"] || []);
+SCRIPTS["karim>design"] = KARIM_ARGUES["karim>design"].concat(SCRIPTS["design>design"] || []);
+SCRIPTS["design>karim"] = KARIM_ARGUES["design>karim"].concat(SCRIPTS["design>design"] || []);
+SCRIPTS["karim>it"] = KARIM_ARGUES["karim>it"].concat(SCRIPTS["*>it"] || []);
+SCRIPTS["it>karim"] = KARIM_ARGUES["it>karim"].concat(SCRIPTS["it>*"] || []);
 MEET_PAIRS.zeina.push(["The new client wants a full rebrand.","Big job. Make sure we price it right."]);
 MEET_PAIRS.yassin.push(["The posts are scheduled until the end of the month.","Good. Check the comments every day."]);
 MEET_PAIRS.nour.push(["We're testing three logo directions.","Show me the strongest one next time."]);
@@ -3488,6 +3507,7 @@ const KARIM_NPC = { id:"karim", bath:2, name:"Karim", role:"Graphic designer", r
 LINES.karim = ["Music on, world off.","Nour, come look at this.","Quick vape and I'm back.","Who touched my speaker?","Coffee first. Then pixels.",
   "One more export and I'm done.","Zeina, it's almost ready. Almost.","Yassin, send me the brief again?","The client wants it bigger? Of course."];
 GROUP.karim = "design";
+LINES.karim.push("No, hear me out.","I'm not arguing. I'm explaining why I'm right.","Fine. But the old version was better and you know it.","That's not feedback, that's an opinion.","Agree to disagree. Mostly disagree.","Who decided this? Show me the email.","I'll do it. Under protest.","Nour, you're wrong and you know it.","Zeina, the client is wrong this time. Really.","Yassin, that's not what the brief says. Read it again.");
 LINES.karim.push("This kerning is personal.","Headphones on means do not disturb.","Bass boosted, productivity boosted.","The client wants it bigger. Bigger it is.","Who unplugged my speaker? Again?","Lunch at three is still lunch.","Nour, your colours are fire today.","Zeina, I'm on it. Two minutes. Maybe ten.","Yassin, what does 'make it pop' mean?");
 PLANS.vape = n => { const w = POI.win[5]; return [go(w[0], w[1]), wait(rnd(6,10), "drink", w[2], {say: pick(["Quick vape break.","Mango ice. The best flavour.","Two minutes, then back to it."])}), ...homeWork(n)]; };
 
@@ -3538,7 +3558,7 @@ const CHARS = {
       {id:"n7", title:"Pick logo colours with Karim", where:"npc:karim", game:"color", from:750}
     ] },
   karim:{ name:"Karim", role:"Graphic designer", start:720, end:1140, room:5, hours:"12 pm to 7 pm",
-    blurb:"Coffee as he settles in, music on the speakers.",
+    blurb:"Coffee as he settles in, music on the speakers. Argues a lot, about everything.",
     meter:{ name:"Vibe", good:"high", start:80, decay:0.15, low:35,
       tip:"Karim works on vibes. They fade over the day. Walk around the office, put the music on, or take a vape break at the studio window. Low vibe means less time in tasks." },
     abilities:[{id:"smooth", name:"Smooth talker", active:true, uses:2, desc:"Twice a day: finish a talk task by message, from anywhere."},{id:"tech", name:"Tech fixer", desc:"More time when fixing tech."}],
@@ -3909,7 +3929,12 @@ function dayEvents(){
     if (n && visible(n)){ bumpMeter(-15); toast(`${who}: "Nour! Got a second?" <span class="k">Focus -15</span>`); }
   }
   if (c === "yassin" && Math.random() < 0.6) toast(pick(["Yassin checks his phone. Then checks it again.","Somebody's playing music in the lounge…","Yassin wonders what's for lunch."]));
-  if (c === "karim" && Math.random() < 0.5) toast(pick(["Your speaker lost the Bluetooth. Vibe's dropping.","A client email: 'can we make it pop more?'"]));
+  if (c === "karim" && Math.random() < 0.6){
+    const ev = pick([["Your speaker lost the Bluetooth. Vibe's dropping.", -6],["A client email: 'can we make it pop more?'", -4],
+      ["Zeina wants the logo bigger. You argue for ten minutes. She wins.", -8],["You and Nour argue about a shade of green. Nobody wins.", -5],
+      ["You win an argument with Yassin about the brief. Feels good.", 8]]);
+    bumpMeter(ev[1]); toast(`${ev[0]} <span class="k">Vibe ${ev[1] > 0 ? "up" : "down"}</span>`);
+  }
 }
 
 let meterT = 0, panelT = 0;
@@ -4647,24 +4672,25 @@ const DIALOG = {
   "*>zeina":[{l:["Zeina, need anything from me?","Yes. Everything. By three.","...On it."]},{l:["How was the client call?","Long. They want a new direction.","Again?"]},{l:["You look stressed.","I'm not stressed. I'm efficient."]}],
   "*>yassin":[{l:["Yassin, what are you watching?","Research. For the client.","Sure it is."]},{l:["Lunch later?","Always. Koshary?","Deal."]},{l:["Did the client reply?","They sent a thumbs up. That's a yes, right?"]}],
   "*>nour":[{l:["Nour, what are you working on?","Something beautiful. Don't look yet."]},{l:["Coffee?","Only if it's strong.","Is there another kind?"]},{l:["Can I see the poster?","Two more minutes. Then you'll be amazed."]}],
-  "*>karim":[{l:["Karim, what's playing?","Something chill. Want me to turn it up?","Maybe a bit."]},{l:["How's the logo?","Almost there. The client will love it.","Or ask for it bigger."]},{l:["Vape break later?","Already had one. OK, maybe one more."]}],
+  "*>karim":[{l:["Karim, the client wants it bigger.","Bigger? It's already huge. Who said that?","...the client."]},{l:["Can I suggest something?","Go on. I'll probably disagree, but go on."]},{l:["Karim, what's playing?","Something chill. Want me to turn it up?","Maybe a bit."]},{l:["How's the logo?","Almost there. The client will love it.","Or ask for it bigger."]},{l:["Vape break later?","Already had one. OK, maybe one more."]}],
   "*>amr":[{l:["Welcome back, Amr!","Thank you, {me}. Everything good here?","All good."], fx:"amr"},{l:["How's the other branch?","Busy, but not as fun as here."], fx:"amr"}],
   "*>mohamed":[{l:["Mohamed, my laptop is so slow.","Give it here. Your next task will run smoother.","You're a hero."], fx:"it"},{l:["Can you fix the Wi-Fi?","It's not broken. It's busy.","Busy with what?"]},{l:["Any chance of a second monitor?","Fill in the form. Then wait. Then wait more."]}],
   "*>osama":[{l:["Osama, any news on the payment?","It came in this morning. Finally."]},{l:["Need any receipts from me?","All of them. Every single one.","I'll look."]},{l:["How are the numbers this month?","Good. Don't spend anything."]}],
   "*>finance":[{l:["How's it going in finance?","Numbers, numbers, numbers.","Sounds fun.","It's not."]},{l:["Busy day?","Month end. Always busy."]},{l:["Need anything from us?","Just the receipts, please."]}],
   "*>boys":[{l:["Can I get a tea, please?","Right away, {me}. Mint or no mint?","Mint, please."], fx:"tea"},{l:["Thanks for cleaning up earlier.","Anytime, ya basha."]},{l:["What's for lunch today?","Rice, chicken and molokhia.","Perfect."]},{l:["Could I get a Nescafe?","Three sugars, as usual?","You know me."], fx:"tea"}],
-  "karim>nour":[{l:["Nour, rate this colour.","It's... bold.","Bold good or bold bad?"]},{l:["Any music requests?","Anything but that same playlist."]}],
-  "karim>zeina":[{l:["Zeina, the client wants changes again.","What did they say?","Bigger."]}],
-  "karim>yassin":[{l:["Yassin, who approved this brief?","The client. At midnight.","That explains a lot."]}],
-  "nour>karim":[{l:["Karim, A or B?","B. Always B.","I knew it."]},{l:["Turn it up, I love this song.","Finally, someone with taste."]}],
+  "karim>nour":[{l:["Nour, that green is wrong.","It's not wrong, it's bold.","It's boldly wrong."]},{l:["Nour, rate this colour.","It's... bold.","Bold good or bold bad?"]},{l:["Any music requests?","Anything but that same playlist."]}],
+  "karim>zeina":[{l:["Zeina, they can't change the brief again.","They're the client, Karim.","Then they can pay for it."]},{l:["Zeina, the client wants changes again.","What did they say?","Bigger."]}],
+  "karim>mohamed":[{l:["Mohamed, the Wi-Fi isn't busy. It's broken.","It's busy.","It's broken."]}],
+  "karim>yassin":[{l:["Yassin, who told them Friday? That's impossible.","I said maybe Friday.","Clients don't hear 'maybe'."]},{l:["Yassin, who approved this brief?","The client. At midnight.","That explains a lot."]}],
+  "nour>karim":[{l:["Karim, admit it, mine looks better.","Never. Ask anyone.","I asked everyone."]},{l:["Karim, A or B?","B. Always B.","I knew it."]},{l:["Turn it up, I love this song.","Finally, someone with taste."]}],
   "nour>zeina":[{l:["Zeina, can I get one more day?","For what?","Perfection."]}],
   "nour>yassin":[{l:["Yassin, did you read the brief?","I skimmed it.","That's a no."]}],
   "zeina>yassin":[{l:["Yassin. The deck.","Already in your inbox!","...Really?"]},{l:["Yassin, are you on TikTok?","Market research, Zeina."]}],
-  "zeina>karim":[{l:["Karim, the logo?","Thirty minutes. Promise.","I'm timing you."]}],
+  "zeina>karim":[{l:["Karim, please, no debate this time.","Who's debating? I'm just saying they're wrong."]},{l:["Karim, the logo?","Thirty minutes. Promise.","I'm timing you."]}],
   "zeina>nour":[{l:["Nour, I need the poster today.","You'll have it by four.","Three."]}],
   "yassin>zeina":[{l:["Zeina, can I leave early today?","Finish the report first.","Worth a try."]},{l:["You OK, Zeina? You seem stressed.","I'm fine. Just three calls and a fire."]}],
   "yassin>nour":[{l:["Nour, the client wants it to pop.","Say that again and I quit.","Kidding! Kidding."]}],
-  "yassin>karim":[{l:["Karim, send me that playlist.","Only if you stop skipping songs."]}]
+  "yassin>karim":[{l:["Karim, the client loved it!","Of course. I argued for that version for an hour."]},{l:["Karim, send me that playlist.","Only if you stop skipping songs."]}]
 };
 const GREET = {
   morning:[["Morning, {n}!","Morning! Coffee first."],["Sabah el kheir!","Sabah el noor."],["Morning! How are you?","Alive. Ask me after tea."]],
