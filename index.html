@@ -1094,6 +1094,14 @@ const floorAc = (body, shade, hi, panel) => sprite(24,16,g=>{
   g.fillStyle="rgba(0,0,0,.22)"; for (let k=0;k<3;k++) g.fillRect(3,7+k*2,13,1);  // front grille
   g.fillStyle="#9fe3ff"; g.fillRect(18,7,3,2); g.fillStyle="#5fd17a"; g.fillRect(20,10,1,1);
 });
+const trayTable = sprite(16,12,g=>{
+  sh(g,2,10,13);
+  g.fillStyle="#3a2a1e"; g.fillRect(3,6,1,4); g.fillRect(12,6,1,4);            // legs
+  g.fillStyle="#b08a5a"; g.fillRect(1,3,14,4); g.fillStyle="#8a6a44"; g.fillRect(1,6,14,1); g.fillStyle="#c9a571"; g.fillRect(2,3,12,1);  // tray
+  g.fillStyle="#f2ece0"; g.fillRect(3,1,3,3); g.fillStyle="#6b3a1e"; g.fillRect(3,1,3,1);                                          // coffee cup
+  g.fillStyle="#e9c46a"; g.fillRect(8,1,2,3); g.fillStyle="#a8d0d8"; g.fillRect(8,1,2,1);                                          // tea glass
+  g.fillStyle="#5a5e66"; g.fillRect(11,3,3,2); g.fillStyle="#2a2c30"; g.fillRect(12,3,1,1);                                        // ashtray
+});
 const CATALOG = {
   chair:      {name:"Black chair", group:"Seating", solid:[1,12,10,3], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#a07c50"; g.fillRect(2,10,1,5); g.fillRect(9,10,1,5); g.fillStyle="#18191c"; g.fillRect(2,1,8,8); g.fillRect(1,7,10,3); g.fillStyle="#26282d"; g.fillRect(3,2,6,1); })},
   eames:      {name:"Shell armchair", group:"Seating", solid:[1,11,10,4], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#9b7a52"; g.fillRect(2,10,1,5); g.fillRect(9,10,1,5); g.fillRect(4,11,1,4); g.fillRect(7,11,1,4); g.fillStyle="#141518"; g.fillRect(1,2,10,7); g.fillRect(0,6,12,4); g.fillStyle="#24262b"; g.fillRect(2,3,8,2); })},
@@ -1122,6 +1130,7 @@ const CATALOG = {
   floorAcWhite:{name:"Floor AC (white)", group:"Office", solid:[1,9,22,5], cv:floorAc("#eeeeea","#c9c9c4","#ffffff","#d9d9d4")},
   floorAcBlack:{name:"Floor AC (black)", group:"Office", solid:[1,9,22,5], cv:floorAc("#26282c","#16171a","#3a3d43","#1b1c1f")},
   floorAcBrown:{name:"Floor AC (brown)", group:"Office", solid:[1,9,22,5], cv:floorAc("#7a5a40","#5c432f","#93714f","#634833")},
+  trayTable:{name:"Little tray table", group:"Tables", solid:[1,7,14,4], cv:trayTable},
   waterCooler:{name:"Water cooler", group:"Kitchen", solid:[1,17,8,4], cv:sprite(10,22,g=>{ sh(g,1,20,8); g.fillStyle="#e9e9e6"; g.fillRect(1,8,8,12); g.fillStyle="#7fc3e6"; g.fillRect(2,0,6,8); g.fillStyle="#a8dcf2"; g.fillRect(3,1,2,5); g.fillStyle="#3a7fb8"; g.fillRect(3,11,1,1); g.fillStyle="#d24f3f"; g.fillRect(6,11,1,1); })},
   toilet:     {name:"Toilet", group:"Bathroom", solid:[1,8,10,7], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#f3f3f1"; g.fillRect(2,0,8,5); g.fillRect(1,6,10,8); g.fillStyle="#dcdcd8"; g.fillRect(3,8,6,4); g.fillStyle="#c8c8c4"; g.fillRect(1,5,10,1); })},
   washbasin:  {name:"Washbasin", group:"Bathroom", solid:[1,10,12,5], cv:sprite(14,16,g=>{ sh(g,2,14,10); g.fillStyle="#f3f3f1"; g.fillRect(1,3,12,6); g.fillStyle="#d4d6d6"; g.fillRect(3,4,8,3); g.fillStyle="#c0c3c4"; g.fillRect(6,0,2,4); g.fillStyle="#e2e2de"; g.fillRect(5,9,4,6); })},
@@ -1714,7 +1723,7 @@ const TEAM = [
   { id:"yassin", bath:1, name:"Yassin", role:"Account manager", room:4, seat:[78,470], arrive:[560,625], leave:[1030,1110],
     look:{ skin:"medium", hairStyle:"fade", hair:"#16110d", hairHi:"#2e241c", beardStyle:"stubble", top:"shirt", topC:"#9db8d6", topSh:"#7e9abb", topHi:"#b7cde4", accent:"#c9d9ec",
       untucked:true, bottom:"#c2ad8a", bottomSh:"#a79270", bottomHi:"#d3c09e", shoe:"#ecebe6", sole:"#a9a7a0", lace:"#c9c6be" },
-    acts:{ work:5, coffee:2, bathroom:1, visit:4, lounge:2, window:2 }, visits:["zeina","nour","nour","mohamed","osama","yassin3am"],
+    acts:{ work:5, coffee:2, bathroom:1, visit:4, lounge:2, window:2, nap:2 }, visits:["zeina","nour","nour","mohamed","osama","yassin3am"],
     lines:["On it, Zeina!","The client wants the logo bigger. Again.","Has anyone seen my charger?","Nour, got a minute?","I'll send it in five.","Who's ordering lunch?"] },
   { id:"nour", bath:1, name:"Nour", role:"Graphic designer", room:5, seat:[428,626], arrive:[565,620], leave:[1050,1130],
     look:{ skin:"medium", hairStyle:"curly", hair:"#1e1611", hairHi:"#3a2b21", beardStyle:"full", beard:"#241a14", glasses:"#16171a", top:"tee", topC:"#2b2e33", topSh:"#1e2024", topHi:"#383c43",
@@ -1722,7 +1731,7 @@ const TEAM = [
     acts:{ work:7, coffee:2, bathroom:1, visit:2, lounge:2, gallery:1 }, visits:["yassin","yassin","zeina","mohamed"],
     lines:["Kerning is a lifestyle.","Send me the brief and I'm on it.","That frame on the gallery wall is crooked.","Give me ten minutes on this layout.","Karim, which one, A or B?","More contrast. Always more contrast."] },
   { id:"amr", name:"Amr Fawzy", role:"Office manager", room:6, seat:[456,190], arrive:[540,570], leave:[1050,1110], visitor:true,
-    look:{ skin:"medium", hairStyle:"short", hair:"#2b2420", hairHi:"#4a3f37", beardStyle:"none", top:"blazer", topC:"#1f2a3d", topSh:"#172030", topHi:"#2b3850",
+    look:{ skin:"medium", hairStyle:"fade", hair:"#6e5747", hairHi:"#927761", beardStyle:"none", top:"blazer", topC:"#1f2a3d", topSh:"#172030", topHi:"#2b3850",
       accent:"#f2efe8", tie:"#6e2430", bottom:"#2b2d33", bottomSh:"#202226", bottomHi:"#383a41", shoe:"#3a2418", sole:"#160d08", w:11 },
     acts:{ work:4, coffee:1, rounds:3, lab:1, visit:2, window:1, brief:2, team:2 }, visits:["osama","mohamed","zeina","yassin","nour","karim"],
     lines:["Sabah el kheir, everyone!","Just passing through from the other branch.","Meeting room in five minutes.","I'm only here for an hour.","The lab stays locked, my friend.","Make sure the invoices go out today."] },
@@ -1829,7 +1838,7 @@ const POI = {
   rounds:[[150,420,"left"],[320,620,"down"],[560,180,"up"],[760,300,"up"],[1000,300,"up"],[1350,300,"up"],[1600,420,"right"],[1080,520,"down"],[904,500,"down"]]
 };
 (function mapPOI(o){ for (const k in o){ const v = o[k]; if (Array.isArray(v)){ if (typeof v[0] === "number"){ const m = mapR(v[0], v[1]); v[0] = m[0]; v[1] = m[1]; } else v.forEach(a => { const m = mapR(a[0], a[1]); a[0] = m[0]; a[1] = m[1]; }); } else if (v && typeof v === "object") mapPOI(v); } })(POI);
-const SEAT_TYPES = new Set(["chair","eames","officeChair","foldChair","armchair","armchairBlack"]);
+const SEAT_TYPES = new Set(["chair","eames","officeChair","foldChair","armchair","armchairBlack","sofa"]);
 const ROT_DIR = ["down","right","up","left"];
 
 // ---------- navigation grid (8px cells) ----------
@@ -1905,7 +1914,7 @@ function seatNear(x, y, r=30){
 }
 function seatsIn(room, type){ return props.filter(p => SEAT_TYPES.has(p.type) && (!type || p.type===type) && propRoom(p)===room); }
 function seatApproach(p){
-  const off = [[0,12],[0,-14],[-14,0],[14,0]][p.rot||0];      // in front of where the chair faces
+  const off = p.type==="sofa" ? [[0,14],[16,0],[0,-16],[-16,0]][p.rot||0] : [[0,12],[0,-14],[-14,0],[14,0]][p.rot||0];      // in front of where the seat faces
   let k = nearestCell(p.x + off[0], p.y + off[1]); return k < 0 ? null : cellPt(k);
 }
 const seatTaken = new Map();
@@ -1989,6 +1998,14 @@ const PLANS = {
     pts.forEach(p => { out.push(go(p[0], p[1]), wait(rnd(3,6), "stand", p[2], {say: Math.random()<0.5 ? pick(["Everything good?","Sabah el kheir!","Keep it up."]) : null})); }); return [...out, ...homeWork(n)]; },
   visit: n => visitPlan(n, pick(n.visits)),
   brief: n => (clock.min - (clock.lastMeeting || -999) > 150 && callMeeting(n)) || homeWork(n),
+  // Yassin naps on the studio couch, but only on days when Amr and the other branch aren't coming in
+  nap: n => {
+    if (npcs.some(m => m.visitor && m.arriveAt < Infinity) || G.outage) return homeWork(n);
+    const s = seatNear(AMR_TEAM_SEAT[0], AMR_TEAM_SEAT[1]);
+    if (!s || seatTaken.has(s.id)) return homeWork(n);
+    return [sitAt(s.x, s.y, {room:5}), wait(rnd(6,10), "sit", null, {say: pick(["Just resting my eyes. Five minutes.","Wake me up if Zeina asks.","Shh. Power nap."])}),
+      wait(rnd(30,50), "sit", null, {say:"Zzz…", nap:true}), wait(rnd(4,6), "sit", null, {say: pick(["Huh? I wasn't sleeping.","Okay. Back to work. Probably.","Best nap ever."])}), ...homeWork(n)];
+  },
   team: n => {
     const [x, y] = AMR_TEAM_SEAT, s = seatNear(x, y);
     if (!s || seatTaken.has(s.id)) return homeWork(n);
@@ -2059,8 +2076,8 @@ function scheduleBranch(){
   br.filter(on).sort(() => Math.random() - .5).slice(4).forEach(n => { n.arriveAt = Infinity; n.leaveAt = -1; });
 }
 // designers from the other branch work at the spare computers in Karim & Nour's studio; Rawda (accounts) sits with Zeina
-const BRANCH_DESK = { joy:[114,497], nourk:[163,497], rawda:[351,489], ehab:[351,569], aya:[202,581], dina:[130,581], salma:[90,436] };
-const AMR_TEAM_SEAT = [278,581];     // desk 5 in the studio: Amr comes to sit with the team now and then
+const BRANCH_DESK = { joy:[114,497], nourk:[163,497], rawda:[351,489], ehab:[351,569], aya:[202,581], dina:[130,581], rana:[278,581], salma:[90,436] };
+const AMR_TEAM_SEAT = [40,551];      // the studio couch: Amr comes to sit with the team now and then (tray in front of it)
 function branchSeat(n){
   const mine = s => npcs.some(m => m !== n && visible(m) && m.seat && Math.hypot(m.seat[0]-s.x, m.seat[1]-s.y) < 8);
   const fixed = BRANCH_DESK[n.id];
@@ -2139,7 +2156,7 @@ function callMeeting(lead){
   return [sitAt(s.x, s.y), {do:"wait", until:end, pose:"sit", meeting:true}, ...homeWork(lead)];
 }
 
-const AMR_TEAM_LINES = ["So, what are we working on today?","Show me something nice.","This studio has the best vibe in the building.","Karim, Nour, how's it going?","Don't mind me, I'm just sitting with you guys.","Who wants a coffee? My treat.","Tell me the truth, is the client happy?"];
+const AMR_TEAM_LINES = ["So, what are we working on today?","Show me something nice.","This studio has the best vibe in the building.","Karim, Nour, how's it going?","Don't mind me, I'm just sitting with you guys.","This couch is the best seat in the building.","Who wants a coffee? My treat.","Tell me the truth, is the client happy?"];
 // ---------- conversations: each line answers the one before ----------
 const convos = [];
 function converse(a, b, lines){
@@ -2477,6 +2494,7 @@ const ROOM_SCREENS = {
 const LOOK = {
   printer:["The printer wakes up, thinks about it, and prints one page.","Out of toner. Again.","Paper jam. Of course."],
   waterCooler:["Glug, glug. Ice-cold water.","Refreshing."],
+  trayTable:["Amr's coffee, a glass of tea and his ashtray. Don't touch."],
   standAcWhite:["Cold air. Someone set it to 16 again.","Ahh. That's better."], standAcBlack:["Cold air. Someone set it to 16 again.","Ahh. That's better."],
   standAcBrown:["Cold air. Someone set it to 16 again.","Ahh. That's better."],
   floorAcWhite:["A cool breeze at knee height.","Who turned this to full blast?"], floorAcBlack:["A cool breeze at knee height.","Who turned this to full blast?"],
@@ -2894,6 +2912,7 @@ function render(){
     const vg = ctx.createRadialGradient(VW/2, VH/2, Math.min(VW,VH)*0.45, VW/2, VH/2, Math.max(VW,VH)*0.8);
     vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.22)");
     ctx.fillStyle = vg; ctx.fillRect(0,0,VW,VH);
+    if (G.outage && G.mode === "day") G.drawOutage(cx, cy);
     G.drawWorld(cx, cy);
   } else drawEditorOverlay(cx, cy);
 }
@@ -2969,7 +2988,7 @@ function serialize(){
   return { v:1, props: props.map(p => { const o = {id:p.id, type:p.type, x:p.x, y:p.y, rot:p.rot||0, sx:p.sx||1, sy:p.sy||1}; if (typeof p.z==="number") o.z = p.z; if (p.locked) o.locked = true; return o; }),
            doors: doors.map(d => ({n:d.n, i:d.i, j:d.j, v:d.v, glass:!!d.glass, locked:!!d.locked, kind:d.kind||"", off:d.off||0})),
            art: art.map(a => ({id:a.id, kind:a.kind, x:a.x, j:a.j, w:a.w, img:a.img||""})),
-           walls: {add:[...wallEdits.add], rem:[...wallEdits.rem]}, floors: {...floorOverrides}, furnished:1, branchDesks:3, ms:MS };
+           walls: {add:[...wallEdits.add], rem:[...wallEdits.rem]}, floors: {...floorOverrides}, furnished:1, branchDesks:4, ms:MS };
 }
 // one-time upgrade of a saved layout: add the furniture for every room (ids f1...) without touching anything already placed
 function mergeFurniture(L){
@@ -3098,18 +3117,19 @@ async function connect(){
 // EDITOR
 // ======================================================================
 // spare computers for the people from the other branch (5 in the studio, Rawda's desk with Zeina & Yassin)
-const BRANCH_DESKS = [{"id":"n1","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":114,"y":478,"z":18.5},{"id":"n2","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":163,"y":478,"z":18.5},{"id":"n3","rot":2,"sx":1,"sy":1,"type":"monitor","x":130,"y":585,"z":77.5},{"id":"n4","rot":2,"sx":1,"sy":1,"type":"monitor","x":202,"y":585,"z":77.5},{"id":"n5","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":478,"z":77.5},{"id":"n10","rot":2,"sx":1,"sy":1,"type":"officeChair","x":90,"y":436},{"id":"n11","rot":0,"sx":1,"sy":1,"type":"laptop","x":90,"y":410}];
+const BRANCH_DESKS = [{"id":"n1","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":114,"y":478,"z":18.5},{"id":"n2","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":163,"y":478,"z":18.5},{"id":"n3","rot":2,"sx":1,"sy":1,"type":"monitor","x":130,"y":585,"z":77.5},{"id":"n4","rot":2,"sx":1,"sy":1,"type":"monitor","x":202,"y":585,"z":77.5},{"id":"n5","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":478,"z":77.5},{"id":"n10","rot":2,"sx":1,"sy":1,"type":"officeChair","x":90,"y":436},{"id":"n11","rot":0,"sx":1,"sy":1,"type":"laptop","x":90,"y":410},
+  {"id":"n12","rot":0,"sx":1,"sy":1,"type":"trayTable","x":63,"y":553}];
 // room 4 rearranged (Zeina's desk faces Yassin and Salma's shared desk, more room between them)
 const ROOM4_MOVES = { f3:{x:100,y:332,rot:2}, f4:{x:100,y:336,rot:2}, f5:{x:100,y:328,rot:2}, f6:{x:113,y:329}, f7:{x:100,y:314,rot:0},
   f8:{x:78,y:418,sx:1.6}, f9:{x:66,y:410}, f10:{x:101,y:411}, f11:{x:53,y:412}, f12:{x:66,y:436}, f13:{x:138,y:410}, f16:{x:128,y:336} };
 const BRANCH_DESKS_GONE = new Set(["n6","n7","n8","n9"]);
 function withBranchDesks(L){
-  const v = L.branchDesks || 0; if (v >= 3) return L;
-  let props = (L.props||[]).filter(q => !BRANCH_DESKS_GONE.has(q.id)).map(q => ROOM4_MOVES[q.id] ? {...q, ...ROOM4_MOVES[q.id]} : q);
+  const v = L.branchDesks || 0; if (v >= 4) return L;
+  let props = (L.props||[]).filter(q => !BRANCH_DESKS_GONE.has(q.id)).map(q => (v < 3 && ROOM4_MOVES[q.id]) ? {...q, ...ROOM4_MOVES[q.id]} : q);
   const have = new Set(props.map(q => q.id));
-  const add = BRANCH_DESKS.filter(q => !have.has(q.id) && (v === 0 || q.id === "n10" || q.id === "n11"));
-  props = props.map(q => (q.id === "n10" || q.id === "n11") ? {...q, ...BRANCH_DESKS.find(b => b.id === q.id)} : q);
-  return {...L, branchDesks:3, props: props.concat(add)};
+  const add = BRANCH_DESKS.filter(q => !have.has(q.id) && (v === 0 || q.id === "n12" || (v < 3 && (q.id === "n10" || q.id === "n11"))));
+  if (v < 3) props = props.map(q => (q.id === "n10" || q.id === "n11") ? {...q, ...BRANCH_DESKS.find(b => b.id === q.id)} : q);
+  return {...L, branchDesks:4, props: props.concat(add)};
 }
 function snapshot(){ ed.undo.push(JSON.stringify(serialize())); if (ed.undo.length > 80) ed.undo.shift(); syncEdUI(); }
 function undo(){
@@ -4052,6 +4072,7 @@ function beginDay(cid, withTut){
   G.track = null; G.stars = 0; G.meter = G.char.meter.start; G.lastPanel = ""; G.allDoneShown = false;
   G.smoothUses = (G.char.abilities.find(a => a.uses) || {}).uses || 0; G.burst = false; G.cool = {}; G.talkCool = {};
   G.nextEvent = clock.min + rnd(50, 80); G.callN = 0;
+  G.outage = null; G.outageAt = Math.random() < 0.45 ? rnd(G.char.start + 80, G.char.end - 110) : Infinity;
   try { const c = localStorage.getItem("lj_col"); G.collapsed = c ? c === "1" : innerHeight < 430; } catch(e){ G.collapsed = innerHeight < 430; }
   if (withTut) G.collapsed = false;
   G.mode = "day"; G.paused = false;
@@ -4166,6 +4187,8 @@ function updateDay(dt){
     else { goodMeter(-(t.missMeter || 5)); toast(t.miss || `Missed: ${esc(t.title)}`); }
     renderPanel(true); } });
   if (rate > 0){ dayEvents(); generalEvents(); }
+  if (!G.outage && !G.tut && clock.min >= G.outageAt && $("mg").hidden) startOutage();
+  if (G.outage) updateOutage(dt);
   if (clock.min >= G.char.end){ toast(`${hhmm(G.char.end)}. Time to go home.`); endDay(false, true); return; }
   if (G.char.end - clock.min < 30 && !G.warned){ G.warned = true; toast(`Thirty minutes left in ${G.char.name}'s day.`); }
   meterT -= dt; if (meterT <= 0){ meterT = 0.25; renderMeter(); }
@@ -4176,8 +4199,10 @@ function clockRate(){
   if (G.hold) return 0;
   if (G.mode === "menu" || G.mode === "summary" || G.mode === "title") return 0;
   if (G.mode === "day" && (G.paused || (G.tut && !G.tut.clockOn))) return 0;
-  return 1;
+  if (G.outage) return 0;                      // the clock stops while the power is out
+  return G.mode === "day" ? DAY_CLOCK : 1;
 }
+const DAY_CLOCK = 0.6;                         // workday: one office minute every 1.7 real seconds, so nothing feels rushed
 
 // interact hook: tasks first, then special spots, then the usual
 function onInteract(){
@@ -4209,7 +4234,7 @@ function onTalk(n){
 function taskHintText(){
   if (G.mode !== "day" || G.paused || ed.on) return null;
   const t = taskInRange(); if (t){ const tg = target(t); return {label:`${KEY()} ${t.title}`, x:tg.npc ? tg.npc.x : tg.x, y:tg.npc ? tg.npc.y - 30 : tg.y - 22}; }
-  const c = ringing(); if (c && !npcNear()) return {label:`${KEY()} Answer the call`, x:P.x, y:P.y - 34};
+  const c = ringing(); if (c && !npcNear()) return {label:`${KEY()} ${c.outage ? "Join the shadow puppets" : "Answer the call"}`, x:P.x, y:P.y - 34};
   if (G.cid === "karim"){ const w = POI.win[5]; if (Math.hypot(P.x - w[0], P.y - w[1]) < 26 && !P.sit) return {label:`${KEY()} Vape break`, x:w[0], y:w[1] - 26}; }
   if (G.cid === "nour" && !P.sit && Math.hypot(P.x - POI.counter[0], P.y - POI.counter[1]) < 24) return {label:`${KEY()} Grab a coffee`, x:POI.counter[0], y:POI.counter[1] - 24};
   return null;
@@ -4927,6 +4952,59 @@ function visitorTasks(cid){
   return out;
 }
 
+// ---------- power cut: the office goes dark, phone flashlights, a team game, the clock stops ----------
+const OUTAGE_SAY = ["Who turned off the lights?!","My file! Did it save?!","Phone flashlights, everyone!","Don't move, I'm scared of the dark.","Again?! Third time this month.",
+  "Mohamed Ali! Do something!","Okay, this is kind of fun.","Who's touching my chair?","I can't see my coffee.","Ahmed, bring the candles!","Generator? We have a generator, right?",
+  "Somebody tell a ghost story.","Shh. Listen. It's so quiet.","I'm going to scare Yassin. Watch."];
+const OUTAGE_BY = { mohamed:["It's not the Wi-Fi this time. It's the whole building.","Don't touch the servers! They're sleeping."],
+  amr:["Nobody panic. Everyone gather in the meeting room.","Fine. Fifteen-minute break. Officially."],
+  karim:["It's the generator. No, it's the main switch. Trust me."], rawda:["Ehab! Ehab, where are you?!","My deadline! Oh no, oh no."],
+  ehab:["Rawda, I'm here. Follow my voice."], yassin:["Best. Break. Ever."], zeina:["Everyone stay calm. I'll call the building manager."],
+  rana:["Shadow puppets! Who's in?"], joy:["Honestly? This is relaxing."], salma:["Ugh, my phone's on 12%."], nescafe:["Tea's ready anyway. Gas stove."], yassin3am:["I've got candles in the kitchen."] };
+const OUTAGE_TALK = [["Can you see anything?","Only your flashlight. Point it somewhere else!"],["Is this the third power cut this month?","Fourth. I'm counting."],
+  ["Want to do shadow puppets?","Only if I get to do the camel.","Deal."],["Did your work save?","Don't. Ask. Me. That."],["Should we tell ghost stories?","No! Okay, maybe one."],
+  ["Free break, I guess?","Best kind of break."],["Stay close to the light.","I'm right behind you. Literally."]];
+function startOutage(){
+  G.outage = {t0: state.t, end: state.t + rnd(70, 100), k: 0, sayT: 1, ended: false};
+  G.outageAt = Infinity;
+  toast("<b>Power cut!</b> The whole office goes dark. Phone flashlight on. The clock stops until the power's back.");
+  evTask({id:"outage_game", title:"Power cut: shadow puppets with the team", where:"anywhere", game:"shadows", outage:true, note:"Join from anywhere"});
+  npcs.filter(n => visible(n)).sort(() => Math.random() - .5).slice(0, 4).forEach((n, i) => setTimeout(() => { if (G.outage && visible(n)) say(n, pick(OUTAGE_BY[n.id] || OUTAGE_SAY), 3); }, 400 + i*900));
+}
+function updateOutage(dt){
+  const o = G.outage;
+  o.k = Math.min(1, o.k + dt*1.6);
+  o.sayT -= dt;
+  if (o.sayT <= 0){ o.sayT = rnd(3, 6);
+    const near = npcs.filter(n => visible(n) && !n.convo && n.sayT <= 0 && Math.hypot(n.x - P.x, n.y - P.y) < 160);
+    if (near.length){ const n = pick(near); say(n, pick(OUTAGE_BY[n.id] && Math.random() < 0.5 ? OUTAGE_BY[n.id] : OUTAGE_SAY), 3); } }
+  if (state.t >= o.end) endOutage();
+}
+function endOutage(){
+  G.outage = null;
+  G.tasks = G.tasks.filter(t => !(t.outage && !t.done)); renderPanel(true);
+  toast("The power's back! The lights flicker on and the computers wake up. The clock is running again.");
+  npcs.filter(n => visible(n)).sort(() => Math.random() - .5).slice(0, 3).forEach((n, i) => setTimeout(() => say(n, pick(["Yesss!","Finally!","Aww, I was having fun.","Did anyone save their work?","Back to reality."]), 2.6), 300 + i*700));
+}
+// darkness with a pool of light around the player (phone flashlight)
+const darkCv = document.createElement("canvas");
+function drawOutage(cx, cy){
+  const o = G.outage; if (!o) return;
+  if (darkCv.width !== VW || darkCv.height !== VH){ darkCv.width = VW; darkCv.height = VH; }
+  const d = darkCv.getContext("2d"), px = P.x - cx, py = P.y - 14 - cy, fl = 1 + Math.sin(state.t*9)*0.015;
+  d.globalCompositeOperation = "source-over"; d.clearRect(0, 0, VW, VH);
+  d.fillStyle = `rgba(3,5,10,${0.94*o.k})`; d.fillRect(0, 0, VW, VH);
+  d.globalCompositeOperation = "destination-out";
+  const r = 52*fl, gr = d.createRadialGradient(px, py, 0, px, py, r);
+  gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(0.55, "rgba(0,0,0,.9)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+  d.fillStyle = gr; d.fillRect(px - r, py - r, r*2, r*2);
+  ctx.setTransform(HR,0,0,HR,0,0); ctx.drawImage(darkCv, 0, 0);
+  ctx.globalCompositeOperation = "soft-light";
+  const w = ctx.createRadialGradient(px, py, 0, px, py, r*0.8); w.addColorStop(0, "rgba(220,235,255,.35)"); w.addColorStop(1, "rgba(220,235,255,0)");
+  ctx.fillStyle = w; ctx.fillRect(px - r, py - r, r*2, r*2);
+  ctx.globalCompositeOperation = "source-over";
+}
+
 // ---------- conversations the player starts ----------
 const DIALOG = {
   "*>zeina":[{l:["Zeina, need anything from me?","Yes. Everything. By three.","...On it."]},{l:["How was the client call?","Long. They want a new direction.","Again?"]},{l:["You look stressed.","I'm not stressed. I'm efficient."]}],
@@ -4966,6 +5044,7 @@ const GREET = {
   late:[["Long day, huh?","Almost done. Hang in there."],["Going home soon?","Not soon enough."]]
 };
 function exchange(n){
+  if (G.outage) return {l: pick(OUTAGE_TALK)};
   if (Math.random() < 0.38) return null;   // sometimes they just say something
   const me = PLAYER.id, grp = GROUP[n.id] || "*", fill = l => l.replace(/\{me\}/g, PLAYER.name).replace(/\{n\}/g, n.name.split(" ")[0]);
   G.greeted = G.greeted || {}; G.exUsed = G.exUsed || {};
@@ -5032,7 +5111,7 @@ const EVENTS = [
     evTask({title:"Unjam the printer", where:"printer", game:"wires", expires: clock.min + 45, miss:"Someone else fixed the printer. Badly."});
     toast("The printer jammed mid-print. Everyone's staring at it."); }},
   {id:"drill", run(){ fadeEvent("Fire drill! Everyone out to the hallway…", 12, () => { goodMeter(-6); toast("Fire drill over. Twelve minutes gone."); }); }},
-  {id:"power", run(){ fadeEvent("Power cut. The office goes dark for a moment…", 8, () => { G.fx.slowUntil = clock.min + 20; toast("Power's back. The computers are still waking up."); }); }},
+  {id:"power", ok:() => !G.outage && G.outageAt === Infinity, run(){ G.outageAt = clock.min; }},
   {id:"coffee", run(){ goodMeter(-8); toast("The coffee machine broke. Mohamed Nescafe says it's tea only today."); }},
   {id:"deadline", ok:() => G.tasks.some(t => !t.done && !t.opt && !t.due && !t.talk && t.game && t.game !== "music" && t.game !== "errand" && isAvail(t)), run(){
     const t = pick(G.tasks.filter(t => !t.done && !t.opt && !t.due && !t.talk && t.game && t.game !== "music" && t.game !== "errand" && isAvail(t)));
@@ -5150,6 +5229,48 @@ MG.typos = { name:"Proofread the copy", time:30,
           if (found === total) api.finish(0.65 + 0.35*ratio(), "Clean copy."); }
         else { b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss"); api.penalty(2); } }; });
     return { partial: () => found/total*0.8 };
+  } };
+
+// Power cut: shadow puppets on the wall with phone flashlights
+const SHADOWS = {
+  bird:["................","..##........##..","...###....###...","....###..###....",".....######.....","......####......","......####......",".......##.......","................"],
+  dog:["................","..##............",".####...........","######..........","#######.........",".############...","..###########...","..##.......##...","..##.......##..."],
+  rabbit:["...#..#.........","...#..#.........","...#..#.........","..######........",".########.......",".#########......","..##########....","...#########....","....##...##....."],
+  camel:["..##............",".###....##..##..","..##...######...","..##..#########.","..############..","...##########...","....#......#....","....#......#....","....#......#...."],
+  snail:["..#.#...........","..#.#....####...","..###...######..","..###..##....##.","..###..##.##.##.","..###..##.####..","..############..",".##############.","................"],
+  cat:[".#...#..........",".##.##..........",".#####........#.",".#####.......#..","..###########...","..###########...","...#########....","...##.....##....","...##.....##...."]
+};
+const SHADOW_NAMES = {bird:"Bird", dog:"Dog", rabbit:"Rabbit", camel:"Camel", snail:"Snail", cat:"Cat"};
+MG.shadows = { name:"Shadow puppets", time:50,
+  how:"The power's out, so the team is making shadow puppets on the wall with their phone flashlights. <b>Guess each shadow.</b> Five rounds, just for fun.",
+  build(box, api){
+    const team = npcs.filter(n => visible(n) && n.id !== PLAYER.id), names = team.length ? team : [{name:"Yassin"}];
+    const order = shuffle(Object.keys(SHADOWS)).slice(0, 5); let round = 0, right = 0;
+    const w = el("div", "g2"); box.appendChild(w);
+    const cvs = document.createElement("canvas"); cvs.width = 176; cvs.height = 110; cvs.style.cssText = "width:100%;max-width:352px;image-rendering:pixelated;border-radius:6px;display:block;margin:0 auto 8px";
+    w.appendChild(cvs);
+    const who = el("div", "rd", ""); w.appendChild(who);
+    const row = el("div", "", ""); row.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"; w.appendChild(row);
+    const g = cvs.getContext("2d");
+    function draw(k){
+      g.fillStyle = "#14161c"; g.fillRect(0, 0, 176, 110);
+      const gr = g.createRadialGradient(88, 52, 4, 88, 52, 70); gr.addColorStop(0, "#f3e6c4"); gr.addColorStop(1, "#2a2a2e"); g.fillStyle = gr; g.fillRect(0, 0, 176, 110);
+      const bm = SHADOWS[k], S = 7, ox = 88 - 8*S, oy = 52 - 4.5*S, j = Math.sin(state.t*3)*1;
+      g.fillStyle = "rgba(20,18,22,.92)";
+      bm.forEach((line, y) => [...line].forEach((ch, x) => { if (ch === "#") g.fillRect(ox + x*S, oy + y*S + j, S, S); }));
+    }
+    function next(){
+      if (round >= order.length){ api.finish(0.45 + 0.55*right/order.length, right >= 4 ? "Best power cut ever." : "That was fun anyway."); return; }
+      const k = order[round], n = pick(names), first = (n.call || n.name || "").split(" ")[0];
+      draw(k); who.textContent = `Round ${round+1} of ${order.length}: ${first}'s shadow. What is it?`;
+      row.innerHTML = ""; const opts = shuffle([k, ...shuffle(Object.keys(SHADOWS).filter(x => x !== k)).slice(0, 3)]);
+      opts.forEach(o => { const b = el("button", "", SHADOW_NAMES[o]); b.style.cssText = "padding:8px;font:inherit"; row.appendChild(b);
+        b.onclick = () => { if (row._lock) return; row._lock = true;
+          if (o === k){ right++; flash(pick(["Yes!","Got it!","Everyone claps."]), true); } else flash(`It was a ${SHADOW_NAMES[k].toLowerCase()}!`, false);
+          setTimeout(() => { row._lock = false; round++; next(); }, 750); }; });
+    }
+    next();
+    return { partial: () => 0.4 + 0.4*right/order.length };
   } };
 
 // Memory: match the file pairs
@@ -5392,7 +5513,7 @@ function gmFrame(dt){ animMenu(dt); tickGame(dt); updateDay(dt);
   if (G.mode === "roam" && !G.hold) roamEvents();
 }
 
-Object.assign(G, { openMenu, beginDay, onInteract, onTalk, placeTaskHint, drawWorld, syncMeTag, onKey, gmFrame, rate:clockRate, lockMsg, endDay, CHARS, MG, openGame, completeTask, taskById });
+Object.assign(G, { drawOutage, openMenu, beginDay, onInteract, onTalk, placeTaskHint, drawWorld, syncMeTag, onKey, gmFrame, rate:clockRate, lockMsg, endDay, CHARS, MG, openGame, completeTask, taskById });
 
 applyLayout(withBranchDesks(DEFAULT_LAYOUT));
 buildPalette();
