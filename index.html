@@ -685,7 +685,9 @@ for (let j=0;j<ROWS;j++) for (let i=0;i<COLS;i++){
 }
 const baseWall = wall.slice();
 let wallEdits = {add:new Set(), rem:new Set()};        // "i:j" keys painted in the editor
+let wallVer = 0;
 function applyWallEdits(){
+  wallVer++;
   wall.set(baseWall);
   wallEdits.add.forEach(k => { const [i,j] = k.split(":").map(Number); if (i>=0&&j>=0&&i<COLS&&j<ROWS) wall[j*COLS+i] = 1; });
   wallEdits.rem.forEach(k => { const [i,j] = k.split(":").map(Number); if (i>=0&&j>=0&&i<COLS&&j<ROWS && grid[j*COLS+i]>0) wall[j*COLS+i] = 0; });
@@ -1094,14 +1096,39 @@ const floorAc = (body, shade, hi, panel) => sprite(24,16,g=>{
   g.fillStyle="rgba(0,0,0,.22)"; for (let k=0;k<3;k++) g.fillRect(3,7+k*2,13,1);  // front grille
   g.fillStyle="#9fe3ff"; g.fillRect(18,7,3,2); g.fillStyle="#5fd17a"; g.fillRect(20,10,1,1);
 });
-const trayTable = sprite(16,12,g=>{
+// the little tray table: Amr's coffee, tea and ashtray only while he's in; otherwise empty or whatever people left on it
+const trayArt = what => sprite(16,12,g=>{
   sh(g,2,10,13);
   g.fillStyle="#3a2a1e"; g.fillRect(3,6,1,4); g.fillRect(12,6,1,4);            // legs
   g.fillStyle="#b08a5a"; g.fillRect(1,3,14,4); g.fillStyle="#8a6a44"; g.fillRect(1,6,14,1); g.fillStyle="#c9a571"; g.fillRect(2,3,12,1);  // tray
-  g.fillStyle="#f2ece0"; g.fillRect(3,1,3,3); g.fillStyle="#6b3a1e"; g.fillRect(3,1,3,1);                                          // coffee cup
-  g.fillStyle="#e9c46a"; g.fillRect(8,1,2,3); g.fillStyle="#a8d0d8"; g.fillRect(8,1,2,1);                                          // tea glass
-  g.fillStyle="#5a5e66"; g.fillRect(11,3,3,2); g.fillStyle="#2a2c30"; g.fillRect(12,3,1,1);                                        // ashtray
+  if (what === "amr"){
+    g.fillStyle="#f2ece0"; g.fillRect(3,1,3,3); g.fillStyle="#6b3a1e"; g.fillRect(3,1,3,1);                                        // coffee cup
+    g.fillStyle="#e9c46a"; g.fillRect(8,1,2,3); g.fillStyle="#a8d0d8"; g.fillRect(8,1,2,1);                                        // tea glass
+    g.fillStyle="#5a5e66"; g.fillRect(11,3,3,2); g.fillStyle="#2a2c30"; g.fillRect(12,3,1,1);                                      // ashtray
+  } else if (what === "magazine"){
+    g.fillStyle="#d24f3f"; g.fillRect(3,3,6,3); g.fillStyle="#f2ece0"; g.fillRect(4,4,3,1);                                        // magazine
+    g.fillStyle="#2a2c30"; g.fillRect(11,4,3,1);                                                                                  // phone
+  } else if (what === "sweets"){
+    g.fillStyle="#e9e4d8"; g.fillRect(5,2,6,3); g.fillStyle="#e58fa8"; g.fillRect(6,2,1,1); g.fillStyle="#e9c46a"; g.fillRect(8,2,1,1); g.fillStyle="#7fc3e6"; g.fillRect(9,3,1,1);  // bowl of sweets
+  } else if (what === "keys"){
+    g.fillStyle="#c9c3b5"; g.fillRect(3,4,2,1); g.fillRect(4,3,1,1); g.fillStyle="#d4af37"; g.fillRect(5,4,2,1);                 // keys
+    g.fillStyle="#efebe3"; g.fillRect(9,3,4,3); g.fillStyle="#9a958b"; g.fillRect(10,4,2,1);                                      // sticky notes
+  }
 });
+const TRAY = { amr: trayArt("amr"), empty: trayArt("empty"), magazine: trayArt("magazine"), sweets: trayArt("sweets"), keys: trayArt("keys") };
+const TRAY_LOOK = { amr:["Amr's coffee, a glass of tea and his ashtray. Don't touch."], empty:["An empty little tray. Somebody cleaned up."],
+  magazine:["Last month's magazine and someone's phone. Not yours."], sweets:["A bowl of sweets. One won't hurt."], keys:["Somebody's keys and a pile of sticky notes."] };
+let trayNow = "amr";
+const trayTable = TRAY.amr;
+// called every frame: swap what's on the tray when Amr comes in or leaves
+function syncTray(){
+  const amr = typeof npcById === "function" ? npcById("amr") : null;
+  const want = amr && !amr.gone && !amr.hidden ? "amr" : ["empty","magazine","sweets","keys","empty"][(clock.day*7 + 3) % 5];
+  if (want === trayNow) return;
+  trayNow = want; CATALOG.trayTable.cv = TRAY[want];
+  for (const k of [..._sprCache.keys()]) if (k.startsWith("trayTable:")) _sprCache.delete(k);
+  for (const k of [..._sizeCache.keys()]) if (k.startsWith("trayTable:")) _sizeCache.delete(k);
+}
 const CATALOG = {
   chair:      {name:"Black chair", group:"Seating", solid:[1,12,10,3], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#a07c50"; g.fillRect(2,10,1,5); g.fillRect(9,10,1,5); g.fillStyle="#18191c"; g.fillRect(2,1,8,8); g.fillRect(1,7,10,3); g.fillStyle="#26282d"; g.fillRect(3,2,6,1); })},
   eames:      {name:"Shell armchair", group:"Seating", solid:[1,11,10,4], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#9b7a52"; g.fillRect(2,10,1,5); g.fillRect(9,10,1,5); g.fillRect(4,11,1,4); g.fillRect(7,11,1,4); g.fillStyle="#141518"; g.fillRect(1,2,10,7); g.fillRect(0,6,12,4); g.fillStyle="#24262b"; g.fillRect(2,3,8,2); })},
@@ -1311,9 +1338,23 @@ function propSprite(p){
 }
 function propBox(p){ const c = propSprite(p); return {x: p.x - (c.width>>1), y: p.y - c.height + 3, w: c.width, h: c.height}; }
 function propSolid(p){
-  const base = getSprite(p.type, p.rot), s = solidFor(p.type, p.rot, base.width, base.height); if (!s) return null;
-  const b = propBox(p), kx = b.w/base.width, ky = b.h/base.height;
-  return [b.x+Math.round(s[0]*kx), b.y+Math.round(s[1]*ky), Math.max(1,Math.round(s[2]*kx)), Math.max(1,Math.round(s[3]*ky))];
+  const key = p.type + ":" + p.x + ":" + p.y + ":" + (p.rot||0) + ":" + (p.sx||1) + ":" + (p.sy||1) + ":" + wallVer;
+  if (p._solK === key) return p._sol;
+  const base = getSprite(p.type, p.rot), s = solidFor(p.type, p.rot, base.width, base.height);
+  let r = null;
+  if (s){
+    const b = propBox(p), kx = b.w/base.width, ky = b.h/base.height;
+    r = [b.x+Math.round(s[0]*kx), b.y+Math.round(s[1]*ky), Math.max(1,Math.round(s[2]*kx)), Math.max(1,Math.round(s[3]*ky))];
+    // a wall (or wall face) just behind it: stretch the solid back to the wall so the gap can't be walked
+    if (!SEAT_TYPES.has(p.type)){
+      const xs = [r[0]+2, r[0]+r[2]/2, r[0]+r[2]-2];
+      for (let k = 1; k <= 16; k++){
+        const yy = r[1] - k;
+        if (xs.some(xx => { const i = Math.floor(xx/T), j = Math.floor(yy/T); return isWall(i, j) || (isWall(i, j-1) && hasFace(i, j-1)) || !at(i, j); })){ if (k > 1 && !props.some(q => SEAT_TYPES.has(q.type) && q.x > r[0]-4 && q.x < r[0]+r[2]+4 && q.y >= r[1]-k && q.y <= r[1]+2)){ r[3] += k - 1; r[1] -= k - 1; } break; }
+      }
+    }
+  }
+  p._solK = key; p._sol = r; return r;
 }
 function propRoom(p){ return at(Math.floor(p.x/T), Math.floor((p.y-2)/T)); }
 
@@ -2364,6 +2405,7 @@ function updateNpc(n, dt){
 function updatePeople(dt){
   if (!navReady) return;
   clock.min += dt * G.rate();                // one game minute per real second (paused in menus, popups and the tutorial)
+  syncTray();
   if (G.mode !== "day" && clock.min >= 1140 && npcs.every(n => n.gone)){
     clock.min = 510; clock.day = (clock.day + 1) % DAYS.length; newDay(false);
     toast(`${DAYS[clock.day]} morning. The team is on its way in.`);
@@ -2500,7 +2542,7 @@ const ROOM_SCREENS = {
 const LOOK = {
   printer:["The printer wakes up, thinks about it, and prints one page.","Out of toner. Again.","Paper jam. Of course."],
   waterCooler:["Glug, glug. Ice-cold water.","Refreshing."],
-  trayTable:["Amr's coffee, a glass of tea and his ashtray. Don't touch."],
+
   standAcWhite:["Cold air. Someone set it to 16 again.","Ahh. That's better."], standAcBlack:["Cold air. Someone set it to 16 again.","Ahh. That's better."],
   standAcBrown:["Cold air. Someone set it to 16 again.","Ahh. That's better."],
   floorAcWhite:["A cool breeze at knee height.","Who turned this to full blast?"], floorAcBlack:["A cool breeze at knee height.","Who turned this to full blast?"],
@@ -2555,6 +2597,7 @@ function lookText(p){
     const o = deskOwner(p), bits = ["sticky notes and three pens that don't work","a cold glass of tea","a neat pile of folders","cables everywhere","a tiny plant and a phone charger"];
     return (o ? `${o.name}'s desk: ` : "A desk: ") + pick(bits) + ".";
   }
+  if (t === "trayTable") return pick(TRAY_LOOK[trayNow] || TRAY_LOOK.empty);
   if (LOOK[t]) return pick(LOOK[t]);
   const nm = (CATALOG[t] && CATALOG[t].name || t).toLowerCase();
   return `A ${nm}.`;
