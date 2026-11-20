@@ -205,6 +205,16 @@ canvas.logo{image-rendering:pixelated;image-rendering:crisp-edges}
 .ghost:hover{border-color:#4a515c}
 
 .ghud{position:fixed;inset:0;pointer-events:none;z-index:4}
+.way{position:fixed;left:0;top:0;z-index:8;pointer-events:none;opacity:0;transition:opacity .2s;will-change:transform}
+.way.show{opacity:1}
+.way svg{display:block;overflow:visible;filter:drop-shadow(0 2px 0 rgba(0,0,0,.55))}
+.way .wb{fill:rgba(10,13,18,.78);stroke:#f4b44c;stroke-width:2.5}
+.way.on .wb{fill:none;stroke:none}
+.way .wo{fill:#0b0d11;stroke:#0b0d11;stroke-width:3;stroke-linejoin:round}
+.way .wi{fill:#f4b44c}
+.way.on .wo{stroke:#fff3d6;stroke-width:2}
+.way.edge .wb{animation:wayp 1.1s ease-in-out infinite}
+@keyframes wayp{50%{stroke:#ffe2a8;stroke-width:3.5}}
 .tasks{position:absolute;left:max(12px,env(safe-area-inset-left));top:max(46px,calc(env(safe-area-inset-top) + 34px));width:min(250px,34vw);max-height:calc(100% - 140px);overflow:auto;background:rgba(10,13,18,.8);border:1px solid #2a2f37;border-radius:6px;padding:7px 8px 8px;pointer-events:auto}
 .tasks .th{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12px;letter-spacing:.06em;color:var(--amber);margin:0 0 5px}
 .tasks .th small{color:var(--dim);letter-spacing:.02em;font-size:11px}
@@ -584,6 +594,7 @@ html.lj-gate .title,html.lj-gate .rotate,html.lj-gate .inst{display:none!importa
 </div>
 <button class="abil" id="gAbil" hidden><kbd>Q</kbd><span class="an"></span></button>
 <div class="tcard" id="tcard" hidden></div>
+<div class="way" id="way" aria-hidden="true"><svg viewBox="-26 -26 52 52" width="52" height="52"><circle class="wb" r="23"/><path class="wo" d="M17 0 L-11 -15 L-5 0 L-11 15 Z"/><path class="wi" d="M13 0 L-7 -10.5 L-2.5 0 L-7 10.5 Z"/></svg></div>
 <div class="menu" id="menu" hidden>
   <div class="mscr" id="mainScr">
     <h2>HOW DO YOU WANT TO PLAY?</h2>
@@ -4372,27 +4383,67 @@ function markerTarget(){
   const tg = target(G.track); if (!tg || tg.away || tg.anywhere) return null;
   return tg.npc ? {x:tg.npc.x, y:tg.npc.y, h:34} : {x:tg.x, y:tg.y, h:24};
 }
+// the wayfinding arrow: a big amber arrow drawn above everything (characters, speech bubbles, buttons),
+// pointing down at the target when it's on screen, or from the screen edge toward it when it isn't,
+// always nudged clear of the task list, the top bar and the ability button
 function drawWorld(cx, cy){
-  const m = markerTarget(); if (!m || ed.on) return;
-  ctx.setTransform(HR,0,0,HR,0,0);
-  const bob = Math.round(Math.sin(state.t*4)*1.5), x = m.x - cx, y = m.y - cy;
-  const onScreen = x > 6 && x < VW-6 && y - m.h > 6 && y < VH-6;
-  if (onScreen){
-    const pul = 0.35 + 0.25*Math.sin(state.t*5);
-    ctx.strokeStyle = `rgba(242,181,82,${pul})`; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.ellipse(x, y, 10, 4, 0, 0, Math.PI*2); ctx.stroke();
-    const ty = y - m.h + bob;
-    ctx.fillStyle = "#0b0d11"; ctx.beginPath(); ctx.moveTo(x-5, ty-6); ctx.lineTo(x+5, ty-6); ctx.lineTo(x, ty+1); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = "#f2b552"; ctx.beginPath(); ctx.moveTo(x-3.5, ty-5); ctx.lineTo(x+3.5, ty-5); ctx.lineTo(x, ty-0.5); ctx.closePath(); ctx.fill();
-  } else {
-    const ox = VW/2, oy = VH/2, dx = x - ox, dy = (y - m.h/2) - oy, a = Math.atan2(dy, dx);
-    const k = Math.min((VW/2 - 14) / Math.abs(Math.cos(a) || 1e-6), (VH/2 - 14) / Math.abs(Math.sin(a) || 1e-6));
-    const ax = ox + Math.cos(a)*k, ay = oy + Math.sin(a)*k;
-    ctx.save(); ctx.translate(Math.round(ax), Math.round(ay)); ctx.rotate(a);
-    ctx.fillStyle = "#0b0d11"; ctx.beginPath(); ctx.moveTo(8+bob*0.5, 0); ctx.lineTo(-5, -7); ctx.lineTo(-5, 7); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = "#f2b552"; ctx.beginPath(); ctx.moveTo(6+bob*0.5, 0); ctx.lineTo(-3.5, -5); ctx.lineTo(-3.5, 5); ctx.closePath(); ctx.fill();
-    ctx.restore();
+  const m = markerTarget(), el = $("way");
+  if (!m || ed.on || G.paused){ if (el) el.classList.remove("show"); return; }
+  const x = m.x - cx, y = m.y - cy;
+  // a soft ring on the floor at the target
+  if (x > -20 && x < VW+20 && y > -20 && y < VH+20){
+    ctx.setTransform(HR,0,0,HR,0,0);
+    const pul = 0.55 + 0.3*Math.sin(state.t*5);
+    ctx.lineWidth = 1.5; ctx.strokeStyle = `rgba(244,180,76,${pul})`;
+    ctx.beginPath(); ctx.ellipse(x, y, 13, 5, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = `rgba(11,13,17,${pul*0.6})`; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(x, y, 15, 6.5, 0, 0, Math.PI*2); ctx.stroke();
   }
+  placeWay(el, cx, cy, m);
+}
+function wayObstacles(){
+  const out = [];
+  for (const id of ["gTasks","gMeter","gAbil","room","tcard","toast"]){
+    const e = $(id); if (!e || e.hidden || e.offsetParent === null) continue;
+    const r = e.getBoundingClientRect(); if (r.width < 2 || r.height < 2) continue;
+    if (id === "toast" && !e.classList.contains("show")) continue;
+    out.push(r);
+  }
+  const b = document.querySelector(".hud .btns"); if (b){ const r = b.getBoundingClientRect(); if (r.width > 2) out.push(r); }
+  return out;
+}
+function placeWay(el, cx, cy, m){
+  if (!el) return;
+  const r = cv.getBoundingClientRect(), kx = r.width / VW, ky = r.height / VH, R = 26, PAD = 10;
+  const tx = r.left + (m.x - cx) * kx, ty = r.top + (m.y - m.h - cy) * ky;
+  const safe = {l: Math.max(r.left, 0) + R + 4, t: Math.max(r.top, 0) + R + 4, r: Math.min(r.right, innerWidth) - R - 4, b: Math.min(r.bottom, innerHeight) - R - 4};
+  const obs = wayObstacles();
+  const hits = (px, py) => obs.some(o => px + R > o.left - PAD && px - R < o.right + PAD && py + R > o.top - PAD && py - R < o.bottom + PAD);
+  const bob = Math.sin(state.t*4) * 4;
+  let px, py, rot;
+  if (tx > safe.l && tx < safe.r && ty - 20 > safe.t && ty < safe.b && !hits(tx, ty - 22)){
+    px = tx; py = ty - 22 + bob; rot = 90;                         // on screen: hover above the target, pointing down
+    el.classList.add("on"); el.classList.remove("edge");
+  } else {
+    const ox = (safe.l + safe.r) / 2, oy = (safe.t + safe.b) / 2, dx = tx - ox, dy = ty - oy, a = Math.atan2(dy, dx);
+    const k0 = Math.min((safe.r - ox) / Math.max(1e-6, Math.abs(Math.cos(a))), (safe.b - oy) / Math.max(1e-6, Math.abs(Math.sin(a))));
+    let k = Math.min(k0, Math.hypot(dx, dy));
+    px = ox + Math.cos(a)*k; py = oy + Math.sin(a)*k;
+    for (let i = 0; i < 120 && hits(px, py) && k > 0; i++){ k -= 6; px = ox + Math.cos(a)*k; py = oy + Math.sin(a)*k; }
+    if (hits(px, py)){                                              // still covered: slide along the edge until clear
+      for (let s2 = 6; s2 < 400; s2 += 6){
+        let found = false;
+        for (const sg of [1, -1]){ const qx = px - Math.sin(a)*s2*sg, qy = py + Math.cos(a)*s2*sg;
+          if (qx > safe.l && qx < safe.r && qy > safe.t && qy < safe.b && !hits(qx, qy)){ px = qx; py = qy; found = true; break; } }
+        if (found) break;
+      }
+    }
+    px += Math.cos(a) * bob * 0.6; py += Math.sin(a) * bob * 0.6;
+    rot = a * 180 / Math.PI;
+    el.classList.add("edge"); el.classList.remove("on");
+  }
+  el.style.transform = `translate(${Math.round(px)}px, ${Math.round(py)}px) translate(-50%, -50%) rotate(${rot.toFixed(1)}deg)`;
+  el.classList.add("show");
 }
 
 // ---------- character select ----------
