@@ -168,7 +168,17 @@ canvas.logo{image-rendering:pixelated;image-rendering:crisp-edges}
 .cc .ai b{color:var(--ink);font-weight:600}
 .cc .ai i{font-style:normal;font-size:.85em;letter-spacing:.03em;color:var(--amber);margin-left:5px}
 .cc.on .ai{border-left-color:var(--amber)}
-@media (max-height:430px){.cc .mt .bl{display:none}}
+/* short phone screens: make room for everything on the character cards, personality line included */
+@media (max-height:430px){
+  #charScr .sub{display:none}
+  #charScr h2{font-size:17px}
+  .cc{gap:2px;padding:5px 7px}
+  .cc .por{height:clamp(40px,11vh,52px)}
+  .cc .nm{font-size:14px}
+  .cc .abx{gap:3px;margin-top:1px}
+  .cc .ai,.cc .mt,.cc .hr{font-size:9.5px;line-height:1.22}
+  .cc .pg{padding:1px 4px}
+}
 .cc .mt{font-size:clamp(9px,1.5vh,11px);color:var(--dim);line-height:1.25}
 .cc .mt b{color:var(--ink);font-weight:600}
 .mrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center}
