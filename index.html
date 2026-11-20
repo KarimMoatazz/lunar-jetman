@@ -4072,7 +4072,7 @@ function beginDay(cid, withTut){
   G.track = null; G.stars = 0; G.meter = G.char.meter.start; G.lastPanel = ""; G.allDoneShown = false;
   G.smoothUses = (G.char.abilities.find(a => a.uses) || {}).uses || 0; G.burst = false; G.cool = {}; G.talkCool = {};
   G.nextEvent = clock.min + rnd(50, 80); G.callN = 0;
-  G.outage = null; G.outageAt = Math.random() < 0.45 ? rnd(G.char.start + 80, G.char.end - 110) : Infinity;
+  G.outage = null; G.outageAt = Math.random() < 0.25 ? rnd(G.char.start + 80, G.char.end - 110) : Infinity;
   try { const c = localStorage.getItem("lj_col"); G.collapsed = c ? c === "1" : innerHeight < 430; } catch(e){ G.collapsed = innerHeight < 430; }
   if (withTut) G.collapsed = false;
   G.mode = "day"; G.paused = false;
