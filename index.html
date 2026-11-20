@@ -1456,6 +1456,19 @@ function drawPerson(g, X, Y, L, A){
       if (A.tool==="broom"){ p(W-4+sweep, -6, 10, 2, "#6b4a2a"); p(W-5+sweep, -4, 12, 3, "#c9a253"); p(W-5+sweep, -2, 12, 1, "#a5823d"); }
       else { p(W-4+sweep, -4, 10, 3, "#b9b6a8"); p(W-4+sweep, -2, 10, 1, "#8e8b80"); }
     }
+  } else if (pose==="smoke"){
+    const lift = Math.sin(t*0.9) > 0.55, hyy = (sit ? -47 : -49) + bob, cig = "#f4f1ea", ember = "#e2572b";
+    const puff = (t*7) % 12;
+    if (side){
+      if (lift){ p(ax, ty+2, 5, 7, sleeve); p(flip>0?2:-7, ty-2, 5, 5, sleeve); p(flip>0?3:-5, ty-3, 3, 3, L.skin); p(flip>0?6:-9, ty-4, 4, 1, cig); p(flip>0?9:-9, ty-4, 1, 1, ember); }
+      else { p(ax+sw*flip, ty+2, 5, 15, sleeveHi); p(ax+sw*flip+1, ty+2, 3, 15, sleeve); p(ax+sw*flip, ty+17, 5, 3, L.skin); p(ax+sw*flip+(flip>0?4:-3), ty+17, 4, 1, cig); p(ax+sw*flip+(flip>0?7:-3), ty+17, 1, 1, ember);
+        p(ax+sw*flip+(flip>0?6:-2), ty+14-puff, 2, 2, "rgba(225,225,225,.45)"); }
+    } else {
+      arm(-W-3, ty+2, 15, sleeveHi);
+      if (lift && dir!=="up"){ p(W-1, ty+2, 4, 6, sleeve); p(W-5, ty+2, 5, 5, sleeve); p(W-3, hyy+15, 3, 3, L.skin); p(W-7, hyy+15, 4, 1, cig); p(W-8, hyy+15, 1, 1, ember); }
+      else { arm(W-1, ty+2, 15, null); p(W-1, ty+17, 1, 4, cig); p(W-1, ty+21, 1, 1, ember); p(W-2, ty+12-puff, 2, 2, "rgba(225,225,225,.45)"); }
+    }
+    if (lift) p(-1 + Math.round(Math.sin(t*2)*2), hyy - 3 - puff, 3, 2, "rgba(225,225,225,.4)");
   } else if (pose==="phone" || pose==="drink" || pose==="talk"){
     const lift = pose==="drink" ? (Math.sin(t*1.3) > 0.35) : true;
     const gest = pose==="talk" ? Math.round(Math.sin(t*5)*2) : 0;
@@ -1683,7 +1696,7 @@ const TEAM = [
   { id:"amr", name:"Amr Fawzy", role:"Office manager", room:6, seat:[456,190], arrive:[540,570], leave:[1050,1110], visitor:true,
     look:{ skin:"medium", hairStyle:"short", hair:"#2b2420", hairHi:"#4a3f37", beardStyle:"none", top:"blazer", topC:"#1f2a3d", topSh:"#172030", topHi:"#2b3850",
       accent:"#f2efe8", tie:"#6e2430", bottom:"#2b2d33", bottomSh:"#202226", bottomHi:"#383a41", shoe:"#3a2418", sole:"#160d08", w:11 },
-    acts:{ work:4, coffee:1, rounds:3, lab:1, visit:3, window:1, brief:2 }, visits:["osama","mohamed","zeina","yassin","nour","karim"],
+    acts:{ work:4, coffee:1, rounds:3, lab:1, visit:2, window:1, brief:2, team:2 }, visits:["osama","mohamed","zeina","yassin","nour","karim"],
     lines:["Sabah el kheir, everyone!","Just passing through from the other branch.","Meeting room in five minutes.","I'm only here for an hour.","The lab stays locked, my friend.","Make sure the invoices go out today."] },
   // ---- from the other branch: drop in now and then, for Amr's briefs, tasks and a chat ----
   { id:"ehab", branch:true, visitor:true, designer:true, name:"Ehab", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
@@ -1722,6 +1735,12 @@ const TEAM = [
       bottom:"#2e2c2a", bottomSh:"#22211f", bottomHi:"#3b3936", shoe:"#ecebe6", sole:"#a9a7a0" },
     acts:{ visit:4, coffee:1, lounge:1, window:1, work:4 }, visits:["mohamed","karim","nour","osama","joy"],
     lines:["Wait, how did you do that? Show me.","I watched a tutorial on this last night.","Every day is a school day.","Can I sit in on that? Just to learn.","Interesting. Very interesting.","I'm taking notes, don't mind me."] },
+  { id:"salma", branch:true, visitor:true, bath:1, name:"Salma", role:"Account manager, other branch", room:4, seat:[60,362], arrive:[0,0], leave:[0,0],
+    hello:["Hiii. Yassin, I'm here! Clear my side of the desk.","Morning, everyone. Yes, I know, the hair is new."],
+    look:{ female:true, w:9, skin:"fair", hairStyle:"long", hair:"#d9b56a", hairHi:"#f0d48e", top:"blazer", topC:"#f3eee6", topSh:"#d8d1c4", topHi:"#ffffff", accent:"#1d1d22",
+      bottom:"#1d1d22", bottomSh:"#141418", bottomHi:"#28282f", shoe:"#c8a27a", sole:"#7a5b3c", lips:"#c0645e", necklace:"#d4af37" },
+    acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["yassin","yassin","zeina","rana","dina"],
+    lines:["Yassin, move your stuff, this is my side.","Iced latte, oat milk. Obviously.","Ugh, cute. I love it.","I don't do stress. Stress does me.","Yassin and I go way back. Don't believe anything he says.","Is it Thursday yet?"] },
   { id:"rawda", branch:true, visitor:true, bath:1, name:"Rawda", role:"Account manager, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hi everyone! Sorry, I'm a bit all over the place today.","Morning! Okay, I'm here, I'm here."],
     look:{ female:true, w:9, skin:"medium", hairStyle:"bangs", hair:"#3a2219", hairHi:"#5e3b2a", top:"shirt", topC:"#a99bd1", topSh:"#8c7eb6", topHi:"#bdb2de", accent:"#ece6f6",
@@ -1766,6 +1785,8 @@ const TEAM = [
     acts:{ tea:2, order:3, bring:3, delivery:2, coffeeAmr:1, wash:2, kitchenSit:2, sweep:1, chatStaff:1 }, lines:["Nescafe? Of course.","Three sugars, as usual?","They call me Nescafe for a reason.","Coming right up.","Your order is here."] }
 ];
 TEAM.forEach(d => { d.seat = mapR(d.seat[0], d.seat[1]); });
+const SEAT_FIX = { zeina:[100,314], yassin:[66,436] };     // room 4 rearranged: Zeina faces Yassin and Salma's shared desk
+TEAM.forEach(d => { if (SEAT_FIX[d.id]) d.seat = SEAT_FIX[d.id].slice(); });
 const THANKS = ["Shukran!","Thank you!","You're the best.","Perfect timing.","Allah yekhalik."];
 const CHAT = ["Did you see the email?","Ha, no way.","Let's do it after lunch.","Fine, fine.","I'll check and tell you.","Tomorrow, inshallah.","Exactly what I said.","Send it to me."];
 
@@ -1940,6 +1961,15 @@ const PLANS = {
     pts.forEach(p => { out.push(go(p[0], p[1]), wait(rnd(3,6), "stand", p[2], {say: Math.random()<0.5 ? pick(["Everything good?","Sabah el kheir!","Keep it up."]) : null})); }); return [...out, ...homeWork(n)]; },
   visit: n => visitPlan(n, pick(n.visits)),
   brief: n => (clock.min - (clock.lastMeeting || -999) > 150 && callMeeting(n)) || homeWork(n),
+  team: n => {
+    const [x, y] = AMR_TEAM_SEAT, s = seatNear(x, y);
+    if (!s || seatTaken.has(s.id)) return homeWork(n);
+    const coffee = Math.random() < 0.6 ? [go(...POI.counter.slice(0,2)), wait(rnd(4,7), "stand", "up")] : [];
+    return [...coffee, sitAt(s.x, s.y, {room:5}),
+      wait(rnd(10,16), coffee.length ? "drink" : "talk", null, {say: pick(AMR_TEAM_LINES)}),
+      wait(rnd(14,24), "smoke", null, {say: pick(["Anyone mind if I smoke? No? Good.","Just one. Then back to work.","*lights a cigarette*"])}),
+      wait(rnd(10,18), "talk", null, {chatter:true, say: pick(AMR_TEAM_LINES)}), ...homeWork(n)];
+  },
   checkteam: n => visitPlan(n, pick(["hany","sherif","magdy","tarek","wael"]), ["Show me the numbers.","Is this final?","Good. Send it."]),
   fixpc: n => { const t = pick(npcs.filter(m => m!==n && !m.kitchen && busySeated(m))); if (!t) return homeWork(n);
     return [{do:"visit", who:t.id, t:rnd(12,18), pose:"type", script: scriptFor(n, t)}, ...homeWork(n)]; },
@@ -1994,15 +2024,23 @@ function scheduleBranch(){
     if (on(e) && !on(r) && Math.random() < 0.65) set(r, e.arriveAt + rnd(0, 6), e.leaveAt - e.arriveAt + rnd(-10, 10));
     else if (on(r) && !on(e) && Math.random() < 0.65) set(e, r.arriveAt + rnd(0, 6), r.leaveAt - r.arriveAt + rnd(-10, 10));
   }
+  // Salma and Yassin are old friends: she comes in more often on days he's in
+  const sa = npcById("salma"), ya = npcById("yassin");
+  if (sa && !on(sa) && ya && Math.random() < 0.08) set(sa, rnd(660, 900), rnd(70, 150));
   // never more than four in one day
   br.filter(on).sort(() => Math.random() - .5).slice(4).forEach(n => { n.arriveAt = Infinity; n.leaveAt = -1; });
 }
 // designers from the other branch work at the spare computers in Karim & Nour's studio; Rawda (accounts) sits with Zeina
+const BRANCH_DESK = { joy:[114,497], nourk:[163,497], rawda:[351,489], ehab:[351,569], aya:[202,581], dina:[130,581], salma:[90,436] };
+const AMR_TEAM_SEAT = [278,581];     // desk 5 in the studio: Amr comes to sit with the team now and then
 function branchSeat(n){
   const mine = s => npcs.some(m => m !== n && visible(m) && m.seat && Math.hypot(m.seat[0]-s.x, m.seat[1]-s.y) < 8);
-  const hasScreen = s => props.some(q => (q.type==="monitor" || q.type==="dualMonitor" || q.type==="imac" || q.type==="laptop") && Math.hypot(q.x-s.x, q.y-s.y) < 30);
-  let list = (n.id === "rawda" ? seatsIn(4, "officeChair") : seatsIn(5, "officeChair")).filter(s => hasScreen(s) && !mine(s) && !s.locked);
-  if (!list.length) list = seatsIn(3).concat(seatsIn(18)).filter(s => !mine(s));
+  const fixed = BRANCH_DESK[n.id];
+  if (fixed){
+    const s = props.filter(q => SEAT_TYPES.has(q.type)).sort((a, b) => Math.hypot(a.x-fixed[0], a.y-fixed[1]) - Math.hypot(b.x-fixed[0], b.y-fixed[1]))[0];
+    if (s && Math.hypot(s.x-fixed[0], s.y-fixed[1]) < 16){ n.seat = [s.x, s.y]; n.room = propRoom(s); return; }
+  }
+  let list = seatsIn(3).concat(seatsIn(18)).filter(s => !mine(s));
   const s = list.length ? pick(list) : null;
   if (s){ n.seat = [s.x, s.y]; n.room = propRoom(s); }
 }
@@ -2010,7 +2048,7 @@ function visitorPlan(n){
   if (n.branch) return visitPlan(n);
   if (n.visitKind === "meeting"){ const pl = callMeeting(n); if (pl) return pl; }
   if (Math.random() < 0.5) return homeWork(n);
-  const task = pick(["rounds","lab","visit","checkdesk"]);
+  const task = pick(["rounds","lab","visit","checkdesk","team","team"]);
   let body;
   if (task === "checkdesk") body = [sitAt(n.seat[0], n.seat[1]), wait(rnd(15, 30), "type")];
   else { const pl = PLANS[task](n), home = homeWork(n).length; body = pl.slice(0, pl.length - home); }
@@ -2073,6 +2111,7 @@ function callMeeting(lead){
   return [sitAt(s.x, s.y), {do:"wait", until:end, pose:"sit", meeting:true}, ...homeWork(lead)];
 }
 
+const AMR_TEAM_LINES = ["So, what are we working on today?","Show me something nice.","This studio has the best vibe in the building.","Karim, Nour, how's it going?","Don't mind me, I'm just sitting with you guys.","Who wants a coffee? My treat.","Tell me the truth, is the client happy?"];
 // ---------- conversations: each line answers the one before ----------
 const convos = [];
 function converse(a, b, lines){
@@ -2302,7 +2341,7 @@ function npcNear(){
   for (const n of npcs){ if (!visible(n)) continue; const d = Math.hypot(n.x - P.x, (n.y - P.y)*1.2); if (d < bd){ bd = d; best = n; } }
   return best;
 }
-const TEAM_NAMES = /\b(Karim|Zeina|Yassin|Nour|Osama|Hany|Sherif|Magdy|Tarek|Wael|Amr|Ahmed|Mohamed|Ostaz|Ehab|Aya|Dina|Rana|Joy|Rawda)\b/;
+const TEAM_NAMES = /\b(Karim|Zeina|Yassin|Nour|Osama|Hany|Sherif|Magdy|Tarek|Wael|Amr|Ahmed|Mohamed|Ostaz|Ehab|Aya|Dina|Rana|Joy|Rawda|Salma)\b/;
 function soloLine(n){ const all = (n.lines || []).filter(l => !TEAM_NAMES.test(l)); return pick(all.length ? all : (n.lines || ["..."])); }
 function holdForPlayer(n, secs){
   n.holdT = Math.max(n.holdT || 0, state.t + secs);
@@ -2516,7 +2555,7 @@ function placeHint(cx, cy){
 let hintItem = null;
 
 // ---------- conversations: lines per person, and short scripts by who is talking to whom ----------
-const GROUP = { ehab:"branch", aya:"branch", dina:"branch", rana:"branch", joy:"branch", nourk:"branch", rawda:"branch", zeina:"accounts", yassin:"accounts", nour:"design", amr:"amr", mohamed:"it", osama:"financeLead",
+const GROUP = { ehab:"branch", aya:"branch", dina:"branch", rana:"branch", joy:"branch", nourk:"branch", rawda:"branch", salma:"branch", zeina:"accounts", yassin:"accounts", nour:"design", amr:"amr", mohamed:"it", osama:"financeLead",
   hany:"finance", sherif:"finance", magdy:"finance", tarek:"finance", wael:"finance", yassin3am:"boys", ahmed:"boys", nescafe:"boys" };
 const LINES = {
   zeina:["Yassin, the deck. Today, please.","The client moved the call to three.","Coffee first, then emails.","Karim, can we have the logo by Thursday?","Who's joining the client call?","Let's keep it short, I have a meeting.","Three clients, one afternoon. Fun.","If the client calls, I'm in a meeting.","Karim, the client loved the moodboard.","We're pitching on Sunday. Be ready.","Nobody sends anything without my review.","Where's the signed contract?"],
@@ -2679,6 +2718,8 @@ Object.entries(MORE_SCRIPTS).forEach(([k, v]) => { if (!SCRIPTS[k]) SCRIPTS[k] =
 Object.assign(SCRIPTS, {
   "ehab>rawda":[["Habibti, calm down, it's one email.","One email with forty attachments, Ehab!","Okay, that's a lot."],["Lunch together?","If I finish this. Which I won't.","I'll bring it to you then."]],
   "rawda>ehab":[["Did you send the file?","Which file?","Ehab!","Kidding! I sent it this morning."],["Is my hair okay?","Perfect. Is mine?","Always, apparently."]],
+  "salma>yassin":[["Yassin! Remember our first job? You cried over a spreadsheet.","I did not cry. I sweated.","Same thing."],["Lunch? The usual place?","Only if you don't order for me again.","No promises."],["Did you finish your part?","Almost.","Yassin.","Okay, half."]],
+  "yassin>salma":[["Salma, your stuff is on my side again.","Our desk, Yassin. Our desk.","Fine. Our desk."],["Want a coffee?","Iced latte, oat milk.","I know, I know. Ten years, I know."]],
   "branch>branch":[["Their coffee is better than ours.","Their music is better too.","Don't tell our branch."],["Is Amr in today?","He said he'd pass by.","Look busy, then."]],
   "branch>*":[["Visiting from the other branch. Missed you all!","Missed you too. How's it over there?","Chaos, as usual."],["Do you have a spare charger?","Second drawer.","Lifesaver."],["Is it always this quiet here?","Only until Zeina's phone rings.","Ha!"]],
   "*>branch":[["Back again? Is Amr with you?","He's on his way.","Better look busy then."],["How's the other branch?","Busy. We need a holiday.","Don't we all."]],
@@ -2711,6 +2752,7 @@ Object.assign(MEET_PAIRS, {
   rana:[["Our social media numbers are up!","Great job. Keep it going."],["I planned the team outing!","As long as it's after the deadline."]],
   joy:[["Everything's on track. No drama.","My favourite kind of update."],["I finished the report early.","Early? Well done."]],
   nourk:[["I finished the analytics course.","Good. Teach the others what you learned."],["I have a question about the process.","Stay after and I'll walk you through it."]],
+  salma:[["The client approved everything. Yassin and I are a dream team.","Good. Keep it that way."],["I closed the new account yesterday.","Excellent work, Salma."]],
   rawda:[["Three deadlines this week, but it's under control. I think.","Breathe. Ask for help if you need it."],["The client changed everything last night.","We'll sort it out. One step at a time."]]
 });
 MEET_PAIRS.zeina.push(["The new client wants a full rebrand.","Big job. Make sure we price it right."]);
@@ -2895,7 +2937,7 @@ function serialize(){
   return { v:1, props: props.map(p => { const o = {id:p.id, type:p.type, x:p.x, y:p.y, rot:p.rot||0, sx:p.sx||1, sy:p.sy||1}; if (typeof p.z==="number") o.z = p.z; if (p.locked) o.locked = true; return o; }),
            doors: doors.map(d => ({n:d.n, i:d.i, j:d.j, v:d.v, glass:!!d.glass, locked:!!d.locked, kind:d.kind||"", off:d.off||0})),
            art: art.map(a => ({id:a.id, kind:a.kind, x:a.x, j:a.j, w:a.w, img:a.img||""})),
-           walls: {add:[...wallEdits.add], rem:[...wallEdits.rem]}, floors: {...floorOverrides}, furnished:1, branchDesks:1, ms:MS };
+           walls: {add:[...wallEdits.add], rem:[...wallEdits.rem]}, floors: {...floorOverrides}, furnished:1, branchDesks:3, ms:MS };
 }
 // one-time upgrade of a saved layout: add the furniture for every room (ids f1...) without touching anything already placed
 function mergeFurniture(L){
@@ -3024,11 +3066,18 @@ async function connect(){
 // EDITOR
 // ======================================================================
 // spare computers for the people from the other branch (5 in the studio, Rawda's desk with Zeina & Yassin)
-const BRANCH_DESKS = [{"id":"n1","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":114,"y":478,"z":18.5},{"id":"n2","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":163,"y":478,"z":18.5},{"id":"n3","rot":2,"sx":1,"sy":1,"type":"monitor","x":130,"y":585,"z":77.5},{"id":"n4","rot":2,"sx":1,"sy":1,"type":"monitor","x":202,"y":585,"z":77.5},{"id":"n5","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":478,"z":77.5},{"id":"n6","rot":0,"sx":1,"sy":1,"type":"desk","x":128,"y":384},{"id":"n7","rot":0,"sx":1,"sy":1,"type":"laptop","x":124,"y":374},{"id":"n8","rot":0,"sx":1,"sy":1,"type":"papers","x":138,"y":377},{"id":"n9","rot":2,"sx":1,"sy":1,"type":"officeChair","x":128,"y":402}];
+const BRANCH_DESKS = [{"id":"n1","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":114,"y":478,"z":18.5},{"id":"n2","rot":0,"sx":0.8,"sy":0.8,"type":"dualMonitor","x":163,"y":478,"z":18.5},{"id":"n3","rot":2,"sx":1,"sy":1,"type":"monitor","x":130,"y":585,"z":77.5},{"id":"n4","rot":2,"sx":1,"sy":1,"type":"monitor","x":202,"y":585,"z":77.5},{"id":"n5","rot":3,"sx":1,"sy":1,"type":"monitor","x":361,"y":478,"z":77.5},{"id":"n10","rot":2,"sx":1,"sy":1,"type":"officeChair","x":90,"y":436},{"id":"n11","rot":0,"sx":1,"sy":1,"type":"laptop","x":90,"y":410}];
+// room 4 rearranged (Zeina's desk faces Yassin and Salma's shared desk, more room between them)
+const ROOM4_MOVES = { f3:{x:100,y:332,rot:2}, f4:{x:100,y:336,rot:2}, f5:{x:100,y:328,rot:2}, f6:{x:113,y:329}, f7:{x:100,y:314,rot:0},
+  f8:{x:78,y:418,sx:1.6}, f9:{x:66,y:410}, f10:{x:101,y:411}, f11:{x:53,y:412}, f12:{x:66,y:436}, f13:{x:138,y:410}, f16:{x:128,y:336} };
+const BRANCH_DESKS_GONE = new Set(["n6","n7","n8","n9"]);
 function withBranchDesks(L){
-  if (L.branchDesks) return L;
-  const have = new Set((L.props||[]).map(q => q.id));
-  return {...L, branchDesks:1, props:(L.props||[]).concat(BRANCH_DESKS.filter(q => !have.has(q.id)))};
+  const v = L.branchDesks || 0; if (v >= 3) return L;
+  let props = (L.props||[]).filter(q => !BRANCH_DESKS_GONE.has(q.id)).map(q => ROOM4_MOVES[q.id] ? {...q, ...ROOM4_MOVES[q.id]} : q);
+  const have = new Set(props.map(q => q.id));
+  const add = BRANCH_DESKS.filter(q => !have.has(q.id) && (v === 0 || q.id === "n10" || q.id === "n11"));
+  props = props.map(q => (q.id === "n10" || q.id === "n11") ? {...q, ...BRANCH_DESKS.find(b => b.id === q.id)} : q);
+  return {...L, branchDesks:3, props: props.concat(add)};
 }
 function snapshot(){ ed.undo.push(JSON.stringify(serialize())); if (ed.undo.length > 80) ed.undo.shift(); syncEdUI(); }
 function undo(){
@@ -4696,8 +4745,22 @@ MG.print = { name:"Collate the pages", time:24,
 // WORKDAY CONTENT (Nov 2026): shuffled task pools, more minigames, events, conversations
 // ======================================================================
 function goodMeter(n){ if (!G.char) return; bumpMeter(G.char.meter.good === "high" ? n : -n); }
-const CLIENTS = ["Nile Bakery","Sahel Surf Co.","Orbit Gym","Mesk Perfumes","Lumen Clinic"];
-const CONTACT = {"Nile Bakery":"Hesham","Sahel Surf Co.":"Mona","Orbit Gym":"Tamer","Mesk Perfumes":"Laila","Lumen Clinic":"Rania"};
+// every person has their own clients (a few are shared where two people work on the same account)
+const CLIENT_BOOK = {
+  karim:["Nile Bakery","Mesk Perfumes","Atlas Coffee","Qasr Hotels"],          // brand identity, packaging, print
+  nour:["Sahel Surf Co.","Orbit Gym","Kiwi Kids","Luna Swimwear"],             // social, illustration, campaigns
+  zeina:["Qasr Hotels","Lumen Clinic","Delta Motors","Mesk Perfumes"],         // the big accounts, contracts, payments
+  yassin:["Nile Bakery","Orbit Gym","Kiwi Kids","Zest Juice Bar"],             // day-to-day social accounts
+  ehab:["Cairo Film Week","Atlas Coffee"], aya:["Bloom Florists","Pharaoh Pharma"], dina:["Maison Nour Jewellery","Qasr Hotels"],
+  rana:["Pop Rocks Candy","Sahel Surf Co."], joy:["Green Leaf Tea","Luna Swimwear"], nourk:["Byte Academy","Orbit Gym"],
+  salma:["Velvet Spa","Zest Juice Bar"], rawda:["Horizon Realty","Delta Motors"]
+};
+const CLIENTS = [...new Set(Object.values(CLIENT_BOOK).flat())];
+const CONTACT = {"Nile Bakery":"Hesham","Sahel Surf Co.":"Mona","Orbit Gym":"Tamer","Mesk Perfumes":"Laila","Lumen Clinic":"Rania","Atlas Coffee":"Sherif",
+  "Qasr Hotels":"Mrs. Hoda","Kiwi Kids":"Dalia","Luna Swimwear":"Nada","Delta Motors":"Eng. Adel","Zest Juice Bar":"Omar","Cairo Film Week":"Marwan",
+  "Bloom Florists":"Farida","Pharaoh Pharma":"Dr. Samy","Maison Nour Jewellery":"Madame Nour","Pop Rocks Candy":"Ziad","Green Leaf Tea":"Mai",
+  "Byte Academy":"Karim S.","Velvet Spa":"Yasmine","Horizon Realty":"Hossam"};
+const clientsFor = id => CLIENT_BOOK[id] || CLIENTS;
 const BRAND = c => c.split(" ")[0].toUpperCase();
 const HANDLE = c => "@" + c.toLowerCase().replace(/[^a-z]/g, "");
 // Each pool is a list of chains. A chain's tasks run in order; "p" is the chance a chain is always in the day,
@@ -4709,13 +4772,14 @@ const POOLS = {
     {keep:true, n:[{title:"Get the {c} brief from Yassin", where:"npc:yassin", talk:["Yassin, what's the {c} brief?","Logo bigger, colours greener, deadline yesterday."]},
                    {title:"Design the {c} logo", where:"desk", game:"pixel"},
                    {title:"Send the logo to Zeina", where:"npc:zeina", talk:["Zeina, the {c} logo's in your inbox.","Perfect. The client will love it."]}]},
-    {keep:true, n:[{title:"Pick brand colours with Nour", where:"npc:nour", game:"color"},{title:"Lay out the {c} post", where:"desk", game:"align"}]},
+    {keep:true, n:[{title:"Pick brand colours with Nour", where:"npc:nour", game:"color"},{title:"Lay out the {c} letterhead", where:"desk", game:"align"}]},
     {n:[{title:"Fix the jammed printer", where:"printer", game:"wires"}]},
-    {n:[{title:"Proofread the {c} caption", where:"desk", game:"typos"}]},
-    {n:[{title:"Find the final {c} files", where:"desk", game:"findfile"}]},
-    {n:[{title:"Export the {c} social sizes", where:"desk", game:"sizes"}]},
-    {keep:true, n:[{title:"Check the {c} print proof", where:"printer", game:"proof"}]},
-    {n:[{title:"Sort the {c} asset folder", where:"desk", game:"memory"}]},
+    {n:[{title:"Proofread the {c} brand guidelines", where:"desk", game:"typos"}]},
+    {n:[{title:"Dig up the {c} logo source files", where:"desk", game:"findfile"}]},
+    {n:[{title:"Kern the {c} wordmark", where:"desk", game:"align"}]},
+    {keep:true, n:[{title:"Check the {c} packaging proof", where:"printer", game:"proof"}]},
+    {n:[{title:"Match the {c} business card pairs", where:"desk", game:"memory"}]},
+    {n:[{title:"Draw the {c} logo icon", where:"desk", game:"pixel"}]},
     {n:[{title:"Hand Osama your taxi receipts", where:"npc:osama", game:"receipts"}]},
     {n:[{title:"Ask Mohamed Ali for the new fonts", where:"npc:mohamed", talk:["Mohamed, can you install the {c} fonts?","Send me the files. Only those, please."]}]}
   ],
@@ -4726,23 +4790,24 @@ const POOLS = {
                    {title:"Approve the logo proof", where:"npc:karim", game:"proof", from:800},
                    {title:"Print the final for the client", where:"printer", game:"print"}]},
     {p:0.6, n:[{title:"Run errands: bank and courier", where:"door", game:"errand", from:840}]},
-    {n:[{title:"Book the meeting room for {c}", where:"desk", game:"meeting"}]},
+    {n:[{title:"Set up the {c} pitch meeting", where:"desk", game:"meeting"}]},
     {n:[{title:"Approve the {c} expenses with Osama", where:"npc:osama", game:"receipts"}]},
     {n:[{title:"Brief Yassin on {c}", where:"npc:yassin", talk:["Yassin, {c} wants a proposal by Thursday.","On it. Well, after lunch."]}]},
-    {n:[{title:"Proofread the {c} proposal", where:"desk", game:"typos"}]},
+    {n:[{title:"Proofread the {c} contract", where:"desk", game:"typos"}]},
     {n:[{title:"Second client call", where:"anywhere", game:"call", from:960, note:"Walk and talk: answer anywhere"}]},
     {n:[{title:"Chase the {c} payment with Osama", where:"npc:osama", talk:["Osama, did {c} pay yet?","Not yet. I'll call them today."]}]},
-    {n:[{title:"Print the {c} contract", where:"printer", game:"print"}]}
+    {n:[{title:"Print the {c} quarterly report", where:"printer", game:"print"}]}
   ],
   nour:[
     {p:0.8, first:true, n:[{title:"Catch up with Yassin", where:"npc:yassin", talk:["Morning, Yassin. What did I miss?","{c} wants a post. And Zeina's already on her third call."]}]},
     {keep:true, n:[{title:"Sketch the {c} mascot", where:"desk", game:"pixel"},{title:"Build the {c} palette", where:"desk", game:"color"},{title:"Lay out the {c} poster", where:"desk", game:"align"}]},
     {keep:true, n:[{title:"Check the print proof", where:"printer", game:"proof"},{title:"Show Zeina the poster", where:"npc:zeina", talk:["Zeina, the poster's ready. Take a look.","Love it. Don't touch it again."]}]},
     {keep:true, n:[{title:"Pick logo colours with Karim", where:"npc:karim", game:"color", from:750}]},
-    {n:[{title:"Export the {c} social sizes", where:"desk", game:"sizes"}]},
-    {n:[{title:"Proofread the {c} flyer", where:"desk", game:"typos"}]},
-    {n:[{title:"Organise the {c} asset folder", where:"desk", game:"memory"}]},
-    {n:[{title:"Find the {c} logo file", where:"desk", game:"findfile"}]},
+    {n:[{title:"Export the {c} story and reel sizes", where:"desk", game:"sizes"}]},
+    {n:[{title:"Proofread the {c} carousel captions", where:"desk", game:"typos"}]},
+    {n:[{title:"Match the {c} animation frames", where:"desk", game:"memory"}]},
+    {n:[{title:"Pick photos for the {c} feed", where:"desk", game:"findfile"}]},
+    {n:[{title:"Colour the {c} campaign illustration", where:"desk", game:"color"}]},
     {n:[{title:"Fix the tablet cable with Mohamed Ali", where:"npc:mohamed", game:"wires"}]}
   ],
   yassin:[
@@ -4753,11 +4818,11 @@ const POOLS = {
         {title:"Hand the deck to Zeina", where:"npc:zeina", talk:["Deck's printed and ready, Zeina.","Finally! Good job, Yassin."]}]},
     {n:[{title:"Afternoon coffee run", where:"kitchen", game:"coffee", from:840}]},
     {p:0.7, n:[{title:"Send the end-of-day update", where:"desk", game:"inbox", from:930, due:1015}]},
-    {n:[{title:"Book the meeting room for {c}", where:"desk", game:"meeting"}]},
-    {n:[{title:"Find the {c} contract", where:"desk", game:"findfile"}]},
+    {n:[{title:"Schedule the {c} shoot day", where:"desk", game:"meeting"}]},
+    {n:[{title:"Find last month's {c} report", where:"desk", game:"findfile"}]},
     {n:[{title:"Submit your expenses to Osama", where:"npc:osama", game:"receipts"}]},
-    {n:[{title:"Proofread the {c} caption", where:"desk", game:"typos"}]},
-    {n:[{title:"Check the {c} post sizes", where:"desk", game:"sizes"}]},
+    {n:[{title:"Proofread the {c} content calendar", where:"desk", game:"typos"}]},
+    {n:[{title:"Match the {c} posts to their dates", where:"desk", game:"memory"}]},
     {n:[{title:"Ask Karim for the {c} logo", where:"npc:karim", talk:["Karim, any news on the {c} logo?","Tonight. Maybe tomorrow morning."], from:735}]}
   ]
 };
@@ -4774,7 +4839,7 @@ function buildDayTasks(cid){
   // a chain you can start right away goes first, then the rest in random order
   const firsts = sh(chosen.filter(c => c.first)), others = sh(chosen.filter(c => !c.first));
   chosen = firsts.concat(others);
-  const clients = sh(CLIENTS); let ci = 0, k = 0;
+  const clients = sh(clientsFor(cid)); let ci = 0, k = 0;
   const start = CHARS[cid].start, end = CHARS[cid].end, tasks = [];
   G.dayN = (G.dayN || 0) + 1;
   chosen.forEach((c, idx) => {
@@ -4796,27 +4861,33 @@ function buildDayTasks(cid){
 
 // ---------- bonus tasks when Amr or someone from the other branch is in ----------
 const BRANCH_TASK = {
-  ehab:{title:"Help Ehab find the {c} files", game:"findfile"},
-  aya:{title:"Check the {c} expenses Aya brought", game:"receipts"},
-  dina:{title:"Walk Dina through the {c} proof", game:"proof"},
-  rana:{title:"Rana's challenge: export the {c} sizes", game:"sizes"},
-  joy:{title:"Tidy Joy's shared {c} folder", game:"memory"},
-  nourk:{title:"Show Nour Khaled the {c} workflow", talk:["Want to see how we run {c} here?","Yes! Show me everything. I'm taking notes."]},
-  rawda:{title:"Find Rawda a meeting slot, fast", game:"meeting"}
+  ehab:{role:"design", title:"Help Ehab find the {c} files", game:"findfile"},
+  aya:{role:"design", title:"Review Aya's {c} moodboard", game:"color"},
+  dina:{role:"design", title:"Walk Dina through the {c} proof", game:"proof"},
+  rana:{role:"design", title:"Rana's challenge: export the {c} sizes", game:"sizes"},
+  joy:{role:"design", title:"Tidy Joy's shared {c} folder", game:"memory"},
+  nourk:{role:"design", title:"Show Nour Khaled the {c} workflow", talk:["Want to see how we run {c} here?","Yes! Show me everything. I'm taking notes."]},
+  rawda:{role:"accounts", title:"Find Rawda a meeting slot, fast", game:"meeting"},
+  salma:{role:"accounts", title:"Help Salma and Yassin with the {c} brief", titleYassin:"Finish the {c} brief with Salma", talk:["Need a hand with the {c} brief?","Yes, please. Yassin's been staring at it for an hour."],
+    talkYassin:["Salma, let's finish the {c} brief.","Finally. You type, I'll talk."]}
 };
 function visitorTasks(cid){
   const out = [], cl = shuffle(CLIENTS); let i = 0;
   const c = CHARS[cid], fits = n => n && n.arriveAt < c.end - 25 && n.leaveAt > c.start + 15;
   const amr = npcById("amr");
   if (fits(amr)){
-    const a = cl[i++ % cl.length], from = Math.round(Math.max(amr.arriveAt + 5, c.start)), until = Math.round(Math.min(amr.leaveAt - 3, c.end));
+    const a = pick(clientsFor(cid)), from = Math.round(Math.max(amr.arriveAt + 5, c.start)), until = Math.round(Math.min(amr.leaveAt - 3, c.end));
     out.push({id:"vamr1", title:`Give Amr the ${a} update`, where:"npc:amr", client:a, opt:true, from, expires:until, missMeter:3, miss:"Amr left before you could update him.",
       talk:[`Amr, a quick update on ${a}: we're on track.`, "Good. That's what I like to hear. Keep me posted."]});
     if (Math.random() < 0.6) out.push({id:"vamr2", title:`Get the ${a} numbers ready for Amr`, where:"desk", game:pick(["receipts","findfile","typos"]), client:a, opt:true, from, expires:until, missMeter:3, miss:"Amr left without the numbers."});
   }
   npcs.filter(n => n.branch && fits(n)).forEach(n => {
-    const t = BRANCH_TASK[n.id]; if (!t) return;
-    const a = cl[i++ % cl.length], fill = x => x.replace(/\{c\}/g, a);
+    const t0 = BRANCH_TASK[n.id]; if (!t0) return;
+    const myRole = (cid === "karim" || cid === "nour") ? "design" : "accounts";
+    if (t0.role !== myRole && Math.random() > 0.2) return;           // mostly tasks that fit your own job
+    const t = Object.assign({}, t0); if (cid === "yassin" && t.titleYassin){ t.title = t.titleYassin; t.talk = t.talkYassin; }
+    delete t.titleYassin; delete t.talkYassin; delete t.role;
+    const a = pick(clientsFor(n.id)), fill = x => x.replace(/\{c\}/g, a);
     out.push(Object.assign({}, t, {id:"v" + n.id, title:fill(t.title), talk: t.talk ? t.talk.map(fill) : undefined, client:a, opt:true, where:"npc:" + n.id,
       from:Math.round(Math.max(n.arriveAt + 3, c.start)), expires:Math.round(Math.min(n.leaveAt - 2, c.end)), missMeter:3,
       miss:`${n.call || n.name} went back to the other branch.`}));
@@ -4838,6 +4909,7 @@ const DIALOG = {
   "*>rana":[{l:["Rana! What's up?","Everything! Guess what I just found out.","What?","I'll tell you at lunch."]},{l:["You look happy today.","I'm always happy. It's my job."]},{l:["Did you bring sweets?","Kitchen. Second shelf. You're welcome."]}],
   "*>joy":[{l:["Hey Joy, all good?","All good. No rush, no stress."]},{l:["Busy day?","Is it? I hadn't noticed."]},{l:["How do you stay so calm?","Tea, and not reading my emails."]}],
   "*>nourk":[{l:["What are you up to?","Learning how your team does things. Fascinating."]},{l:["Need a hand with anything?","Teach me one new thing today and we're even."]},{l:["Still taking notes?","Page twelve. You're all very quotable."]}],
+  "*>salma":[{l:["Hey Salma, how's it going?","Cool. Everything's cool. Always."]},{l:["Love the look.","Thanks, babe. I know."]},{l:["You and Yassin go way back, right?","Since forever. He was so awkward. Still is."]}],
   "*>rawda":[{l:["Rawda, are you okay?","Three deadlines, one laptop, zero time.","Breathe."]},{l:["Where's Ehab?","Probably fixing his hair. Again."]},{l:["It'll be fine, you know.","Thank you. Say it again in an hour."]}],
   "*>osama":[{l:["Osama, any news on the payment?","It came in this morning. Finally."]},{l:["Need any receipts from me?","All of them. Every single one.","I'll look."]},{l:["How are the numbers this month?","Good. Don't spend anything."]}],
   "*>finance":[{l:["How's it going in finance?","Numbers, numbers, numbers.","Sounds fun.","It's not."]},{l:["Busy day?","Month end. Always busy."]},{l:["Need anything from us?","Just the receipts, please."]}],
