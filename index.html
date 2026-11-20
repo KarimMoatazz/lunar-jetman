@@ -1591,7 +1591,7 @@ function drawPerson(g, X, Y, L, A){
     p(bx, by, 7, 9, "#1e1f22"); p(bx+1, by+1, 2, 6, "#34363b"); p(bx+2, by-2, 3, 2, "#2c2d31");
   }
   // ---------- head ----------
-  const HSX = L.hairStyle, HS = ({hollywood:"long", curlylong:"long", bangs:"long", bob:"slick", ponytail:"slick", bun:"slick", updo:"slick"})[HSX] || HSX;
+  const HSX = L.hairStyle, HS = ({hollywood:"short", curlylong:"long", bangs:"long", bob:"slick", ponytail:"slick", bun:"slick", updo:"slick"})[HSX] || HSX;
   const hy = (sit ? -47 : -49) + bob, BS = L.beardStyle;
   const look = pose==="text" ? 2 : (pose==="read" ? 1 : 0);
   const talking = A.talk && Math.floor(t*7)%2===0;
@@ -1606,7 +1606,7 @@ function drawPerson(g, X, Y, L, A){
       if (HS==="fade"){ p(-8, hy+10, 16, 4, L.skinSh); p(-7, hy+9, 14, 1, L.hair); }
     }
     if (HS==="long"){ p(-9, hy+2, 18, 16, L.hair); p(-8, hy+18, 16, 8, L.hair); p(-6, hy+25, 12, 2, L.hair); p(-5, hy+4, 3, 12, L.hairHi); p(2, hy+8, 2, 10, L.hairHi); }
-    if (HSX==="hollywood"){ p(-9, hy, 18, 3, L.hair); p(-4, hy+1, 6, 1, L.hairHi); }
+    if (HSX==="hollywood"){ p(-8, hy-3, 16, 4, L.hair); p(-6, hy-5, 12, 2, L.hair); p(-4, hy-4, 6, 1, L.hairHi); }
     else if (HSX==="curlylong"){ p(-11, hy+3, 22, 18, L.hair); p(-9, hy+20, 18, 7, L.hair); for (let k=-9;k<10;k+=4) p(k, hy+5+((k+11)%5)*3, 2, 2, L.hairHi); }
     else if (HSX==="bob"){ p(-9, hy+2, 18, 13, L.hair); p(-5, hy+4, 3, 8, L.hairHi); }
     else if (HSX==="ponytail"){ p(-2, hy+3, 4, 2, L.hairHi); p(-2, hy+5, 4, 13, L.hair); p(-1, hy+7, 1, 9, L.hairHi); }
@@ -1627,7 +1627,7 @@ function drawPerson(g, X, Y, L, A){
     else { p(-8, hy, 15, 5, L.hair); p(fx>0? -8:-1, hy+2, 8, 9, L.hair); }
     if (HS==="curly"){ p(-9, hy-2, 17, 5, L.hair); p(fx>0?-6:-1, hy-1, 2, 1, L.hairHi); p(fx>0?-1:3, hy, 2, 1, L.hairHi); }
     if (HS==="long"){ p(fx>0?-9:1, hy+2, 8, 22, L.hair); p(fx>0?-8:2, hy+4, 2, 16, L.hairHi); p(fx>0?2:-7, hy+2, 5, 3, L.hair); }
-    if (HSX==="hollywood"){ p(-8, hy-2, 14, 3, L.hair); p(fx>0?-5:-1, hy-2, 6, 1, L.hairHi); }
+    if (HSX==="hollywood"){ p(-8, hy-3, 15, 4, L.hair); p(fx>0?-7:-4, hy-5, 11, 2, L.hair); p(fx>0?2:-7, hy-3, 5, 3, L.hair); p(fx>0?-3:-2, hy-4, 6, 1, L.hairHi); }
     else if (HSX==="curlylong"){ p(-9, hy-2, 17, 4, L.hair); p(fx>0?-11:3, hy, 9, 26, L.hair); p(fx>0?-10:4, hy+5, 2, 2, L.hairHi); p(fx>0?-7:7, hy+12, 2, 2, L.hairHi); p(fx>0?-10:4, hy+19, 2, 2, L.hairHi); }
     else if (HSX==="bangs"){ p(fx>0?0:-6, hy+2, 6, 3, L.hair); }
     else if (HSX==="bob"){ p(fx>0?-9:1, hy+1, 8, 13, L.hair); p(fx>0?-8:2, hy+3, 2, 8, L.hairHi); p(fx>0?1:-7, hy+1, 6, 2, L.hair); }
@@ -1671,7 +1671,7 @@ function drawPerson(g, X, Y, L, A){
       p(-9, hy-1, 18, 5, L.hair); p(-10, hy+2, 3, 17, L.hair); p(7, hy+2, 3, 17, L.hair); p(-9, hy+18, 3, 3, L.hair); p(6, hy+18, 3, 3, L.hair);
       p(-8, hy+4, 7, 2, L.hair); p(-3, hy+3, 4, 1, L.hair); p(-5, hy, 5, 1, L.hairHi); p(-9, hy+6, 1, 10, L.hairHi);
     }
-    if (HSX==="hollywood"){ p(-8, hy-3, 15, 3, L.hair); p(-5, hy-3, 6, 1, L.hairHi); p(1, hy+3, 6, 2, L.hair); }
+    if (HSX==="hollywood"){ p(-8, hy-4, 16, 5, L.hair); p(-6, hy-6, 12, 2, L.hair); p(-5, hy-5, 7, 1, L.hairHi); p(2, hy+1, 6, 2, L.hair); p(-2, hy-2, 3, 1, L.hairHi); }
     else if (HSX==="curlylong"){ p(-10, hy-2, 20, 4, L.hair); p(-12, hy+1, 3, 22, L.hair); p(9, hy+1, 3, 22, L.hair); p(-11, hy+5, 1, 1, L.hairHi); p(10, hy+9, 1, 1, L.hairHi); p(-11, hy+14, 1, 1, L.hairHi); p(10, hy+18, 1, 1, L.hairHi); p(-6, hy-1, 1, 1, L.hairHi); p(3, hy-2, 1, 1, L.hairHi); }
     else if (HSX==="bangs"){ p(-7, hy+2, 14, 3, L.hair); p(-6, hy+4, 2, 1, L.hair); p(1, hy+4, 3, 1, L.hair); p(-4, hy+2, 4, 1, L.hairHi); }
     else if (HSX==="bob"){ p(-10, hy+1, 3, 12, L.hair); p(7, hy+1, 3, 12, L.hair); p(-10, hy+12, 4, 2, L.hair); p(6, hy+12, 4, 2, L.hair); p(-9, hy+3, 1, 7, L.hairHi); }
@@ -1791,7 +1791,7 @@ const TEAM = [
   // ---- from the other branch: drop in now and then, for Amr's briefs, tasks and a chat ----
   { id:"ehab", branch:true, visitor:true, designer:true, name:"Ehab", role:"Designer, other branch", room:3, seat:[470,410], arrive:[0,0], leave:[0,0],
     hello:["Hey hey! Visiting from the other branch.","Good morning, everyone! Don't mind the hair."],
-    look:{ skin:"fair", hairStyle:"hollywood", hair:"#6b4a2e", hairHi:"#9a7048", top:"shirt", topC:"#f1eee6", topSh:"#d6d1c5", topHi:"#ffffff", accent:"#ffffff",
+    look:{ skin:"fair", hairStyle:"hollywood", hair:"#6b4a2e", hairHi:"#9a7048", w:11, top:"shirt", topC:"#f1eee6", topSh:"#d6d1c5", topHi:"#ffffff", accent:"#ffffff",
       bottom:"#2f3e5c", bottomSh:"#243049", bottomHi:"#3c4d70", shoe:"#4a3222", sole:"#1a110b" },
     acts:{ visit:3, coffee:2, lounge:1, window:1, work:4 }, visits:["rawda","karim","yassin","zeina","amr"],
     lines:["Hair's on point today, if anyone's wondering.","Rawda, have you eaten? You get stressed when you don't eat.","This office feels like home.","Who's up for lunch later?","Relax, relax, it'll be fine.","Amr wants the report tonight. No pressure."] },
