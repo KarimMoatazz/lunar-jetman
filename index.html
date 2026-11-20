@@ -3917,10 +3917,10 @@ const CHARS = {
                {id:"buddy", kind:"chatty", name:"Old friends", desc:"Chatting with people keeps her cool."}] },
   rawda:{ name:"Rawda Mahmoud", role:"Account director, other branch", branch:true, start:570, end:1050, room:5, hours:"9:30 am to 5:30 pm",
     blurb:"Playful, joyous, fun to be around, has anger bursts from clients' feedback. Ehab's wife.",
-    meter:{ name:"Stress", good:"low", start:30, decay:-0.15, low:70,
-      tip:"Rawda is fun to be around, until client feedback lands. Every client call and inbox task sets off a little anger burst that pushes her stress up, and it creeps up through the day anyway. Chatting with anyone calms her down, and a chat with Ehab calms her the most. High stress means less time in tasks." },
+    meter:{ name:"Temper", good:"low", start:30, decay:-0.15, low:70,
+      tip:"Rawda is fun to be around, until client feedback lands. Every client call and inbox task sets off a little anger burst that pushes her temper up, and it creeps up through the day anyway. Chatting with anyone calms her down, and a chat with Ehab calms her the most. A high temper means less time in tasks." },
     abilities:[{id:"multitask", kind:"timeboost", games:["inbox","meeting","receipts"], name:"Multitasker", desc:"50% more time in inbox, scheduling and receipts."},
-               {id:"talkitout", kind:"chatty", name:"Talk it out", desc:"Chatting with anyone calms her down."}] }
+               {id:"talkitout", kind:"chatty", name:"Talk it out", desc:"Chatting with anyone cools her temper."}] }
 };
 const ORDER = ["karim","zeina","nour","yassin","ehab","aya","dina","rana","joy","nourk","salma","rawda"];
 const SEAT_OF = { karim:mapR(239,575), nour:mapR(428,626), zeina:mapR(136,406), yassin:mapR(78,470) };
@@ -4150,7 +4150,7 @@ function startTask(t){
 }
 function completeTask(t, stars){
   t.done = true; t.stars = stars; t.doneAt = clock.min;
-  if (G.cid === "rawda" && (t.game === "call" || t.game === "inbox")){ bumpMeter(8); meSay(pick(["Make it POP?! What does that even mean?!","They want it bigger AND smaller?!","Okay. Deep breath. It's just feedback."]), 2.8); toast(`Client feedback. Rawda has a little anger burst. <span class="k">Stress up</span>`); }
+  if (G.cid === "rawda" && (t.game === "call" || t.game === "inbox")){ bumpMeter(8); meSay(pick(["Make it POP?! What does that even mean?!","They want it bigger AND smaller?!","Okay. Deep breath. It's just feedback."]), 2.8); toast(`Client feedback. Rawda has a little anger burst. <span class="k">Temper up</span>`); }
   if (t.due && clock.min > t.due && stars > 1){ t.stars = stars - 1; toast(`Done, but late. <span class="k">-1 star</span>`); }
   G.stars += t.stars;
   if (t.onDone) t.onDone(t);
