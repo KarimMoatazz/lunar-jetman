@@ -1084,6 +1084,16 @@ const standAc = (body, shade, hi, panel) => sprite(12,30,g=>{
   g.fillStyle="#5fd17a"; g.fillRect(8,12,1,1);                                 // power light
   g.fillStyle="rgba(0,0,0,.22)"; for (let k=0;k<4;k++) g.fillRect(3,18+k*2,6,1);// intake grille
 });
+const floorAc = (body, shade, hi, panel) => sprite(24,16,g=>{
+  sh(g,1,14,22);
+  g.fillStyle=body; g.fillRect(1,1,22,13); g.fillRect(2,0,20,1);
+  g.fillStyle=hi; g.fillRect(2,0,20,1); g.fillRect(1,1,1,12);
+  g.fillStyle=shade; g.fillRect(22,1,1,13); g.fillRect(1,13,22,1);
+  g.fillStyle=panel; g.fillRect(3,2,18,3);                                      // top air outlet
+  g.fillStyle="rgba(0,0,0,.35)"; g.fillRect(3,3,18,1);                           // louvre
+  g.fillStyle="rgba(0,0,0,.22)"; for (let k=0;k<3;k++) g.fillRect(3,7+k*2,13,1);  // front grille
+  g.fillStyle="#9fe3ff"; g.fillRect(18,7,3,2); g.fillStyle="#5fd17a"; g.fillRect(20,10,1,1);
+});
 const CATALOG = {
   chair:      {name:"Black chair", group:"Seating", solid:[1,12,10,3], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#a07c50"; g.fillRect(2,10,1,5); g.fillRect(9,10,1,5); g.fillStyle="#18191c"; g.fillRect(2,1,8,8); g.fillRect(1,7,10,3); g.fillStyle="#26282d"; g.fillRect(3,2,6,1); })},
   eames:      {name:"Shell armchair", group:"Seating", solid:[1,11,10,4], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#9b7a52"; g.fillRect(2,10,1,5); g.fillRect(9,10,1,5); g.fillRect(4,11,1,4); g.fillRect(7,11,1,4); g.fillStyle="#141518"; g.fillRect(1,2,10,7); g.fillRect(0,6,12,4); g.fillStyle="#24262b"; g.fillRect(2,3,8,2); })},
@@ -1109,6 +1119,9 @@ const CATALOG = {
   standAcWhite:{name:"Stand AC (white)", group:"Office", solid:[1,24,10,5], cv:standAc("#eeeeea","#c9c9c4","#ffffff","#d9d9d4")},
   standAcBlack:{name:"Stand AC (black)", group:"Office", solid:[1,24,10,5], cv:standAc("#26282c","#16171a","#3a3d43","#1b1c1f")},
   standAcBrown:{name:"Stand AC (brown)", group:"Office", solid:[1,24,10,5], cv:standAc("#7a5a40","#5c432f","#93714f","#634833")},
+  floorAcWhite:{name:"Floor AC (white)", group:"Office", solid:[1,9,22,5], cv:floorAc("#eeeeea","#c9c9c4","#ffffff","#d9d9d4")},
+  floorAcBlack:{name:"Floor AC (black)", group:"Office", solid:[1,9,22,5], cv:floorAc("#26282c","#16171a","#3a3d43","#1b1c1f")},
+  floorAcBrown:{name:"Floor AC (brown)", group:"Office", solid:[1,9,22,5], cv:floorAc("#7a5a40","#5c432f","#93714f","#634833")},
   waterCooler:{name:"Water cooler", group:"Kitchen", solid:[1,17,8,4], cv:sprite(10,22,g=>{ sh(g,1,20,8); g.fillStyle="#e9e9e6"; g.fillRect(1,8,8,12); g.fillStyle="#7fc3e6"; g.fillRect(2,0,6,8); g.fillStyle="#a8dcf2"; g.fillRect(3,1,2,5); g.fillStyle="#3a7fb8"; g.fillRect(3,11,1,1); g.fillStyle="#d24f3f"; g.fillRect(6,11,1,1); })},
   toilet:     {name:"Toilet", group:"Bathroom", solid:[1,8,10,7], cv:sprite(12,16,g=>{ sh(g,1,14,10); g.fillStyle="#f3f3f1"; g.fillRect(2,0,8,5); g.fillRect(1,6,10,8); g.fillStyle="#dcdcd8"; g.fillRect(3,8,6,4); g.fillStyle="#c8c8c4"; g.fillRect(1,5,10,1); })},
   washbasin:  {name:"Washbasin", group:"Bathroom", solid:[1,10,12,5], cv:sprite(14,16,g=>{ sh(g,2,14,10); g.fillStyle="#f3f3f1"; g.fillRect(1,3,12,6); g.fillStyle="#d4d6d6"; g.fillRect(3,4,8,3); g.fillStyle="#c0c3c4"; g.fillRect(6,0,2,4); g.fillStyle="#e2e2de"; g.fillRect(5,9,4,6); })},
@@ -2466,6 +2479,8 @@ const LOOK = {
   waterCooler:["Glug, glug. Ice-cold water.","Refreshing."],
   standAcWhite:["Cold air. Someone set it to 16 again.","Ahh. That's better."], standAcBlack:["Cold air. Someone set it to 16 again.","Ahh. That's better."],
   standAcBrown:["Cold air. Someone set it to 16 again.","Ahh. That's better."],
+  floorAcWhite:["A cool breeze at knee height.","Who turned this to full blast?"], floorAcBlack:["A cool breeze at knee height.","Who turned this to full blast?"],
+  floorAcBrown:["A cool breeze at knee height.","Who turned this to full blast?"],
   fridge:["Someone has labelled their yoghurt. Twice.","Mostly milk for the tea, and a forgotten sandwich."],
   counterMicro:["The microwave smells like yesterday's lunch.","Someone left a plate inside."],
   counter:["Tea glasses, sugar and a box of Lipton.","Spotless. The office boys keep it that way."],
@@ -4791,7 +4806,7 @@ const POOLS = {
                    {title:"Send the logo to Zeina", where:"npc:zeina", talk:["Zeina, the {c} logo's in your inbox.","Perfect. The client will love it."]}]},
     {keep:true, n:[{title:"Pick brand colours with Nour", where:"npc:nour", game:"color"},{title:"Lay out the {c} letterhead", where:"desk", game:"align"}]},
     {n:[{title:"Fix the jammed printer", where:"printer", game:"wires"}]},
-    {n:[{title:"Proofread the {c} brand guidelines", where:"desk", game:"typos"}]},
+    {n:[{title:"Match the {c} animation frames", where:"desk", game:"memory"}]},
     {n:[{title:"Dig up the {c} logo source files", where:"desk", game:"findfile"}]},
     {n:[{title:"Kern the {c} wordmark", where:"desk", game:"align"}]},
     {keep:true, n:[{title:"Check the {c} packaging proof", where:"printer", game:"proof"}]},
@@ -4822,7 +4837,7 @@ const POOLS = {
     {keep:true, n:[{title:"Pick logo colours with Karim", where:"npc:karim", game:"color", from:750}]},
     {n:[{title:"Export the {c} story and reel sizes", where:"desk", game:"sizes"}]},
     {n:[{title:"Proofread the {c} carousel captions", where:"desk", game:"typos"}]},
-    {n:[{title:"Match the {c} animation frames", where:"desk", game:"memory"}]},
+    {n:[{title:"Proofread the {c} brand guidelines", where:"desk", game:"typos"}]},
     {n:[{title:"Pick photos for the {c} feed", where:"desk", game:"findfile"}]},
     {n:[{title:"Colour the {c} campaign illustration", where:"desk", game:"color"}]},
     {n:[{title:"Fix the tablet cable with Mohamed Ali", where:"npc:mohamed", game:"wires"}]}
