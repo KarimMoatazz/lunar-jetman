@@ -201,6 +201,8 @@ canvas.logo{image-rendering:pixelated;image-rendering:crisp-edges}
 .mrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center}
 .tog{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink);cursor:pointer}
 .tog input{width:16px;height:16px;accent-color:#f2b552;margin:0}
+.tog.must{cursor:default;color:var(--amber)}
+.tog.must input{pointer-events:none}
 .gobtn{font:inherit;font-size:15px;font-weight:600;letter-spacing:.06em;color:#1a1206;background:var(--amber);border:0;border-radius:5px;padding:9px 20px;cursor:pointer}
 .gobtn:hover{filter:brightness(1.08)}
 .ghost{font:inherit;font-size:13px;color:var(--ink);background:rgba(10,13,18,.72);border:1px solid #2a2f37;border-radius:5px;padding:8px 14px;cursor:pointer}
@@ -268,6 +270,7 @@ body.editing .ghud,body.editing .abil,body.editing .tcard,body.editing .menu{dis
 .tcard p .k{display:inline-block;padding:0 5px;margin:0 1px;border:1px solid #4a515c;border-radius:3px;font-size:12px;line-height:1.35;color:var(--amber)}
 .tcard .tb{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px}
 .tcard .skip{font:inherit;font-size:11.5px;color:var(--dim);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.tcard .skip.req{cursor:default;text-decoration:none;color:var(--amber)}
 .tcard .nx{font:inherit;font-size:13px;font-weight:600;color:#1a1206;background:var(--amber);border:0;border-radius:4px;padding:5px 13px;cursor:pointer}
 .tcard .goal{font-size:12px;color:#8fd19e}
 .hl{outline:2px solid var(--amber)!important;outline-offset:3px;animation:hlp 1.2s ease-in-out infinite}
@@ -615,7 +618,7 @@ html.lj-gate .title,html.lj-gate .rotate,html.lj-gate .inst{display:none!importa
     <div class="carw"><button class="cn" id="cPrev" aria-label="Previous characters">‹</button><div class="cards" id="cards"></div><button class="cn" id="cNext" aria-label="More characters">›</button></div><div class="cdots" id="cDots"></div>
     <div class="mrow">
       <button class="ghost" id="mBack">Back</button>
-      <label class="tog" id="tutTog"><input type="checkbox" id="tutOn"> Play the tutorial</label>
+      <label class="tog" id="tutTog"><input type="checkbox" id="tutOn"> <span id="tutLbl">Play the tutorial</span></label>
       <button class="gobtn" id="goDay">Start the day</button>
     </div>
   </div>
@@ -4506,8 +4509,10 @@ const ABIL_CARD = {
 function openChars(m){
   menuMode = m;
   if (m === "day" && SAVE.last && !openChars.picked){ menuSel = SAVE.last; openChars.picked = true; }
-  let tutDone = false; try { tutDone = localStorage.getItem("lj_tut") === "done"; } catch(e){}
-  $("tutOn").checked = !tutDone;
+  const must = tutRequired();
+  $("tutOn").checked = must || !tutIsDone(); $("tutOn").disabled = must;
+  $("tutTog").classList.toggle("must", must);
+  $("tutLbl").textContent = must ? "Tutorial: required on your first workday" : "Play the tutorial";
   $("tutTog").hidden = m !== "day";
   $("goDay").textContent = m === "day" ? "Start the day" : "Start free roam";
   $("charSub").textContent = m === "day" ? "Every character has their own hours, tasks, meter and abilities." : "Pick who you want to walk around as. The others carry on with their day.";
@@ -4536,7 +4541,7 @@ $("modes").addEventListener("click", e => { const b = e.target.closest(".mode");
 $("mBack").addEventListener("click", () => { $("charScr").hidden = true; $("mainScr").hidden = false; });
 $("cards").addEventListener("click", e => { const b = e.target.closest(".cc"); if (!b) return; menuSel = b.dataset.c; $("cards").querySelectorAll(".cc").forEach(x => x.classList.toggle("on", x.dataset.c === menuSel)); });
 $("cards").addEventListener("dblclick", e => { const b = e.target.closest(".cc"); if (b){ menuSel = b.dataset.c; goDay(); } });
-function goDay(){ if (!dropPaused()) return; if (menuMode === "roam") beginRoam(menuSel); else beginDay(menuSel, $("tutOn").checked); }
+function goDay(){ if (!dropPaused()) return; if (menuMode === "roam") beginRoam(menuSel); else beginDay(menuSel, tutRequired() || $("tutOn").checked); }
 $("goDay").addEventListener("click", goDay);
 // free roam: the office as it is, no tasks, no clock pauses, every room open
 function beginRoam(cid){
@@ -5703,6 +5708,10 @@ MG.findfile = { name:"Find the right file", time:28,
 DESIGN_GAMES.add("sizes");
 
 // ---------- the tutorial ----------
+// first workday on this device = the tutorial must be played to the end (no skipping). If this browser can't remember anything, don't force it every time.
+function tutIsDone(){ try { return localStorage.getItem("lj_tut") === "done"; } catch(e){ return true; } }
+function canRemember(){ try { localStorage.setItem("lj_probe", "1"); localStorage.removeItem("lj_probe"); return true; } catch(e){ return false; } }
+function tutRequired(){ return canRemember() && !tutIsDone(); }
 function tutSteps(){
   const c = G.char, touch = isTouch(), first = G.tasks[0];
   const walkTxt = touch ? `Put your thumb anywhere on the <b>left side</b> of the screen and drag to walk.` : `Use <span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span> or the <span class="k">arrow keys</span> to walk.`;
@@ -5736,7 +5745,7 @@ function abilityHelp(c, touch){
   return c.abilities.map(a => `<span class="abl"><b>${a.name}</b>${a.active ? ` <em>use it</em>` : ` <em>always on</em>`}<br>${(HOW[a.id] || (() => esc(a.desc)))(a)}</span>`).join("");
 }
 function tutStart(){
-  G.tut = {i:-1, steps:tutSteps(), clockOn:false, marker:null};
+  G.tut = {i:-1, steps:tutSteps(), clockOn:false, marker:null, must:tutRequired()};
   G.tut.walkPt = (() => { const k = nearestCell(POI.hallW[0] + 70, POI.hallW[1]); return k >= 0 ? cellPt(k) : [670, 420]; })();
   tutGo(0);
 }
@@ -5754,9 +5763,9 @@ function tutGo(i){
   if (s.id === "clock") tu.clockOn = false;
   const card = $("tcard"); card.classList.toggle("mid", !!s.mid); card.classList.toggle("low", i >= 4 && !s.mid);
   card.innerHTML = `<div class="tk"><span>Tutorial · ${i+1} of ${tu.steps.length}</span></div><h3>${s.title}</h3><p>${s.text}</p>
-    <div class="tb"><button class="skip" id="tSkip">Skip tutorial</button>${s.next ? `<button class="nx" id="tNext">${s.next}</button>` : `<span class="goal">Goal: ${s.goal}</span>`}</div>`;
+    <div class="tb">${tu.must ? `<span class="skip req">First workday: finish the tutorial to start</span>` : `<button class="skip" id="tSkip">Skip tutorial</button>`}${s.next ? `<button class="nx" id="tNext">${s.next}</button>` : `<span class="goal">Goal: ${s.goal}</span>`}</div>`;
   card.hidden = false;
-  $("tSkip").onclick = () => tutFinish(true);
+  if ($("tSkip")) $("tSkip").onclick = () => tutFinish(true);
   if (s.next) $("tNext").onclick = () => tutGo(i+1);
   if (s.hl) $(s.hl).classList.add("hl");
 }
@@ -5771,6 +5780,7 @@ function tutUpdate(){
   if (s.id === "use" && P.sit && !tu.sat){ tu.sat = true; setTimeout(() => G.tut && tutGo(4), 1100); }
 }
 function tutFinish(skipped){
+  if (G.tut && G.tut.must && skipped) return;          // can't skip the first-time tutorial
   try { localStorage.setItem("lj_tut", "done"); } catch(e){}
   $("gTasks").style.visibility = "";
   tutStop(); pickTrack(); renderPanel(true);
