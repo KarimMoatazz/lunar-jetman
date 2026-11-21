@@ -1353,7 +1353,19 @@ function makeProp(p){ const o = {id: p.id || ("p" + (nextId++)), type:p.type, x:
 // draw order: things lower on screen draw later; tabletop items get a lift so they sit on desks; z overrides it
 const isFloorItem = p => CATALOG[p.type].layer==="floor";
 const zOf = p => typeof p.z==="number" ? p.z : (CATALOG[p.type].top ? 12 : 0);
-const sortKey = p => p.y + zOf(p);
+// things standing on a desk (monitors, laptops, lamps) draw right after that desk, so someone sitting behind the desk stays in front of them
+const SUPPORTS = new Set(["desk","woodDesk","standingDesk","meetingTable","sideTable","bistroTable","counter","sideboard","woodCoffeeTable","tvStand"]);
+function deskUnder(p){
+  if (SUPPORTS.has(p.type)) return null;
+  for (const d of props){ if (d === p || !SUPPORTS.has(d.type)) continue; const b = propBox(d); if (p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h + 2) return d; }
+  return null;
+}
+const sortKey = p => {
+  const k = p.y + zOf(p);
+  if (!(zOf(p) > 0)) return k;
+  const d = deskUnder(p); if (!d) return k;
+  return Math.min(k, d.y + zOf(d) + 0.6);
+};
 // sized sprite: the rotated sprite stretched to the item's size, kept pixel-sharp
 const _sizeCache = new Map();
 function propSprite(p){
